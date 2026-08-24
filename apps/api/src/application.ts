@@ -3,6 +3,7 @@ import Fastify from 'fastify'
 import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
 import { registerSecurityPlugins } from './plugins/security.js'
+import { registerSwagger } from './plugins/swagger.js'
 import { healthRoutes } from './routes/health.routes.js'
 
 export function buildApp() {
@@ -18,8 +19,8 @@ export function buildApp() {
   })
 
   registerErrorHandlers(app)
-
-  app.register(registerSecurityPlugins)
+  registerSecurityPlugins(app)
+  registerSwagger(app)
 
   app.get('/', async () => {
     return {

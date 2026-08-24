@@ -3,8 +3,8 @@ import swaggerUi from '@fastify/swagger-ui'
 
 import type { FastifyInstance } from 'fastify'
 
-export async function registerSwagger(app: FastifyInstance) {
-  await app.register(swagger, {
+export function registerSwagger(app: FastifyInstance) {
+  app.register(swagger, {
     openapi: {
       openapi: '3.0.3',
 
@@ -34,7 +34,7 @@ export async function registerSwagger(app: FastifyInstance) {
     },
   })
 
-  await app.register(swaggerUi, {
+  app.register(swaggerUi, {
     routePrefix: '/docs',
 
     uiConfig: {
@@ -49,6 +49,7 @@ export async function registerSwagger(app: FastifyInstance) {
     schema: {
       hide: true,
     },
+
     handler: async () => {
       return app.swagger()
     },
