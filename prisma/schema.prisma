@@ -6,3 +6,76 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum GlobalRole {
+  USER
+  SUPER_ADMIN
+}
+
+enum GymRole {
+  OWNER
+  ADMIN
+  RECEPTIONIST
+  PROFESSOR
+  STUDENT
+}
+
+model User {
+  id              String     @id @default(uuid()) @db.Uuid
+  name            String     @db.VarChar(150)
+  email           String     @unique @db.VarChar(255)
+  passwordHash    String     @map("password_hash") @db.VarChar(255)
+  phone           String?    @db.VarChar(30)
+  avatarUrl       String?    @map("avatar_url") @db.Text
+  globalRole      GlobalRole @default(USER) @map("global_role")
+  active          Boolean    @default(true)
+  emailVerifiedAt DateTime?  @map("email_verified_at") @db.Timestamptz(6)
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  memberships GymMembership[]
+
+  @@index([active])
+  @@index([globalRole])
+  @@map("users")
+}
+
+model Gym {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(150)
+  slug        String   @unique @db.VarChar(120)
+  description String?  @db.Text
+  phone       String?  @db.VarChar(30)
+  email       String?  @db.VarChar(255)
+  logoUrl     String?  @map("logo_url") @db.Text
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  memberships GymMembership[]
+
+  @@index([active])
+  @@index([createdAt])
+  @@map("gyms")
+}
+
+model GymMembership {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  gymId     String   @map("gym_id") @db.Uuid
+  role      GymRole
+  active    Boolean  @default(true)
+  joinedAt  DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  gym  Gym  @relation(fields: [gymId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, gymId], map: "uk_gym_memberships_user_gym")
+  @@index([userId])
+  @@index([gymId])
+  @@index([gymId, role])
+  @@index([gymId, active])
+  @@map("gym_memberships")
+}

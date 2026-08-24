@@ -9,10 +9,10 @@ export async function databaseTestRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Health'],
 
-        summary: 'Verificar conexão com o PostgreSQL',
+        summary: 'Verificar conexão e estrutura do PostgreSQL',
 
         description:
-          'Executa uma consulta simples para confirmar a comunicação entre a API FightOps, Prisma e PostgreSQL.',
+          'Confirma a comunicação entre a API FightOps, Prisma e PostgreSQL e consulta as tabelas principais do núcleo multi-tenant.',
 
         response: {
           200: {
@@ -28,20 +28,42 @@ export async function databaseTestRoutes(app: FastifyInstance) {
                 type: 'string',
                 example: 'connected',
               },
+
+              users: {
+                type: 'number',
+                example: 0,
+              },
+
+              gyms: {
+                type: 'number',
+                example: 0,
+              },
+
+              memberships: {
+                type: 'number',
+                example: 0,
+              },
             },
 
-            required: ['status', 'database'],
+            required: ['status', 'database', 'users', 'gyms', 'memberships'],
           },
         },
       },
     },
 
     async () => {
-      await prisma.$queryRaw`SELECT 1`
+      const [users, gyms, memberships] = await Promise.all([
+        prisma.user.count(),
+        prisma.gym.count(),
+        prisma.gymMembership.count(),
+      ])
 
       return {
         status: 'ok',
         database: 'connected',
+        users,
+        gyms,
+        memberships,
       }
     },
   )
