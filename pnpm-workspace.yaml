@@ -3,4 +3,6 @@ packages:
   - 'packages/*'
   - 'tests/*'
 allowBuilds:
+  '@prisma/engines': false
   esbuild: false
+  prisma: false
