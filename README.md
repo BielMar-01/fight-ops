@@ -38,3 +38,4 @@ Node.js / Fastify
    | Prisma
    v
 PostgreSQL / Supabase
+```
