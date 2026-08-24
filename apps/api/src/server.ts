@@ -1,15 +1,13 @@
-import { buildApp } from './app.js'
+import { buildApp } from './application.js'
 import { env } from './config/env.js'
 
 const app = buildApp()
-
-const host = '0.0.0.0'
 
 async function start() {
   try {
     await app.listen({
       port: env.API_PORT,
-      host,
+      host: '0.0.0.0',
     })
 
     app.log.info(
