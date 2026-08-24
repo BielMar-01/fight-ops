@@ -52,17 +52,32 @@ export async function authenticateUser(input: LoginInput) {
   })
 
   if (!user) {
-    throw new AppError('INVALID_CREDENTIALS', 401, 'E-mail ou senha inválidos.')
+    throw new AppError(
+      'INVALID_CREDENTIALS',
+      401,
+      'E-mail ou senha inválidos.',
+    )
   }
 
-  const passwordMatches = await verifyPassword(user.passwordHash, input.password)
+  const passwordMatches = await verifyPassword(
+    user.passwordHash,
+    input.password,
+  )
 
   if (!passwordMatches) {
-    throw new AppError('INVALID_CREDENTIALS', 401, 'E-mail ou senha inválidos.')
+    throw new AppError(
+      'INVALID_CREDENTIALS',
+      401,
+      'E-mail ou senha inválidos.',
+    )
   }
 
   if (!user.active) {
-    throw new AppError('USER_INACTIVE', 403, 'Este usuário está inativo.')
+    throw new AppError(
+      'USER_INACTIVE',
+      403,
+      'Este usuário está inativo.',
+    )
   }
 
   return {
@@ -71,4 +86,42 @@ export async function authenticateUser(input: LoginInput) {
     email: user.email,
     globalRole: user.globalRole,
   }
+}
+
+export async function getAuthenticatedUser(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      avatarUrl: true,
+      globalRole: true,
+      active: true,
+      emailVerifiedAt: true,
+      createdAt: true,
+    },
+  })
+
+  if (!user) {
+    throw new AppError(
+      'USER_NOT_FOUND',
+      404,
+      'Usuário não encontrado.',
+    )
+  }
+
+  if (!user.active) {
+    throw new AppError(
+      'USER_INACTIVE',
+      403,
+      'Este usuário está inativo.',
+    )
+  }
+
+  return user
 }

@@ -28,7 +28,9 @@ export function getFastifyOptions() {
   }
 }
 
-export function configureApp(app: FastifyInstance) {
+export function configureApp(
+  app: FastifyInstance,
+) {
   registerErrorHandlers(app)
 
   registerSecurityPlugins(app)
@@ -50,7 +52,9 @@ export function configureApp(app: FastifyInstance) {
 }
 
 export function buildApp() {
-  const app = Fastify(getFastifyOptions())
+  const app = Fastify(
+    getFastifyOptions(),
+  )
 
   return configureApp(app)
 }

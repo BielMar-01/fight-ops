@@ -1,15 +1,23 @@
 import Fastify from 'fastify'
 
-import { configureApp, getFastifyOptions } from './application.js'
+import {
+  configureApp,
+  getFastifyOptions,
+} from './application.js'
 import { env } from './config/env.js'
 
-const app = Fastify(getFastifyOptions())
+const app = Fastify(
+  getFastifyOptions(),
+)
 
 configureApp(app)
 
 async function start() {
   try {
-    const port = Number(process.env.PORT ?? env.API_PORT)
+    const port = Number(
+      process.env.PORT ??
+        env.API_PORT,
+    )
 
     await app.listen({
       port,

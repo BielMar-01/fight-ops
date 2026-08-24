@@ -3,7 +3,9 @@ import swaggerUi from '@fastify/swagger-ui'
 
 import type { FastifyInstance } from 'fastify'
 
-export function registerSwagger(app: FastifyInstance) {
+export function registerSwagger(
+  app: FastifyInstance,
+) {
   app.register(swagger, {
     openapi: {
       openapi: '3.0.3',
@@ -18,11 +20,14 @@ export function registerSwagger(app: FastifyInstance) {
       tags: [
         {
           name: 'Health',
-          description: 'Monitoramento e disponibilidade da API.',
+          description:
+            'Monitoramento e disponibilidade da API.',
         },
+
         {
           name: 'Auth',
-          description: 'Autenticação e gerenciamento de sessão.',
+          description:
+            'Autenticação e gerenciamento de sessão.',
         },
       ],
 
@@ -49,13 +54,16 @@ export function registerSwagger(app: FastifyInstance) {
     staticCSP: true,
   })
 
-  app.get('/openapi.json', {
-    schema: {
-      hide: true,
+  app.get(
+    '/openapi.json',
+    {
+      schema: {
+        hide: true,
+      },
     },
 
-    handler: async () => {
+    async () => {
       return app.swagger()
     },
-  })
+  )
 }
