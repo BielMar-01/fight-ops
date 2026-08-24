@@ -10,6 +10,7 @@ const rootEnvPath = resolve(currentDirectory, '../../../../.env')
 
 config({
   path: rootEnvPath,
+  quiet: true,
 })
 
 const envSchema = z.object({
@@ -31,9 +32,9 @@ const envSchema = z.object({
 
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1, 'SUPABASE_PUBLISHABLE_KEY is required'),
 
-  JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must have at least 32 characters'),
+  JWT_ACCESS_SECRET: z.string().min(32).optional(),
 
-  JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must have at least 32 characters'),
+  JWT_REFRESH_SECRET: z.string().min(32).optional(),
 
   JWT_ACCESS_EXPIRATION: z.string().default('15m'),
 
@@ -43,10 +44,12 @@ const envSchema = z.object({
 const parsedEnv = envSchema.safeParse(process.env)
 
 if (!parsedEnv.success) {
-  console.error('Invalid environment variables:')
-  console.error(z.treeifyError(parsedEnv.error))
+  const errors = z.treeifyError(parsedEnv.error)
 
-  process.exit(1)
+  console.error('Invalid environment variables:')
+  console.error(JSON.stringify(errors, null, 2))
+
+  throw new Error('Invalid environment configuration.')
 }
 
 export const env = parsedEnv.data
