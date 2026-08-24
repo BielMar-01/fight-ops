@@ -1,9 +1,9 @@
 import { prisma } from '../../database/prisma.js'
 import { AppError } from '../../http/app-error.js'
 
-import { hashPassword } from './password.js'
+import { hashPassword, verifyPassword } from './password.js'
 
-import type { RegisterInput } from './auth.schemas.js'
+import type { LoginInput, RegisterInput } from './auth.schemas.js'
 
 export async function registerUser(input: RegisterInput) {
   const existingUser = await prisma.user.findUnique({
@@ -42,4 +42,33 @@ export async function registerUser(input: RegisterInput) {
   })
 
   return user
+}
+
+export async function authenticateUser(input: LoginInput) {
+  const user = await prisma.user.findUnique({
+    where: {
+      email: input.email,
+    },
+  })
+
+  if (!user) {
+    throw new AppError('INVALID_CREDENTIALS', 401, 'E-mail ou senha inválidos.')
+  }
+
+  const passwordMatches = await verifyPassword(user.passwordHash, input.password)
+
+  if (!passwordMatches) {
+    throw new AppError('INVALID_CREDENTIALS', 401, 'E-mail ou senha inválidos.')
+  }
+
+  if (!user.active) {
+    throw new AppError('USER_INACTIVE', 403, 'Este usuário está inativo.')
+  }
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    globalRole: user.globalRole,
+  }
 }

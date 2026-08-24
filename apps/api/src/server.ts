@@ -3,6 +3,7 @@ import Fastify from 'fastify'
 import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
 import { authRoutes } from './modules/auth/auth.routes.js'
+import { registerJwt } from './plugins/jwt.js'
 import { registerSecurityPlugins } from './plugins/security.js'
 import { registerSwagger } from './plugins/swagger.js'
 import { databaseTestRoutes } from './routes/database-test.routes.js'
@@ -23,14 +24,11 @@ const app = Fastify({
   },
 })
 
-// Tratamento global de erros
 registerErrorHandlers(app)
-
-// Plugins globais
 registerSecurityPlugins(app)
+registerJwt(app)
 registerSwagger(app)
 
-// Rota raiz
 app.get('/', async () => {
   return {
     status: 'ok',
@@ -39,7 +37,6 @@ app.get('/', async () => {
   }
 })
 
-// Rotas da aplicação
 app.register(healthRoutes)
 app.register(databaseTestRoutes)
 app.register(authRoutes)
@@ -52,14 +49,6 @@ async function start() {
       port,
       host: '0.0.0.0',
     })
-
-    app.log.info(
-      {
-        port,
-        environment: env.NODE_ENV,
-      },
-      'FightOps API started',
-    )
   } catch (error) {
     app.log.error(error)
     process.exit(1)

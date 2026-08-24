@@ -1,7 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 
-import { registerSchema } from './auth.schemas.js'
-import { registerUser } from './auth.service.js'
+import { env } from '../../config/env.js'
+
+import { loginSchema, registerSchema } from './auth.schemas.js'
+import { authenticateUser, registerUser } from './auth.service.js'
 
 export async function authRoutes(app: FastifyInstance) {
   app.get(
@@ -110,16 +112,6 @@ export async function authRoutes(app: FastifyInstance) {
 
             required: ['user'],
           },
-
-          400: {
-            type: 'object',
-            additionalProperties: true,
-          },
-
-          409: {
-            type: 'object',
-            additionalProperties: true,
-          },
         },
       },
     },
@@ -130,6 +122,93 @@ export async function authRoutes(app: FastifyInstance) {
       const user = await registerUser(input)
 
       return reply.status(201).send({
+        user,
+      })
+    },
+  )
+
+  app.post(
+    '/auth/login',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Autenticar usuário',
+
+        body: {
+          type: 'object',
+          required: ['email', 'password'],
+
+          properties: {
+            email: {
+              type: 'string',
+              format: 'email',
+            },
+
+            password: {
+              type: 'string',
+              minLength: 1,
+            },
+          },
+        },
+
+        response: {
+          200: {
+            type: 'object',
+
+            properties: {
+              accessToken: {
+                type: 'string',
+              },
+
+              user: {
+                type: 'object',
+
+                properties: {
+                  id: {
+                    type: 'string',
+                  },
+
+                  name: {
+                    type: 'string',
+                  },
+
+                  email: {
+                    type: 'string',
+                  },
+
+                  globalRole: {
+                    type: 'string',
+                  },
+                },
+
+                required: ['id', 'name', 'email', 'globalRole'],
+              },
+            },
+
+            required: ['accessToken', 'user'],
+          },
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const input = loginSchema.parse(request.body)
+
+      const user = await authenticateUser(input)
+
+      const accessToken = app.jwt.sign(
+        {
+          email: user.email,
+          globalRole: user.globalRole,
+        },
+        {
+          sub: user.id,
+          expiresIn: env.JWT_ACCESS_EXPIRATION,
+        },
+      )
+
+      return reply.status(200).send({
+        accessToken,
         user,
       })
     },
