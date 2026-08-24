@@ -30,6 +30,14 @@ const envSchema = z.object({
   SUPABASE_URL: z.string().url('SUPABASE_URL must be a valid URL'),
 
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1, 'SUPABASE_PUBLISHABLE_KEY is required'),
+
+  JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must have at least 32 characters'),
+
+  JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must have at least 32 characters'),
+
+  JWT_ACCESS_EXPIRATION: z.string().default('15m'),
+
+  JWT_REFRESH_EXPIRATION_DAYS: z.coerce.number().int().positive().default(7),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)

@@ -20,6 +20,10 @@ export function registerSwagger(app: FastifyInstance) {
           name: 'Health',
           description: 'Monitoramento e disponibilidade da API.',
         },
+        {
+          name: 'Auth',
+          description: 'Autenticação e gerenciamento de sessão.',
+        },
       ],
 
       components: {

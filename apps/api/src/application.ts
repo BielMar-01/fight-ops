@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 
 import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
+import { authRoutes } from './modules/auth/auth.routes.js'
 import { registerSecurityPlugins } from './plugins/security.js'
 import { registerSwagger } from './plugins/swagger.js'
 import { databaseTestRoutes } from './routes/database-test.routes.js'
@@ -13,16 +14,24 @@ export function buildApp() {
       level: env.LOG_LEVEL,
 
       redact: {
-        paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers.set-cookie'],
+        paths: [
+          'req.headers.authorization',
+          'req.headers.cookie',
+          'res.headers.set-cookie',
+        ],
         censor: '[REDACTED]',
       },
     },
   })
 
+  // Tratamento global de erros
   registerErrorHandlers(app)
+
+  // Plugins globais
   registerSecurityPlugins(app)
   registerSwagger(app)
 
+  // Rota raiz
   app.get('/', async () => {
     return {
       status: 'ok',
@@ -31,8 +40,10 @@ export function buildApp() {
     }
   })
 
+  // Rotas da aplicação
   app.register(healthRoutes)
   app.register(databaseTestRoutes)
+  app.register(authRoutes)
 
   return app
 }
