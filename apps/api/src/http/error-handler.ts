@@ -6,6 +6,15 @@ function isFastifyError(error: unknown): error is FastifyError {
 
 export function registerErrorHandlers(app: FastifyInstance) {
   app.setNotFoundHandler((request, reply) => {
+    request.log.warn(
+      {
+        requestId: request.id,
+        method: request.method,
+        url: request.url,
+      },
+      'Route not found',
+    )
+
     return reply.status(404).send({
       error: {
         code: 'ROUTE_NOT_FOUND',

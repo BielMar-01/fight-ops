@@ -1,28 +1,38 @@
 import Fastify from 'fastify'
 
+import { env } from './config/env.js'
+import { registerErrorHandlers } from './http/error-handler.js'
+import { healthRoutes } from './routes/health.routes.js'
+
 const app = Fastify({
-  logger: true,
+  logger: {
+    level: env.LOG_LEVEL,
+
+    redact: {
+      paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers.set-cookie'],
+      censor: '[REDACTED]',
+    },
+  },
 })
+
+registerErrorHandlers(app)
 
 app.get('/', async () => {
   return {
     status: 'ok',
     service: 'fightops-api',
-    environment: process.env.NODE_ENV ?? 'development',
+    environment: env.NODE_ENV,
   }
 })
 
-app.get('/health', async () => {
-  return {
-    status: 'ok',
-    service: 'fightops-api',
-  }
-})
+app.register(healthRoutes)
 
 async function start() {
   try {
+    const port = Number(process.env.PORT ?? env.API_PORT)
+
     await app.listen({
-      port: Number(process.env.PORT ?? 3000),
+      port,
       host: '0.0.0.0',
     })
   } catch (error) {
