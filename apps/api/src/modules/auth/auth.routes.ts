@@ -1,9 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 
-import { env } from '../../config/env.js'
-
 import { loginSchema, registerSchema } from './auth.schemas.js'
 import { authenticateUser, registerUser } from './auth.service.js'
+import { signAccessToken } from './token.js'
 
 export async function authRoutes(app: FastifyInstance) {
   app.get(
@@ -196,16 +195,11 @@ export async function authRoutes(app: FastifyInstance) {
 
       const user = await authenticateUser(input)
 
-      const accessToken = app.jwt.sign(
-        {
-          email: user.email,
-          globalRole: user.globalRole,
-        },
-        {
-          sub: user.id,
-          expiresIn: env.JWT_ACCESS_EXPIRATION,
-        },
-      )
+      const accessToken = await signAccessToken({
+        userId: user.id,
+        email: user.email,
+        globalRole: user.globalRole,
+      })
 
       return reply.status(200).send({
         accessToken,

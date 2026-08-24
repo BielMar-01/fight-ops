@@ -1,16 +1,17 @@
 import Fastify from 'fastify'
 
+import type { FastifyInstance } from 'fastify'
+
 import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
 import { authRoutes } from './modules/auth/auth.routes.js'
-import { registerJwt } from './plugins/jwt.js'
 import { registerSecurityPlugins } from './plugins/security.js'
 import { registerSwagger } from './plugins/swagger.js'
 import { databaseTestRoutes } from './routes/database-test.routes.js'
 import { healthRoutes } from './routes/health.routes.js'
 
-export function buildApp() {
-  const app = Fastify({
+export function getFastifyOptions() {
+  return {
     logger: {
       level: env.LOG_LEVEL,
 
@@ -20,14 +21,17 @@ export function buildApp() {
           'req.headers.cookie',
           'res.headers.set-cookie',
         ],
+
         censor: '[REDACTED]',
       },
     },
-  })
+  }
+}
 
+export function configureApp(app: FastifyInstance) {
   registerErrorHandlers(app)
+
   registerSecurityPlugins(app)
-  registerJwt(app)
   registerSwagger(app)
 
   app.get('/', async () => {
@@ -43,4 +47,10 @@ export function buildApp() {
   app.register(authRoutes)
 
   return app
+}
+
+export function buildApp() {
+  const app = Fastify(getFastifyOptions())
+
+  return configureApp(app)
 }
