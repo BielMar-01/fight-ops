@@ -4,6 +4,7 @@ import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
 import { registerSecurityPlugins } from './plugins/security.js'
 import { registerSwagger } from './plugins/swagger.js'
+import { databaseTestRoutes } from './routes/database-test.routes.js'
 import { healthRoutes } from './routes/health.routes.js'
 
 const app = Fastify({
@@ -30,6 +31,7 @@ app.get('/', async () => {
 })
 
 app.register(healthRoutes)
+app.register(databaseTestRoutes)
 
 async function start() {
   try {

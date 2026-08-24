@@ -9,7 +9,7 @@ export async function databaseTestRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Health'],
 
-        summary: 'Verificar conexão e estrutura do PostgreSQL',
+        summary: 'Verificar conexão com o PostgreSQL',
 
         description:
           'Confirma a comunicação entre a API FightOps, Prisma e PostgreSQL e consulta as tabelas principais do núcleo multi-tenant.',
