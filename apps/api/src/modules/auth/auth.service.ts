@@ -1,4 +1,5 @@
 import { prisma } from '../../database/prisma.js'
+import { AppError } from '../../http/app-error.js'
 
 import { hashPassword } from './password.js'
 
@@ -12,7 +13,11 @@ export async function registerUser(input: RegisterInput) {
   })
 
   if (existingUser) {
-    throw new Error('USER_EMAIL_ALREADY_EXISTS')
+    throw new AppError(
+      'USER_EMAIL_ALREADY_EXISTS',
+      409,
+      'Já existe um usuário cadastrado com este e-mail.',
+    )
   }
 
   const passwordHash = await hashPassword(input.password)

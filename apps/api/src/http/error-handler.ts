@@ -1,5 +1,7 @@
 import type { FastifyError, FastifyInstance } from 'fastify'
 
+import { AppError } from './app-error.js'
+
 function isFastifyError(error: unknown): error is FastifyError {
   return error instanceof Error
 }
@@ -24,6 +26,23 @@ export function registerErrorHandlers(app: FastifyInstance) {
   })
 
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof AppError) {
+      request.log.warn(
+        {
+          code: error.code,
+          requestId: request.id,
+        },
+        error.message,
+      )
+
+      return reply.status(error.statusCode).send({
+        error: {
+          code: error.code,
+          message: error.message,
+        },
+      })
+    }
+
     if (!isFastifyError(error)) {
       request.log.error(
         {
