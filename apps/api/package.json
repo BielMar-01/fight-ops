@@ -1,0 +1,23 @@
+{
+  "name": "@fightops/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FightOps REST API",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fastify": "^5.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "node": "link:@types\\node",
+    "tsx": "^4.23.12"
+  }
+}
