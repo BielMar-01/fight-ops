@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 
 import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
+import { registerSecurityPlugins } from './plugins/security.js'
 import { healthRoutes } from './routes/health.routes.js'
 
 const app = Fastify({
@@ -16,6 +17,8 @@ const app = Fastify({
 })
 
 registerErrorHandlers(app)
+
+app.register(registerSecurityPlugins)
 
 app.get('/', async () => {
   return {
