@@ -1,9 +1,22 @@
 import Fastify from 'fastify'
 
-import { configureApp, fastifyOptions } from './application.js'
+const app = Fastify({
+  logger: true,
+})
 
-const app = Fastify(fastifyOptions)
+app.get('/', async () => {
+  return {
+    status: 'ok',
+    service: 'fightops-api',
+    environment: 'vercel',
+  }
+})
 
-configureApp(app)
+app.get('/health', async () => {
+  return {
+    status: 'ok',
+    service: 'fightops-api',
+  }
+})
 
 export default app
