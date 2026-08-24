@@ -7,7 +7,17 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**"]
+      "outputs": ["dist/**", "build/**"],
+      "env": [
+        "NODE_ENV",
+        "LOG_LEVEL",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "FRONTEND_URL",
+        "VITE_API_URL"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
