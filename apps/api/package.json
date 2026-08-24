@@ -4,10 +4,10 @@
   "private": true,
   "description": "FightOps REST API",
   "type": "module",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
+ "scripts": {
+    "dev": "tsx watch src/local.ts",
     "build": "pnpm -w exec prisma generate && tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "start": "node dist/local.js",
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"

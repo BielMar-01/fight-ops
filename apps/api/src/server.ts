@@ -1,26 +1,9 @@
-import { buildApp } from './application.js'
-import { env } from './config/env.js'
+import Fastify from 'fastify'
 
-const app = buildApp()
+import { configureApp, fastifyOptions } from './application.js'
 
-async function start() {
-  try {
-    await app.listen({
-      port: env.API_PORT,
-      host: '0.0.0.0',
-    })
+const app = Fastify(fastifyOptions)
 
-    app.log.info(
-      {
-        port: env.API_PORT,
-        environment: env.NODE_ENV,
-      },
-      'FightOps API started',
-    )
-  } catch (error) {
-    app.log.error(error)
-    process.exit(1)
-  }
-}
+configureApp(app)
 
-void start()
+export default app
