@@ -4,14 +4,22 @@ import { AppError } from '../../http/app-error.js'
 
 import { authenticate } from './authenticate.js'
 import {
+  forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
+  verifyPasswordResetSchema,
 } from './auth.schemas.js'
 import {
   authenticateUser,
   getAuthenticatedUser,
   registerUser,
 } from './auth.service.js'
+import {
+  requestPasswordReset,
+  resetPassword,
+  verifyPasswordResetCode,
+} from './password-reset.service.js'
 import {
   clearRefreshTokenCookie,
   REFRESH_TOKEN_COOKIE_NAME,
@@ -553,6 +561,143 @@ export async function authRoutes(
         .send({
           user,
         })
+    },
+  )
+    app.post(
+    '/auth/password/forgot',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Solicitar recuperação de senha',
+
+        body: {
+          type: 'object',
+          required: ['email'],
+
+          properties: {
+            email: {
+              type: 'string',
+              format: 'email',
+            },
+          },
+        },
+
+        response: {
+          202: {
+            type: 'object',
+
+            properties: {
+              message: {
+                type: 'string',
+              },
+            },
+
+            required: ['message'],
+          },
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const input = forgotPasswordSchema.parse(request.body)
+
+      await requestPasswordReset(input)
+
+      return reply.status(202).send({
+        message:
+          'Se o e-mail estiver cadastrado, enviaremos um código para redefinição da senha.',
+      })
+    },
+  )
+
+  app.post(
+    '/auth/password/verify',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Validar código de recuperação de senha',
+
+        body: {
+          type: 'object',
+          required: ['email', 'code'],
+
+          properties: {
+            email: {
+              type: 'string',
+              format: 'email',
+            },
+
+            code: {
+              type: 'string',
+              minLength: 6,
+              maxLength: 6,
+            },
+          },
+        },
+
+        response: {
+          200: {
+            type: 'object',
+
+            properties: {
+              resetToken: {
+                type: 'string',
+              },
+            },
+
+            required: ['resetToken'],
+          },
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const input = verifyPasswordResetSchema.parse(request.body)
+
+      const result = await verifyPasswordResetCode(input)
+
+      return reply.status(200).send(result)
+    },
+  )
+
+  app.post(
+    '/auth/password/reset',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Definir nova senha',
+
+        body: {
+          type: 'object',
+          required: ['resetToken', 'newPassword'],
+
+          properties: {
+            resetToken: {
+              type: 'string',
+            },
+
+            newPassword: {
+              type: 'string',
+              minLength: 8,
+              maxLength: 128,
+            },
+          },
+        },
+
+        response: {
+          204: {
+            type: 'null',
+          },
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const input = resetPasswordSchema.parse(request.body)
+
+      await resetPassword(input)
+
+      return reply.status(204).send()
     },
   )
 }

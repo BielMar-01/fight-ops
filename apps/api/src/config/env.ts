@@ -39,6 +39,24 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRATION: z.string().default('15m'),
 
   JWT_REFRESH_EXPIRATION_DAYS: z.coerce.number().int().positive().default(7),
+
+  PASSWORD_RESET_CODE_EXPIRATION_MINUTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10),
+
+  PASSWORD_RESET_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+
+  SMTP_HOST: z.string().min(1).optional(),
+
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+
+  SMTP_USER: z.string().min(1).optional(),
+
+  SMTP_PASSWORD: z.string().min(1).optional(),
+
+  SMTP_FROM: z.string().min(1).optional(),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)
