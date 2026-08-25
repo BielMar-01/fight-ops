@@ -1,5 +1,13 @@
-const apiUrl =
+const localApiUrl =
+  'http://localhost:3333'
+
+const configuredApiUrl =
   import.meta.env.VITE_API_URL
+
+const apiUrl =
+  import.meta.env.DEV
+    ? localApiUrl
+    : configuredApiUrl
 
 if (!apiUrl) {
   throw new Error(
@@ -36,6 +44,8 @@ export async function apiRequest<T>(
     `${apiUrl}${path}`,
     {
       ...options,
+
+      credentials: 'include',
 
       headers: {
         Accept: 'application/json',

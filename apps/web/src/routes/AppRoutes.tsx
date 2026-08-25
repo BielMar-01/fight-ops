@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 
-import { PublicLayout } from '../layouts/PublicLayout'
+import { PublicLayout } from '../components/layout/PublicLayout'
 import { FaqPage } from '../pages/FaqPage'
 import { FeaturesPage } from '../pages/FeaturesPage'
 import { HomePage } from '../pages/HomePage'
