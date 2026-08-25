@@ -1,45 +1,165 @@
 import { Link } from 'react-router-dom'
 
+import { PageSeo } from '../components/public/PageSeo'
+import { PublicPageError } from '../components/public/PublicPageError'
+import { PublicPageLoading } from '../components/public/PublicPageLoading'
+import { usePublicPage } from '../hooks/usePublicSite'
+
+import type {
+  FeatureItem,
+} from '../types/public-site'
+
+interface BenefitsMetadata {
+  benefits?: string[]
+}
+
+interface FeaturesMetadata {
+  items?: FeatureItem[]
+}
+
+interface MartialArtsMetadata {
+  items?: string[]
+}
+
 export function HomePage() {
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+  } = usePublicPage('home')
+
+  if (isLoading) {
+    return <PublicPageLoading />
+  }
+
+  if (
+    isError ||
+    !data?.page
+  ) {
+    return (
+      <PublicPageError
+        onRetry={() => {
+          void refetch()
+        }}
+      />
+    )
+  }
+
+  const page = data.page
+
+  const hero =
+    page.sections.find(
+      (section) =>
+        section.key === 'hero',
+    )
+
+  const features =
+    page.sections.find(
+      (section) =>
+        section.key === 'features',
+    )
+
+  const martialArts =
+    page.sections.find(
+      (section) =>
+        section.key ===
+        'martial-arts',
+    )
+
+  const cta =
+    page.sections.find(
+      (section) =>
+        section.key === 'cta',
+    )
+
+  const heroMetadata =
+    hero?.metadata as
+      | BenefitsMetadata
+      | null
+
+  const featuresMetadata =
+    features?.metadata as
+      | FeaturesMetadata
+      | null
+
+  const martialArtsMetadata =
+    martialArts?.metadata as
+      | MartialArtsMetadata
+      | null
+
   return (
-    <>
-      <main>
-        <section className="hero">
+    <main>
+      <PageSeo seo={page.seo} />
+
+      {hero ? (
+        <section
+          className="hero"
+          data-testid="home-hero"
+        >
           <div className="site-container hero-grid">
             <div className="hero-content">
-              <span className="eyebrow">
-                Gestão inteligente para o seu CT
-              </span>
+              {hero.eyebrow ? (
+                <span className="eyebrow">
+                  {hero.eyebrow}
+                </span>
+              ) : null}
 
-              <h1>
-                Organize sua academia.
-                <span> Evolua sua operação.</span>
-              </h1>
+              {hero.title ? (
+                <h1>
+                  {hero.title}
+                </h1>
+              ) : null}
 
-              <p className="hero-description">
-                O FightOps centraliza alunos, professores, planos, turmas,
-                pagamentos e toda a operação do seu centro de treinamento em
-                uma única plataforma.
-              </p>
+              {hero.content ? (
+                <p className="hero-description">
+                  {hero.content}
+                </p>
+              ) : null}
 
               <div className="hero-actions">
-                <Link to="/register" className="button button-primary button-lg">
-                  Começar gratuitamente
-                </Link>
+                {hero.buttonText &&
+                hero.buttonUrl ? (
+                  <Link
+                    to={hero.buttonUrl}
+                    className="button button-primary button-lg"
+                  >
+                    {hero.buttonText}
+                  </Link>
+                ) : null}
 
-                <Link to="/features" className="button button-secondary button-lg">
-                  Conhecer funcionalidades
-                </Link>
+                {hero.secondaryButtonText &&
+                hero.secondaryButtonUrl ? (
+                  <Link
+                    to={
+                      hero.secondaryButtonUrl
+                    }
+                    className="button button-secondary button-lg"
+                  >
+                    {
+                      hero.secondaryButtonText
+                    }
+                  </Link>
+                ) : null}
               </div>
 
-              <div className="hero-meta">
-                <span>Sem cartão de crédito</span>
-                <span>Configuração rápida</span>
-                <span>Gestão em qualquer lugar</span>
-              </div>
+              {heroMetadata?.benefits?.length ? (
+                <div className="hero-meta">
+                  {heroMetadata.benefits.map(
+                    (benefit) => (
+                      <span key={benefit}>
+                        {benefit}
+                      </span>
+                    ),
+                  )}
+                </div>
+              ) : null}
             </div>
 
-            <div className="hero-dashboard">
+            <div
+              className="hero-dashboard"
+              aria-hidden="true"
+            >
               <div className="dashboard-window">
                 <div className="dashboard-window-header">
                   <span />
@@ -49,7 +169,9 @@ export function HomePage() {
 
                 <div className="dashboard-content">
                   <div className="dashboard-sidebar">
-                    <div className="dashboard-logo">FO</div>
+                    <div className="dashboard-logo">
+                      FO
+                    </div>
 
                     <div className="dashboard-nav-item active" />
                     <div className="dashboard-nav-item" />
@@ -58,39 +180,44 @@ export function HomePage() {
                   </div>
 
                   <div className="dashboard-main">
-                    <div>
-                      <span className="dashboard-label">Visão geral</span>
-                      <h3>Dashboard</h3>
-                    </div>
+                    <span className="dashboard-label">
+                      Visão geral
+                    </span>
+
+                    <h3>
+                      Dashboard
+                    </h3>
 
                     <div className="dashboard-stats">
                       <div className="dashboard-card">
-                        <span>Alunos ativos</span>
-                        <strong>248</strong>
-                        <small>+12 este mês</small>
+                        <span>
+                          Alunos ativos
+                        </span>
+
+                        <strong>
+                          248
+                        </strong>
                       </div>
 
                       <div className="dashboard-card">
-                        <span>Turmas hoje</span>
-                        <strong>08</strong>
-                        <small>42 alunos inscritos</small>
+                        <span>
+                          Turmas hoje
+                        </span>
+
+                        <strong>
+                          08
+                        </strong>
                       </div>
 
                       <div className="dashboard-card">
-                        <span>Receita mensal</span>
-                        <strong>R$ 28,4k</strong>
-                        <small>+8,2%</small>
-                      </div>
-                    </div>
+                        <span>
+                          Receita
+                        </span>
 
-                    <div className="dashboard-chart">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
+                        <strong>
+                          R$ 28,4k
+                        </strong>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -98,154 +225,170 @@ export function HomePage() {
             </div>
           </div>
         </section>
+      ) : null}
 
-        <section className="section">
+      {features ? (
+        <section
+          className="section"
+          data-testid="home-features"
+        >
           <div className="site-container">
             <div className="section-heading">
-              <span className="eyebrow">Tudo em um só lugar</span>
+              {features.eyebrow ? (
+                <span className="eyebrow">
+                  {features.eyebrow}
+                </span>
+              ) : null}
 
-              <h2>
-                Menos planilhas.
-                <span> Mais controle.</span>
-              </h2>
+              {features.title ? (
+                <h2>
+                  {features.title}
+                </h2>
+              ) : null}
 
-              <p>
-                Ferramentas pensadas para simplificar a rotina de quem
-                administra uma academia ou centro de treinamento.
-              </p>
+              {features.content ? (
+                <p>
+                  {features.content}
+                </p>
+              ) : null}
             </div>
 
             <div className="feature-grid">
-              <article className="feature-card">
-                <div className="feature-icon">01</div>
+              {featuresMetadata?.items?.map(
+                (
+                  feature,
+                  index,
+                ) => (
+                  <article
+                    className="feature-card"
+                    key={
+                      feature.key ??
+                      feature.title
+                    }
+                  >
+                    <div className="feature-icon">
+                      {String(
+                        index + 1,
+                      ).padStart(
+                        2,
+                        '0',
+                      )}
+                    </div>
 
-                <h3>Gestão de alunos</h3>
+                    <h3>
+                      {feature.title}
+                    </h3>
 
-                <p>
-                  Cadastre alunos, acompanhe status, histórico, planos e
-                  informações importantes.
-                </p>
-              </article>
-
-              <article className="feature-card">
-                <div className="feature-icon">02</div>
-
-                <h3>Turmas e professores</h3>
-
-                <p>
-                  Organize horários, professores, capacidade das turmas e
-                  presença dos alunos.
-                </p>
-              </article>
-
-              <article className="feature-card">
-                <div className="feature-icon">03</div>
-
-                <h3>Financeiro</h3>
-
-                <p>
-                  Acompanhe mensalidades, pagamentos, inadimplência e indicadores
-                  financeiros.
-                </p>
-              </article>
-
-              <article className="feature-card">
-                <div className="feature-icon">04</div>
-
-                <h3>Gestão de acessos</h3>
-
-                <p>
-                  Controle as permissões de donos, administradores,
-                  recepcionistas, professores e alunos.
-                </p>
-              </article>
-
-              <article className="feature-card">
-                <div className="feature-icon">05</div>
-
-                <h3>Multiacademia</h3>
-
-                <p>
-                  Gerencie diferentes unidades dentro da mesma estrutura de
-                  forma organizada e segura.
-                </p>
-              </article>
-
-              <article className="feature-card">
-                <div className="feature-icon">06</div>
-
-                <h3>Indicadores</h3>
-
-                <p>
-                  Tenha uma visão rápida da operação com informações úteis para
-                  decisões do dia a dia.
-                </p>
-              </article>
+                    <p>
+                      {
+                        feature.description
+                      }
+                    </p>
+                  </article>
+                ),
+              )}
             </div>
           </div>
         </section>
+      ) : null}
 
-        <section className="section section-highlight">
+      {martialArts ? (
+        <section
+          className="section section-highlight"
+          data-testid="home-highlight"
+        >
           <div className="site-container highlight-grid">
             <div>
-              <span className="eyebrow">Feito para artes marciais</span>
+              {martialArts.eyebrow ? (
+                <span className="eyebrow">
+                  {
+                    martialArts.eyebrow
+                  }
+                </span>
+              ) : null}
 
-              <h2>
-                Do tatame para a gestão.
-              </h2>
+              {martialArts.title ? (
+                <h2>
+                  {
+                    martialArts.title
+                  }
+                </h2>
+              ) : null}
 
-              <p>
-                O FightOps nasce para atender a realidade de academias,
-                professores e equipes que precisam de organização sem
-                burocracia.
-              </p>
+              {martialArts.content ? (
+                <p>
+                  {
+                    martialArts.content
+                  }
+                </p>
+              ) : null}
             </div>
 
             <div className="highlight-list">
-              <div>
-                <strong>01</strong>
-                <span>Organização operacional</span>
-              </div>
+              {martialArtsMetadata?.items?.map(
+                (
+                  item,
+                  index,
+                ) => (
+                  <div key={item}>
+                    <strong>
+                      {String(
+                        index + 1,
+                      ).padStart(
+                        2,
+                        '0',
+                      )}
+                    </strong>
 
-              <div>
-                <strong>02</strong>
-                <span>Experiência do aluno</span>
-              </div>
-
-              <div>
-                <strong>03</strong>
-                <span>Controle financeiro</span>
-              </div>
-
-              <div>
-                <strong>04</strong>
-                <span>Crescimento sustentável</span>
-              </div>
+                    <span>
+                      {item}
+                    </span>
+                  </div>
+                ),
+              )}
             </div>
           </div>
         </section>
+      ) : null}
 
-        <section className="section">
+      {cta ? (
+        <section
+          className="section"
+          data-testid="home-cta"
+        >
           <div className="site-container cta-card">
             <div>
-              <span className="eyebrow">Comece agora</span>
+              {cta.eyebrow ? (
+                <span className="eyebrow">
+                  {cta.eyebrow}
+                </span>
+              ) : null}
 
-              <h2>
-                Sua operação merece mais controle.
-              </h2>
+              {cta.title ? (
+                <h2>
+                  {cta.title}
+                </h2>
+              ) : null}
 
-              <p>
-                Crie sua conta e prepare sua academia para uma gestão mais
-                simples e profissional.
-              </p>
+              {cta.content ? (
+                <p>
+                  {cta.content}
+                </p>
+              ) : null}
             </div>
 
-            <Link to="/register" className="button button-primary button-lg">
-              Criar minha conta
-            </Link>
+            {cta.buttonText &&
+            cta.buttonUrl ? (
+              <Link
+                to={cta.buttonUrl}
+                className="button button-primary button-lg"
+              >
+                {cta.buttonText}
+              </Link>
+            ) : null}
           </div>
         </section>
-      </main>
-    </>
+      ) : null}
+    </main>
   )
 }

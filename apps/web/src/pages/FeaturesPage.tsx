@@ -1,94 +1,119 @@
-import { Link } from 'react-router-dom'
+import { PageSeo } from '../components/public/PageSeo'
+import { PublicPageError } from '../components/public/PublicPageError'
+import { PublicPageLoading } from '../components/public/PublicPageLoading'
+import { usePublicPage } from '../hooks/usePublicSite'
 
-const features = [
-  {
-    title: 'Alunos',
-    description:
-      'Cadastro, acompanhamento, status, contatos, histórico e informações dos alunos.',
-  },
-  {
-    title: 'Professores',
-    description:
-      'Organização da equipe, funções, permissões e vínculo com turmas.',
-  },
-  {
-    title: 'Turmas',
-    description:
-      'Controle de horários, capacidade, modalidade, professor responsável e participantes.',
-  },
-  {
-    title: 'Planos',
-    description:
-      'Estruturação de planos, mensalidades, regras e vínculos com alunos.',
-  },
-  {
-    title: 'Financeiro',
-    description:
-      'Acompanhamento de cobranças, pagamentos, inadimplência e indicadores.',
-  },
-  {
-    title: 'Permissões',
-    description:
-      'Controle de acesso para proprietários, administradores, recepção, professores e alunos.',
-  },
-  {
-    title: 'Multiacademia',
-    description:
-      'Gerencie mais de uma unidade com separação de dados e permissões.',
-  },
-  {
-    title: 'Dashboard',
-    description:
-      'Indicadores rápidos para acompanhar a saúde e evolução da operação.',
-  },
-]
+import type { FeatureItem } from '../types/public-site'
+
+interface FeaturesMetadata {
+  items?: FeatureItem[]
+}
 
 export function FeaturesPage() {
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+  } = usePublicPage('features')
+
+  if (isLoading) {
+    return <PublicPageLoading />
+  }
+
+  if (
+    isError ||
+    !data?.page
+  ) {
+    return (
+      <PublicPageError
+        onRetry={() => {
+          void refetch()
+        }}
+      />
+    )
+  }
+
+  const page = data.page
+
+  const hero =
+    page.sections.find(
+      (section) =>
+        section.key === 'hero',
+    )
+
+  const items =
+    page.sections.find(
+      (section) =>
+        section.key === 'items',
+    )
+
+  const metadata =
+    items?.metadata as
+      | FeaturesMetadata
+      | null
+
   return (
     <main>
-      <section className="page-hero">
-        <div className="site-container">
-          <span className="eyebrow">Funcionalidades</span>
+      <PageSeo seo={page.seo} />
 
-          <h1>
-            Tudo que sua academia precisa
-            <span> para operar melhor.</span>
-          </h1>
+      {hero ? (
+        <section className="page-hero">
+          <div className="site-container">
+            {hero.eyebrow ? (
+              <span className="eyebrow">
+                {hero.eyebrow}
+              </span>
+            ) : null}
 
-          <p>
-            O FightOps reúne as principais rotinas administrativas e
-            operacionais em uma plataforma única.
-          </p>
-        </div>
-      </section>
+            {hero.title ? (
+              <h1>{hero.title}</h1>
+            ) : null}
+
+            {hero.content ? (
+              <p>
+                {hero.content}
+              </p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       <section className="section">
         <div className="site-container feature-grid">
-          {features.map((feature, index) => (
-            <article className="feature-card" key={feature.title}>
-              <div className="feature-icon">
-                {String(index + 1).padStart(2, '0')}
-              </div>
+          {metadata?.items?.map(
+            (
+              feature,
+              index,
+            ) => (
+              <article
+                className="feature-card"
+                key={
+                  feature.key ??
+                  feature.title
+                }
+              >
+                <div className="feature-icon">
+                  {String(
+                    index + 1,
+                  ).padStart(
+                    2,
+                    '0',
+                  )}
+                </div>
 
-              <h3>{feature.title}</h3>
+                <h3>
+                  {feature.title}
+                </h3>
 
-              <p>{feature.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="site-container cta-card">
-          <div>
-            <span className="eyebrow">Pronto para começar?</span>
-
-            <h2>Organize sua operação com o FightOps.</h2>
-          </div>
-
-          <Link to="/register" className="button button-primary button-lg">
-            Criar conta
-          </Link>
+                <p>
+                  {
+                    feature.description
+                  }
+                </p>
+              </article>
+            ),
+          )}
         </div>
       </section>
     </main>
