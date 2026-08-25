@@ -3,23 +3,42 @@ import type { FastifyInstance } from 'fastify'
 import { AppError } from '../../http/app-error.js'
 
 import { authenticate } from './authenticate.js'
-import { loginSchema, registerSchema } from './auth.schemas.js'
+import {
+  loginSchema,
+  registerSchema,
+} from './auth.schemas.js'
 import {
   authenticateUser,
   getAuthenticatedUser,
   registerUser,
 } from './auth.service.js'
-import { signAccessToken } from './token.js'
+import {
+  clearRefreshTokenCookie,
+  REFRESH_TOKEN_COOKIE_NAME,
+  setRefreshTokenCookie,
+} from './refresh-cookie.js'
+import {
+  createSession,
+  revokeSession,
+  rotateSession,
+} from './session.js'
+import {
+  signAccessToken,
+} from './token.js'
 
-export async function authRoutes(app: FastifyInstance) {
+export async function authRoutes(
+  app: FastifyInstance,
+) {
   app.get(
     '/auth/status',
     {
       schema: {
         tags: ['Auth'],
-        summary: 'Verificar disponibilidade do módulo de autenticação',
+        summary:
+          'Verificar disponibilidade do módulo de autenticação',
       },
     },
+
     async () => {
       return {
         status: 'ok',
@@ -37,7 +56,12 @@ export async function authRoutes(app: FastifyInstance) {
 
         body: {
           type: 'object',
-          required: ['name', 'email', 'password'],
+
+          required: [
+            'name',
+            'email',
+            'password',
+          ],
 
           properties: {
             name: {
@@ -130,13 +154,19 @@ export async function authRoutes(app: FastifyInstance) {
     },
 
     async (request, reply) => {
-      const input = registerSchema.parse(request.body)
+      const input =
+        registerSchema.parse(
+          request.body,
+        )
 
-      const user = await registerUser(input)
+      const user =
+        await registerUser(input)
 
-      return reply.status(201).send({
-        user,
-      })
+      return reply
+        .status(201)
+        .send({
+          user,
+        })
     },
   )
 
@@ -149,7 +179,11 @@ export async function authRoutes(app: FastifyInstance) {
 
         body: {
           type: 'object',
-          required: ['email', 'password'],
+
+          required: [
+            'email',
+            'password',
+          ],
 
           properties: {
             email: {
@@ -213,20 +247,184 @@ export async function authRoutes(app: FastifyInstance) {
     },
 
     async (request, reply) => {
-      const input = loginSchema.parse(request.body)
+      const input =
+        loginSchema.parse(
+          request.body,
+        )
 
-      const user = await authenticateUser(input)
+      const user =
+        await authenticateUser(
+          input,
+        )
 
-      const accessToken = await signAccessToken({
-        userId: user.id,
-        email: user.email,
-        globalRole: user.globalRole,
-      })
+      const accessToken =
+        await signAccessToken({
+          userId: user.id,
+          email: user.email,
+          globalRole:
+            user.globalRole,
+        })
 
-      return reply.status(200).send({
-        accessToken,
-        user,
-      })
+      const refreshToken =
+        await createSession({
+          userId: user.id,
+
+          userAgent:
+            request.headers[
+              'user-agent'
+            ],
+
+          ipAddress:
+            request.ip,
+        })
+
+      setRefreshTokenCookie(
+        reply,
+        refreshToken,
+      )
+
+      return reply
+        .status(200)
+        .send({
+          accessToken,
+          user,
+        })
+    },
+  )
+
+  app.post(
+    '/auth/refresh',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary:
+          'Renovar token de acesso',
+
+        response: {
+          200: {
+            type: 'object',
+
+            properties: {
+              accessToken: {
+                type: 'string',
+              },
+
+              user: {
+                type: 'object',
+
+                properties: {
+                  id: {
+                    type: 'string',
+                  },
+
+                  name: {
+                    type: 'string',
+                  },
+
+                  email: {
+                    type: 'string',
+                  },
+
+                  globalRole: {
+                    type: 'string',
+                  },
+                },
+
+                required: [
+                  'id',
+                  'name',
+                  'email',
+                  'globalRole',
+                ],
+              },
+            },
+
+            required: [
+              'accessToken',
+              'user',
+            ],
+          },
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const refreshToken =
+        request.cookies[
+          REFRESH_TOKEN_COOKIE_NAME
+        ]
+
+      if (!refreshToken) {
+        throw new AppError(
+          'REFRESH_TOKEN_REQUIRED',
+          401,
+          'Token de renovação não informado.',
+        )
+      }
+
+      const result =
+        await rotateSession(
+          refreshToken,
+        )
+
+      const accessToken =
+        await signAccessToken({
+          userId: result.user.id,
+          email:
+            result.user.email,
+          globalRole:
+            result.user.globalRole,
+        })
+
+      setRefreshTokenCookie(
+        reply,
+        result.refreshToken,
+      )
+
+      return reply
+        .status(200)
+        .send({
+          accessToken,
+          user: result.user,
+        })
+    },
+  )
+
+  app.post(
+    '/auth/logout',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary:
+          'Encerrar sessão do usuário',
+
+        response: {
+          204: {
+            type: 'null',
+          },
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const refreshToken =
+        request.cookies[
+          REFRESH_TOKEN_COOKIE_NAME
+        ]
+
+      if (refreshToken) {
+        await revokeSession(
+          refreshToken,
+        )
+      }
+
+      clearRefreshTokenCookie(
+        reply,
+      )
+
+      return reply
+        .status(204)
+        .send()
     },
   )
 
@@ -237,7 +435,8 @@ export async function authRoutes(app: FastifyInstance) {
 
       schema: {
         tags: ['Auth'],
-        summary: 'Consultar usuário autenticado',
+        summary:
+          'Consultar usuário autenticado',
 
         security: [
           {
@@ -328,27 +527,13 @@ export async function authRoutes(app: FastifyInstance) {
 
             required: ['user'],
           },
-
-          401: {
-            type: 'object',
-            additionalProperties: true,
-          },
-
-          403: {
-            type: 'object',
-            additionalProperties: true,
-          },
-
-          404: {
-            type: 'object',
-            additionalProperties: true,
-          },
         },
       },
     },
 
     async (request, reply) => {
-      const authenticatedUser = request.user
+      const authenticatedUser =
+        request.user
 
       if (!authenticatedUser) {
         throw new AppError(
@@ -358,13 +543,16 @@ export async function authRoutes(app: FastifyInstance) {
         )
       }
 
-      const user = await getAuthenticatedUser(
-        authenticatedUser.id,
-      )
+      const user =
+        await getAuthenticatedUser(
+          authenticatedUser.id,
+        )
 
-      return reply.status(200).send({
-        user,
-      })
+      return reply
+        .status(200)
+        .send({
+          user,
+        })
     },
   )
 }

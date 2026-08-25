@@ -5,6 +5,7 @@ import type { FastifyInstance } from 'fastify'
 import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
 import { authRoutes } from './modules/auth/auth.routes.js'
+import { registerCookiePlugin } from './plugins/cookie.js'
 import { registerSecurityPlugins } from './plugins/security.js'
 import { registerSwagger } from './plugins/swagger.js'
 import { databaseTestRoutes } from './routes/database-test.routes.js'
@@ -33,6 +34,7 @@ export function configureApp(
 ) {
   registerErrorHandlers(app)
 
+  registerCookiePlugin(app)
   registerSecurityPlugins(app)
   registerSwagger(app)
 
