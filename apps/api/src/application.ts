@@ -5,6 +5,7 @@ import type { FastifyInstance } from 'fastify'
 import { env } from './config/env.js'
 import { registerErrorHandlers } from './http/error-handler.js'
 import { authRoutes } from './modules/auth/auth.routes.js'
+import { publicSiteRoutes } from './modules/public-site/public-site.routes.js'
 import { registerCookiePlugin } from './plugins/cookie.js'
 import { registerSecurityPlugins } from './plugins/security.js'
 import { registerSwagger } from './plugins/swagger.js'
@@ -29,9 +30,7 @@ export function getFastifyOptions() {
   }
 }
 
-export function configureApp(
-  app: FastifyInstance,
-) {
+export function configureApp(app: FastifyInstance) {
   registerErrorHandlers(app)
 
   registerCookiePlugin(app)
@@ -48,7 +47,9 @@ export function configureApp(
 
   app.register(healthRoutes)
   app.register(databaseTestRoutes)
+
   app.register(authRoutes)
+  app.register(publicSiteRoutes)
 
   return app
 }

@@ -120,3 +120,90 @@ model GymMembership {
   @@index([gymId, active])
   @@map("gym_memberships")
 }
+
+model SiteSetting {
+  id              String   @id @default(uuid()) @db.Uuid
+  siteName        String   @default("FightOps") @map("site_name") @db.VarChar(100)
+  logoUrl         String?  @map("logo_url") @db.Text
+  logoDarkUrl     String?  @map("logo_dark_url") @db.Text
+  faviconUrl      String?  @map("favicon_url") @db.Text
+  primaryColor    String   @default("#E63737") @map("primary_color") @db.VarChar(20)
+  secondaryColor  String   @default("#F04747") @map("secondary_color") @db.VarChar(20)
+  backgroundColor String   @default("#080808") @map("background_color") @db.VarChar(20)
+  surfaceColor    String   @default("#141414") @map("surface_color") @db.VarChar(20)
+  textColor       String   @default("#F6F6F6") @map("text_color") @db.VarChar(20)
+  mutedTextColor  String   @default("#9D9D9D") @map("muted_text_color") @db.VarChar(20)
+  headingFont     String   @default("Inter") @map("heading_font") @db.VarChar(100)
+  bodyFont        String   @default("Inter") @map("body_font") @db.VarChar(100)
+  supportEmail    String?  @map("support_email") @db.VarChar(255)
+  instagramUrl    String?  @map("instagram_url") @db.Text
+  linkedinUrl     String?  @map("linkedin_url") @db.Text
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("site_settings")
+}
+
+model PublicPage {
+  id        String   @id @default(uuid()) @db.Uuid
+  slug      String   @unique @db.VarChar(100)
+  name      String   @db.VarChar(150)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sections PublicPageSection[]
+  seo      SeoSetting?
+
+  @@index([active])
+  @@map("public_pages")
+}
+
+model PublicPageSection {
+  id                  String   @id @default(uuid()) @db.Uuid
+  pageId              String   @map("page_id") @db.Uuid
+  key                 String   @db.VarChar(100)
+  eyebrow             String?  @db.VarChar(150)
+  title               String?  @db.Text
+  subtitle            String?  @db.Text
+  content             String?  @db.Text
+  buttonText          String?  @map("button_text") @db.VarChar(150)
+  buttonUrl           String?  @map("button_url") @db.Text
+  secondaryButtonText String?  @map("secondary_button_text") @db.VarChar(150)
+  secondaryButtonUrl  String?  @map("secondary_button_url") @db.Text
+  imageUrl            String?  @map("image_url") @db.Text
+  metadata            Json?
+  sortOrder           Int      @default(0) @map("sort_order")
+  active              Boolean  @default(true)
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  page PublicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, key], map: "uk_public_page_sections_page_key")
+  @@index([pageId])
+  @@index([pageId, active])
+  @@index([pageId, sortOrder])
+  @@map("public_page_sections")
+}
+
+model SeoSetting {
+  id            String   @id @default(uuid()) @db.Uuid
+  pageId        String   @unique @map("page_id") @db.Uuid
+  title         String   @db.VarChar(255)
+  description   String   @db.Text
+  keywords      String?  @db.Text
+  ogTitle       String?  @map("og_title") @db.VarChar(255)
+  ogDescription String?  @map("og_description") @db.Text
+  ogImageUrl    String?  @map("og_image_url") @db.Text
+  canonicalUrl  String?  @map("canonical_url") @db.Text
+  robotsIndex   Boolean  @default(true) @map("robots_index")
+  robotsFollow  Boolean  @default(true) @map("robots_follow")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  page PublicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@map("seo_settings")
+}

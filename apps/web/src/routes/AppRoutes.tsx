@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 
+import { PublicLayout } from '../layouts/PublicLayout'
 import { FaqPage } from '../pages/FaqPage'
 import { FeaturesPage } from '../pages/FeaturesPage'
 import { HomePage } from '../pages/HomePage'
@@ -11,13 +12,15 @@ import { RegisterPage } from '../pages/RegisterPage'
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
 
-      <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/features" element={<FeaturesPage />} />
 
-      <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
 
-      <Route path="/faq" element={<FaqPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+      </Route>
 
       <Route path="/login" element={<LoginPage />} />
 

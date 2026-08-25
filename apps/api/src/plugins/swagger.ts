@@ -3,31 +3,40 @@ import swaggerUi from '@fastify/swagger-ui'
 
 import type { FastifyInstance } from 'fastify'
 
-export function registerSwagger(
-  app: FastifyInstance,
-) {
+export function registerSwagger(app: FastifyInstance) {
   app.register(swagger, {
     openapi: {
       openapi: '3.0.3',
 
       info: {
         title: 'FightOps API',
+
         description:
           'API REST da plataforma FightOps para gestão de academias e centros de treinamento.',
+
         version: '0.1.0',
       },
 
       tags: [
         {
           name: 'Health',
+
           description:
             'Monitoramento e disponibilidade da API.',
         },
 
         {
           name: 'Auth',
+
           description:
             'Autenticação e gerenciamento de sessão.',
+        },
+
+        {
+          name: 'Public Site',
+
+          description:
+            'Conteúdo, identidade visual e SEO das páginas públicas.',
         },
       ],
 
