@@ -1,3 +1,10 @@
+export type GymRole =
+  | 'OWNER'
+  | 'ADMIN'
+  | 'RECEPTIONIST'
+  | 'PROFESSOR'
+  | 'STUDENT'
+
 export interface CreateGymInput {
   name: string
   description?: string
@@ -20,10 +27,21 @@ export interface GymResponse {
 
 export interface UserGymResponse
   extends GymResponse {
-  role:
-    | 'OWNER'
-    | 'ADMIN'
-    | 'RECEPTIONIST'
-    | 'PROFESSOR'
-    | 'STUDENT'
+  role: GymRole
+}
+
+export interface AddGymMemberInput {
+  email: string
+  role: Exclude<
+    GymRole,
+    'OWNER'
+  >
+}
+
+export interface UpdateGymMemberRoleInput {
+  role: GymRole
+}
+
+export interface UpdateGymMemberStatusInput {
+  active: boolean
 }

@@ -7,7 +7,11 @@ import {
 } from '../../http/app-error.js'
 
 import type {
+  AddGymMemberInput,
   CreateGymInput,
+  GymRole,
+  UpdateGymMemberRoleInput,
+  UpdateGymMemberStatusInput,
 } from './gyms.types.js'
 
 function normalizeSlugValue(
@@ -249,4 +253,386 @@ export async function getUserGymById(
     role:
       membership.role,
   }
+}
+
+export async function listGymMembers(
+  gymId: string,
+) {
+  return prisma.gymMembership.findMany({
+    where: {
+      gymId,
+    },
+
+    orderBy: [
+      {
+        active:
+          'desc',
+      },
+      {
+        joinedAt:
+          'asc',
+      },
+    ],
+
+    select: {
+      id: true,
+      role: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          active: true,
+        },
+      },
+    },
+  })
+}
+
+export async function addGymMember(
+  gymId: string,
+  actorRole: GymRole,
+  input: AddGymMemberInput,
+) {
+  if (
+    actorRole !== 'OWNER' &&
+    input.role === 'ADMIN'
+  ) {
+    throw new AppError(
+      'GYM_ROLE_NOT_ALLOWED',
+      403,
+      'Somente o proprietário pode adicionar administradores.',
+    )
+  }
+
+  const email =
+    input.email
+      .trim()
+      .toLowerCase()
+
+  const user =
+    await prisma.user.findUnique({
+      where: {
+        email,
+      },
+
+      select: {
+        id: true,
+        active: true,
+      },
+    })
+
+  if (!user) {
+    throw new AppError(
+      'USER_NOT_FOUND',
+      404,
+      'Usuário não encontrado.',
+    )
+  }
+
+  if (!user.active) {
+    throw new AppError(
+      'USER_INACTIVE',
+      409,
+      'O usuário informado está inativo.',
+    )
+  }
+
+  const existingMembership =
+    await prisma.gymMembership.findUnique({
+      where: {
+        userId_gymId: {
+          userId:
+            user.id,
+
+          gymId,
+        },
+      },
+    })
+
+  if (existingMembership) {
+    throw new AppError(
+      'GYM_MEMBER_ALREADY_EXISTS',
+      409,
+      'O usuário já faz parte desta academia.',
+    )
+  }
+
+  return prisma.gymMembership.create({
+    data: {
+      userId:
+        user.id,
+
+      gymId,
+
+      role:
+        input.role,
+
+      active:
+        true,
+    },
+
+    select: {
+      id: true,
+      role: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          active: true,
+        },
+      },
+    },
+  })
+}
+
+export async function updateGymMemberRole(
+  gymId: string,
+  memberId: string,
+  actorUserId: string,
+  actorRole: GymRole,
+  input: UpdateGymMemberRoleInput,
+) {
+  const membership =
+    await prisma.gymMembership.findFirst({
+      where: {
+        id:
+          memberId,
+
+        gymId,
+      },
+
+      select: {
+        id: true,
+        userId: true,
+        role: true,
+        active: true,
+      },
+    })
+
+  if (!membership) {
+    throw new AppError(
+      'GYM_MEMBER_NOT_FOUND',
+      404,
+      'Membro não encontrado.',
+    )
+  }
+
+  if (
+    membership.userId ===
+      actorUserId &&
+    membership.role ===
+      'OWNER'
+  ) {
+    throw new AppError(
+      'OWNER_SELF_CHANGE_NOT_ALLOWED',
+      409,
+      'O proprietário não pode alterar o próprio papel.',
+    )
+  }
+
+  if (
+    membership.role ===
+      'OWNER' &&
+    actorRole !==
+      'OWNER'
+  ) {
+    throw new AppError(
+      'OWNER_MANAGEMENT_NOT_ALLOWED',
+      403,
+      'Somente um proprietário pode gerenciar outro proprietário.',
+    )
+  }
+
+  if (
+    input.role ===
+      'OWNER' &&
+    actorRole !==
+      'OWNER'
+  ) {
+    throw new AppError(
+      'OWNER_ASSIGNMENT_NOT_ALLOWED',
+      403,
+      'Somente um proprietário pode definir outro proprietário.',
+    )
+  }
+
+  if (
+    actorRole ===
+      'ADMIN' &&
+    (
+      membership.role ===
+        'ADMIN' ||
+      input.role ===
+        'ADMIN'
+    )
+  ) {
+    throw new AppError(
+      'ADMIN_ROLE_MANAGEMENT_NOT_ALLOWED',
+      403,
+      'Administradores não podem gerenciar outros administradores.',
+    )
+  }
+
+  return prisma.gymMembership.update({
+    where: {
+      id:
+        membership.id,
+    },
+
+    data: {
+      role:
+        input.role,
+    },
+
+    select: {
+      id: true,
+      role: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          active: true,
+        },
+      },
+    },
+  })
+}
+
+export async function updateGymMemberStatus(
+  gymId: string,
+  memberId: string,
+  actorUserId: string,
+  actorRole: GymRole,
+  input: UpdateGymMemberStatusInput,
+) {
+  const membership =
+    await prisma.gymMembership.findFirst({
+      where: {
+        id:
+          memberId,
+
+        gymId,
+      },
+
+      select: {
+        id: true,
+        userId: true,
+        role: true,
+        active: true,
+      },
+    })
+
+  if (!membership) {
+    throw new AppError(
+      'GYM_MEMBER_NOT_FOUND',
+      404,
+      'Membro não encontrado.',
+    )
+  }
+
+  if (
+    membership.userId ===
+      actorUserId
+  ) {
+    throw new AppError(
+      'MEMBER_SELF_STATUS_NOT_ALLOWED',
+      409,
+      'Você não pode alterar o status do próprio vínculo.',
+    )
+  }
+
+  if (
+    membership.role ===
+      'OWNER'
+  ) {
+    throw new AppError(
+      'OWNER_STATUS_CHANGE_NOT_ALLOWED',
+      403,
+      'O vínculo do proprietário não pode ser desativado por esta operação.',
+    )
+  }
+
+  if (
+    actorRole ===
+      'ADMIN' &&
+    membership.role ===
+      'ADMIN'
+  ) {
+    throw new AppError(
+      'ADMIN_MANAGEMENT_NOT_ALLOWED',
+      403,
+      'Administradores não podem gerenciar outros administradores.',
+    )
+  }
+
+  if (
+    membership.active ===
+      input.active
+  ) {
+    throw new AppError(
+      input.active
+        ? 'GYM_MEMBER_ALREADY_ACTIVE'
+        : 'GYM_MEMBER_ALREADY_INACTIVE',
+      409,
+      input.active
+        ? 'O membro já está ativo.'
+        : 'O membro já está inativo.',
+    )
+  }
+
+  return prisma.gymMembership.update({
+    where: {
+      id:
+        membership.id,
+    },
+
+    data: {
+      active:
+        input.active,
+    },
+
+    select: {
+      id: true,
+      role: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          active: true,
+        },
+      },
+    },
+  })
 }
