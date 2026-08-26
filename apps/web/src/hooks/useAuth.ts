@@ -12,10 +12,12 @@ import {
 
 import {
   login,
+  register,
 } from '../services/auth.service'
 
 import type {
   LoginInput,
+  RegisterInput,
 } from '../types/auth'
 
 export function useAuth() {
@@ -50,5 +52,14 @@ export function useLogin() {
         data.user,
       )
     },
+  })
+}
+
+export function useRegister() {
+  return useMutation({
+    mutationFn: (
+      input: RegisterInput,
+    ) =>
+      register(input),
   })
 }

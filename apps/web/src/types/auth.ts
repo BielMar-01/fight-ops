@@ -39,3 +39,24 @@ export interface RefreshResponse {
 export interface MeResponse {
   user: AuthenticatedUser
 }
+
+export interface RegisterInput {
+  name: string
+  email: string
+  password: string
+  phone?: string
+}
+
+export interface RegisteredUser {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  globalRole: GlobalRole
+  active: boolean
+  createdAt: string
+}
+
+export interface RegisterResponse {
+  user: RegisteredUser
+}

@@ -7,6 +7,8 @@ import type {
   LoginResponse,
   MeResponse,
   RefreshResponse,
+  RegisterInput,
+  RegisterResponse,
 } from '../types/auth'
 
 export function login(
@@ -14,6 +16,27 @@ export function login(
 ) {
   return apiRequest<LoginResponse>(
     '/auth/login',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
+      body:
+        JSON.stringify(
+          input,
+        ),
+    },
+  )
+}
+
+export function register(
+  input: RegisterInput,
+) {
+  return apiRequest<RegisterResponse>(
+    '/auth/register',
     {
       method: 'POST',
 

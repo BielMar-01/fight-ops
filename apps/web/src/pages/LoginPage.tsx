@@ -22,6 +22,7 @@ import {
 
 interface LoginLocationState {
   from?: Location
+  accountCreated?: boolean
 }
 
 export function LoginPage() {
@@ -33,6 +34,16 @@ export function LoginPage() {
 
   const loginMutation =
     useLogin()
+
+  const state =
+    location.state as
+      | LoginLocationState
+      | null
+
+  const accountCreated =
+    Boolean(
+      state?.accountCreated,
+    )
 
   const [
     email,
@@ -64,14 +75,9 @@ export function LoginPage() {
 
     try {
       await loginMutation.mutateAsync({
-        email,
+        email: email.trim(),
         password,
       })
-
-      const state =
-        location.state as
-          | LoginLocationState
-          | null
 
       const destination =
         state?.from?.pathname ??
@@ -159,6 +165,18 @@ export function LoginPage() {
                 FightOps.
               </p>
             </div>
+
+            {accountCreated ? (
+              <div
+                className="form-success"
+                role="status"
+                data-testid="login-account-created-success"
+              >
+                Conta criada com
+                sucesso. Agora faça
+                login para continuar.
+              </div>
+            ) : null}
 
             <form
               onSubmit={
