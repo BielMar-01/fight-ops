@@ -339,3 +339,63 @@
     padding: 26px;
   }
 }
+
+/* =========================================================
+   ACADEMIA ATIVA
+   ========================================================= */
+
+.dashboard-current-gym {
+  display: grid;
+
+  gap: 1px;
+
+  overflow: hidden;
+
+  margin-bottom: 22px;
+
+  border: 1px solid
+    var(--border-color);
+
+  border-radius: 14px;
+
+  background:
+    var(--border-color);
+}
+
+.dashboard-current-gym > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  padding: 16px;
+
+  background:
+    var(--color-surface);
+}
+
+.dashboard-current-gym span {
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.7rem;
+}
+
+.dashboard-current-gym strong {
+  overflow-wrap:
+    anywhere;
+
+  font-size: 0.88rem;
+}
+
+@media (min-width: 700px) {
+  .dashboard-current-gym {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+  }
+}

@@ -8,6 +8,10 @@ import {
 } from '../components/auth/GuestRoute'
 
 import {
+  GymRequired,
+} from '../components/auth/GymRequired'
+
+import {
   ProtectedRoute,
 } from '../components/auth/ProtectedRoute'
 
@@ -18,6 +22,10 @@ import {
 import {
   PublicLayout,
 } from '../components/layout/PublicLayout'
+
+import {
+  GymProvider,
+} from '../contexts/GymContext'
 
 import {
   DashboardPage,
@@ -148,7 +156,11 @@ export function AppRoutes() {
       >
         <Route
           element={
-            <AppLayout />
+            <GymProvider>
+              <GymRequired>
+                <AppLayout />
+              </GymRequired>
+            </GymProvider>
           }
         >
           <Route

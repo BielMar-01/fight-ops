@@ -10,6 +10,10 @@ import {
 } from 'react-router-dom'
 
 import {
+  useGym,
+} from '../../contexts/GymContext'
+
+import {
   useAuth,
 } from '../../hooks/useAuth'
 
@@ -26,14 +30,42 @@ export function AppLayout() {
   } =
     useAuth()
 
+  const {
+    gyms,
+    activeGym,
+    selectGym,
+  } =
+    useGym()
+
   const [
     sidebarOpen,
     setSidebarOpen,
   ] =
     useState(false)
 
+  const [
+    gymSelectorOpen,
+    setGymSelectorOpen,
+  ] =
+    useState(false)
+
   function closeSidebar() {
     setSidebarOpen(false)
+  }
+
+  function closeGymSelector() {
+    setGymSelectorOpen(false)
+  }
+
+  function handleGymChange(
+    gymId: string,
+  ) {
+    selectGym(
+      gymId,
+    )
+
+    closeGymSelector()
+    closeSidebar()
   }
 
   async function handleLogout() {
@@ -49,7 +81,10 @@ export function AppLayout() {
     }
   }
 
-  if (!user) {
+  if (
+    !user ||
+    !activeGym
+  ) {
     return null
   }
 
@@ -121,6 +156,97 @@ export function AppLayout() {
           </button>
         </div>
 
+        <div
+          className="app-gym-selector"
+          data-testid="app-gym-selector"
+        >
+          <button
+            type="button"
+            className="app-gym-selector-trigger"
+            aria-expanded={
+              gymSelectorOpen
+            }
+            data-testid="app-gym-selector-trigger"
+            onClick={() => {
+              setGymSelectorOpen(
+                (current) =>
+                  !current,
+              )
+            }}
+          >
+            <div className="app-gym-selector-info">
+              <span className="app-gym-selector-label">
+                Academia
+              </span>
+
+              <strong
+                data-testid="app-active-gym-name"
+              >
+                {activeGym.name}
+              </strong>
+
+              <small
+                data-testid="app-active-gym-role"
+              >
+                {activeGym.role}
+              </small>
+            </div>
+
+            <span className="app-gym-selector-arrow">
+              {gymSelectorOpen
+                ? '▲'
+                : '▼'}
+            </span>
+          </button>
+
+          {gymSelectorOpen ? (
+            <div
+              className="app-gym-selector-menu"
+              data-testid="app-gym-selector-menu"
+            >
+              {gyms.map(
+                (gym) => (
+                  <button
+                    key={
+                      gym.id
+                    }
+                    type="button"
+                    className={
+                      gym.id ===
+                      activeGym.id
+                        ? 'app-gym-option active'
+                        : 'app-gym-option'
+                    }
+                    data-testid={`app-gym-option-${gym.id}`}
+                    onClick={() => {
+                      handleGymChange(
+                        gym.id,
+                      )
+                    }}
+                  >
+                    <div>
+                      <strong>
+                        {gym.name}
+                      </strong>
+
+                      <span>
+                        {gym.role}
+                      </span>
+                    </div>
+
+                    {gym.id ===
+                    activeGym.id ? (
+                      <span>
+                        ✓
+                      </span>
+                    ) : null}
+                  </button>
+                ),
+              )}
+            </div>
+          ) : null}
+        </div>
+
         <nav
           className="app-navigation"
           aria-label="Navegação da área interna"
@@ -159,14 +285,14 @@ export function AppLayout() {
 
           <div
             className="app-nav-link disabled"
-            data-testid="nav-academies-disabled"
+            data-testid="nav-members-disabled"
           >
             <span className="app-nav-icon">
-              ◈
+              ◉
             </span>
 
             <span>
-              Academias
+              Membros
             </span>
 
             <small>
@@ -224,6 +350,36 @@ export function AppLayout() {
               Em breve
             </small>
           </div>
+
+          {(
+            activeGym.role ===
+              'OWNER' ||
+            activeGym.role ===
+              'ADMIN'
+          ) ? (
+            <>
+              <span className="app-navigation-group-title">
+                Administração
+              </span>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-settings-disabled"
+              >
+                <span className="app-nav-icon">
+                  ⚙
+                </span>
+
+                <span>
+                  Configurações
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+            </>
+          ) : null}
         </nav>
 
         <div className="app-sidebar-footer">
@@ -279,7 +435,7 @@ export function AppLayout() {
 
             <div>
               <span className="app-header-eyebrow">
-                FightOps
+                {activeGym.name}
               </span>
 
               <strong className="app-header-title">
@@ -300,7 +456,7 @@ export function AppLayout() {
                 </strong>
 
                 <span>
-                  {user.globalRole}
+                  {activeGym.role}
                 </span>
               </div>
             </div>

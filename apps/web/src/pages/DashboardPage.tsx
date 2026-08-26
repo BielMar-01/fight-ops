@@ -1,4 +1,8 @@
 import {
+  useGym,
+} from '../contexts/GymContext'
+
+import {
   useAuth,
 } from '../hooks/useAuth'
 
@@ -10,7 +14,15 @@ export function DashboardPage() {
   } =
     useAuth()
 
-  if (!user) {
+  const {
+    activeGym,
+  } =
+    useGym()
+
+  if (
+    !user ||
+    !activeGym
+  ) {
     return null
   }
 
@@ -22,7 +34,7 @@ export function DashboardPage() {
       <div className="dashboard-page-heading">
         <div>
           <span className="eyebrow">
-            Visão geral
+            {activeGym.name}
           </span>
 
           <h1>
@@ -31,10 +43,45 @@ export function DashboardPage() {
 
           <p>
             Acompanhe os principais
-            indicadores da sua operação.
+            indicadores da sua academia.
           </p>
         </div>
       </div>
+
+      <section
+        className="dashboard-current-gym"
+        data-testid="dashboard-active-gym"
+      >
+        <div>
+          <span>
+            Academia ativa
+          </span>
+
+          <strong>
+            {activeGym.name}
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Seu acesso
+          </span>
+
+          <strong>
+            {activeGym.role}
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Slug
+          </span>
+
+          <strong>
+            {activeGym.slug}
+          </strong>
+        </div>
+      </section>
 
       <section
         className="dashboard-metrics"
@@ -42,10 +89,10 @@ export function DashboardPage() {
       >
         <article
           className="dashboard-metric-card"
-          data-testid="dashboard-metric-academies"
+          data-testid="dashboard-metric-students"
         >
           <span>
-            Academias
+            Alunos ativos
           </span>
 
           <strong>
@@ -59,10 +106,10 @@ export function DashboardPage() {
 
         <article
           className="dashboard-metric-card"
-          data-testid="dashboard-metric-students"
+          data-testid="dashboard-metric-professors"
         >
           <span>
-            Alunos ativos
+            Professores
           </span>
 
           <strong>
@@ -121,7 +168,7 @@ export function DashboardPage() {
               </span>
 
               <h2>
-                Configure seu FightOps
+                Configure sua academia
               </h2>
             </div>
           </div>
@@ -144,19 +191,20 @@ export function DashboardPage() {
               </div>
             </div>
 
-            <div className="dashboard-step">
+            <div className="dashboard-step completed">
               <span className="dashboard-step-number">
-                2
+                ✓
               </span>
 
               <div>
                 <strong>
-                  Criar academia
+                  Academia criada
                 </strong>
 
                 <p>
-                  Cadastre sua primeira
-                  unidade.
+                  {activeGym.name}
+                  {' '}
+                  está configurada.
                 </p>
               </div>
             </div>
@@ -204,11 +252,11 @@ export function DashboardPage() {
           <div className="dashboard-panel-heading">
             <div>
               <span className="dashboard-panel-eyebrow">
-                Conta
+                Acesso
               </span>
 
               <h2>
-                Seu acesso
+                Seu vínculo
               </h2>
             </div>
           </div>
@@ -216,7 +264,7 @@ export function DashboardPage() {
           <dl className="dashboard-account-list">
             <div>
               <dt>
-                Nome
+                Usuário
               </dt>
 
               <dd>
@@ -236,11 +284,21 @@ export function DashboardPage() {
 
             <div>
               <dt>
-                Perfil global
+                Academia
               </dt>
 
               <dd>
-                {user.globalRole}
+                {activeGym.name}
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Papel na academia
+              </dt>
+
+              <dd>
+                {activeGym.role}
               </dd>
             </div>
 
