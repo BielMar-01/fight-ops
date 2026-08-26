@@ -3,12 +3,17 @@ import {
 } from './api'
 
 import type {
+  ForgotPasswordInput,
+  ForgotPasswordResponse,
   LoginInput,
   LoginResponse,
   MeResponse,
   RefreshResponse,
   RegisterInput,
   RegisterResponse,
+  ResetPasswordInput,
+  VerifyPasswordResetInput,
+  VerifyPasswordResetResponse,
 } from '../types/auth'
 
 export function login(
@@ -76,6 +81,69 @@ export function logoutSession() {
     '/auth/logout',
     {
       method: 'POST',
+    },
+  )
+}
+
+export function requestPasswordReset(
+  input: ForgotPasswordInput,
+) {
+  return apiRequest<ForgotPasswordResponse>(
+    '/auth/password/forgot',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
+      body:
+        JSON.stringify(
+          input,
+        ),
+    },
+  )
+}
+
+export function verifyPasswordReset(
+  input: VerifyPasswordResetInput,
+) {
+  return apiRequest<VerifyPasswordResetResponse>(
+    '/auth/password/verify',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
+      body:
+        JSON.stringify(
+          input,
+        ),
+    },
+  )
+}
+
+export function resetPassword(
+  input: ResetPasswordInput,
+) {
+  return apiRequest<void>(
+    '/auth/password/reset',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
+      body:
+        JSON.stringify(
+          input,
+        ),
     },
   )
 }

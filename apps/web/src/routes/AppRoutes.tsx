@@ -28,6 +28,10 @@ import {
 } from '../pages/FeaturesPage'
 
 import {
+  ForgotPasswordPage,
+} from '../pages/ForgotPasswordPage'
+
+import {
   HomePage,
 } from '../pages/HomePage'
 
@@ -46,6 +50,14 @@ import {
 import {
   RegisterPage,
 } from '../pages/RegisterPage'
+
+import {
+  ResetPasswordPage,
+} from '../pages/ResetPasswordPage'
+
+import {
+  VerifyResetCodePage,
+} from '../pages/VerifyResetCodePage'
 
 export function AppRoutes() {
   return (
@@ -100,6 +112,27 @@ export function AppRoutes() {
           path="/register"
           element={
             <RegisterPage />
+          }
+        />
+
+        <Route
+          path="/forgot-password"
+          element={
+            <ForgotPasswordPage />
+          }
+        />
+
+        <Route
+          path="/verify-reset-code"
+          element={
+            <VerifyResetCodePage />
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={
+            <ResetPasswordPage />
           }
         />
       </Route>

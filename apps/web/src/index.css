@@ -1617,3 +1617,29 @@ summary:focus-visible {
 
   line-height: 1.5;
 }
+
+/* =========================================================
+   RECUPERAÇÃO DE SENHA
+   ========================================================= */
+
+.auth-email-highlight {
+  display: block;
+
+  margin-top: 8px;
+
+  color: var(--color-primary);
+
+  font-size: 0.9rem;
+
+  overflow-wrap: anywhere;
+}
+
+.reset-code-input {
+  text-align: center;
+
+  font-size: 1.7rem !important;
+
+  font-weight: 800;
+
+  letter-spacing: 0.35em;
+}

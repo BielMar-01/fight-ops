@@ -23,6 +23,7 @@ import {
 interface LoginLocationState {
   from?: Location
   accountCreated?: boolean
+  passwordReset?: boolean
 }
 
 export function LoginPage() {
@@ -43,6 +44,11 @@ export function LoginPage() {
   const accountCreated =
     Boolean(
       state?.accountCreated,
+    )
+
+  const passwordReset =
+    Boolean(
+      state?.passwordReset,
     )
 
   const [
@@ -75,7 +81,8 @@ export function LoginPage() {
 
     try {
       await loginMutation.mutateAsync({
-        email: email.trim(),
+        email:
+          email.trim(),
         password,
       })
 
@@ -175,6 +182,18 @@ export function LoginPage() {
                 Conta criada com
                 sucesso. Agora faça
                 login para continuar.
+              </div>
+            ) : null}
+
+            {passwordReset ? (
+              <div
+                className="form-success"
+                role="status"
+                data-testid="login-password-reset-success"
+              >
+                Senha alterada com
+                sucesso. Entre com sua
+                nova senha.
               </div>
             ) : null}
 

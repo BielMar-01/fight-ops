@@ -13,11 +13,17 @@ import {
 import {
   login,
   register,
+  requestPasswordReset,
+  resetPassword,
+  verifyPasswordReset,
 } from '../services/auth.service'
 
 import type {
+  ForgotPasswordInput,
   LoginInput,
   RegisterInput,
+  ResetPasswordInput,
+  VerifyPasswordResetInput,
 } from '../types/auth'
 
 export function useAuth() {
@@ -38,7 +44,8 @@ export function useAuth() {
 export function useLogin() {
   const {
     setAuthenticatedSession,
-  } = useAuth()
+  } =
+    useAuth()
 
   return useMutation({
     mutationFn: (
@@ -61,5 +68,38 @@ export function useRegister() {
       input: RegisterInput,
     ) =>
       register(input),
+  })
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (
+      input: ForgotPasswordInput,
+    ) =>
+      requestPasswordReset(
+        input,
+      ),
+  })
+}
+
+export function useVerifyPasswordReset() {
+  return useMutation({
+    mutationFn: (
+      input: VerifyPasswordResetInput,
+    ) =>
+      verifyPasswordReset(
+        input,
+      ),
+  })
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (
+      input: ResetPasswordInput,
+    ) =>
+      resetPassword(
+        input,
+      ),
   })
 }

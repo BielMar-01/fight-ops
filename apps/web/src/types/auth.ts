@@ -60,3 +60,25 @@ export interface RegisteredUser {
 export interface RegisterResponse {
   user: RegisteredUser
 }
+
+export interface ForgotPasswordInput {
+  email: string
+}
+
+export interface ForgotPasswordResponse {
+  message: string
+}
+
+export interface VerifyPasswordResetInput {
+  email: string
+  code: string
+}
+
+export interface VerifyPasswordResetResponse {
+  resetToken: string
+}
+
+export interface ResetPasswordInput {
+  resetToken: string
+  newPassword: string
+}
