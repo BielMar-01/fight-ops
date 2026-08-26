@@ -1,0 +1,341 @@
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.dashboard-page {
+  width: 100%;
+  max-width: 1500px;
+
+  margin: 0 auto;
+}
+
+.dashboard-page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 28px;
+}
+
+.dashboard-page-heading h1 {
+  margin: 10px 0 8px;
+
+  font-size:
+    clamp(
+      2rem,
+      8vw,
+      3.4rem
+    );
+
+  line-height: 1;
+
+  letter-spacing:
+    -0.045em;
+}
+
+.dashboard-page-heading p {
+  margin: 0;
+
+  color:
+    var(--color-text-muted);
+
+  line-height: 1.6;
+}
+
+/* =========================================================
+   MÉTRICAS
+   ========================================================= */
+
+.dashboard-metrics {
+  display: grid;
+
+  gap: 12px;
+
+  margin-bottom: 22px;
+}
+
+.dashboard-metric-card {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding: 20px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 14px;
+
+  background:
+    var(--color-surface);
+}
+
+.dashboard-metric-card span {
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.78rem;
+
+  font-weight: 600;
+}
+
+.dashboard-metric-card strong {
+  font-size: 1.8rem;
+}
+
+.dashboard-metric-card small {
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.68rem;
+}
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.dashboard-grid {
+  display: grid;
+
+  gap: 16px;
+}
+
+.dashboard-panel {
+  min-width: 0;
+
+  padding: 22px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 14px;
+
+  background:
+    var(--color-surface);
+}
+
+.dashboard-panel-heading {
+  margin-bottom: 22px;
+}
+
+.dashboard-panel-eyebrow {
+  color:
+    var(--color-primary);
+
+  font-size: 0.67rem;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.1em;
+
+  text-transform:
+    uppercase;
+}
+
+.dashboard-panel-heading h2 {
+  margin: 7px 0 0;
+
+  font-size: 1.2rem;
+}
+
+/* =========================================================
+   PRIMEIROS PASSOS
+   ========================================================= */
+
+.dashboard-steps {
+  display: grid;
+}
+
+.dashboard-step {
+  display: flex;
+
+  gap: 14px;
+
+  padding: 16px 0;
+
+  border-bottom:
+    1px solid
+    var(--border-color);
+}
+
+.dashboard-step:last-child {
+  border-bottom: 0;
+}
+
+.dashboard-step-number {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 50%;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.75rem;
+
+  font-weight: 800;
+}
+
+.dashboard-step.completed
+.dashboard-step-number {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--color-primary) 50%,
+      transparent
+    );
+
+  background:
+    color-mix(
+      in srgb,
+      var(--color-primary) 12%,
+      transparent
+    );
+
+  color:
+    var(--color-primary);
+}
+
+.dashboard-step strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 0.88rem;
+}
+
+.dashboard-step p {
+  margin: 0;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.78rem;
+
+  line-height: 1.5;
+}
+
+/* =========================================================
+   CONTA
+   ========================================================= */
+
+.dashboard-account-list {
+  margin: 0;
+}
+
+.dashboard-account-list > div {
+  display: grid;
+
+  gap: 5px;
+
+  padding: 14px 0;
+
+  border-bottom:
+    1px solid
+    var(--border-color);
+}
+
+.dashboard-account-list > div:last-child {
+  border-bottom: 0;
+}
+
+.dashboard-account-list dt {
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.72rem;
+}
+
+.dashboard-account-list dd {
+  margin: 0;
+
+  overflow-wrap: anywhere;
+
+  font-size: 0.88rem;
+
+  font-weight: 700;
+}
+
+.status-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  min-height: 25px;
+
+  padding: 0 9px;
+
+  border-radius: 100px;
+
+  font-size: 0.67rem;
+
+  font-weight: 800;
+}
+
+.status-badge.active {
+  background:
+    rgba(
+      34,
+      197,
+      94,
+      0.12
+    );
+
+  color:
+    rgb(
+      74,
+      222,
+      128
+    );
+}
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+
+@media (min-width: 580px) {
+  .dashboard-metrics {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+@media (min-width: 900px) {
+  .dashboard-metrics {
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+@media (min-width: 1100px) {
+  .dashboard-grid {
+    grid-template-columns:
+      minmax(0, 2fr)
+      minmax(280px, 1fr);
+  }
+
+  .dashboard-panel {
+    padding: 26px;
+  }
+}

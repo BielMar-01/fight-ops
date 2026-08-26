@@ -12,6 +12,10 @@ import {
 } from '../components/auth/ProtectedRoute'
 
 import {
+  AppLayout,
+} from '../components/layout/AppLayout'
+
+import {
   PublicLayout,
 } from '../components/layout/PublicLayout'
 
@@ -143,11 +147,17 @@ export function AppRoutes() {
         }
       >
         <Route
-          path="/dashboard"
           element={
-            <DashboardPage />
+            <AppLayout />
           }
-        />
+        >
+          <Route
+            path="/dashboard"
+            element={
+              <DashboardPage />
+            }
+          />
+        </Route>
       </Route>
 
       <Route
