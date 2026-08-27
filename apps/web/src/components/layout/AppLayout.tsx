@@ -283,22 +283,31 @@ export function AppLayout() {
             Gestão
           </span>
 
-          <div
-            className="app-nav-link disabled"
-            data-testid="nav-members-disabled"
-          >
-            <span className="app-nav-icon">
-              ◉
-            </span>
+          {activeGym.role !==
+          'STUDENT' ? (
+            <NavLink
+              to="/members"
+              className={({
+                isActive,
+              }) =>
+                isActive
+                  ? 'app-nav-link active'
+                  : 'app-nav-link'
+              }
+              onClick={
+                closeSidebar
+              }
+              data-testid="nav-members-link"
+            >
+              <span className="app-nav-icon">
+                ◉
+              </span>
 
-            <span>
-              Membros
-            </span>
-
-            <small>
-              Em breve
-            </small>
-          </div>
+              <span>
+                Membros
+              </span>
+            </NavLink>
+          ) : null}
 
           <div
             className="app-nav-link disabled"

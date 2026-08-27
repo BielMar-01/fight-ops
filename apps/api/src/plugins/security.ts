@@ -2,46 +2,95 @@ import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
 
-import type { FastifyInstance } from 'fastify'
+import type {
+  FastifyInstance,
+} from 'fastify'
 
-import { env } from '../config/env.js'
+import {
+  env,
+} from '../config/env.js'
 
 export async function registerSecurityPlugins(
   app: FastifyInstance,
 ) {
-  await app.register(helmet)
+  await app.register(
+    helmet,
+  )
 
   const allowedOrigins = [
     'http://localhost:5173',
     env.FRONTEND_URL,
-  ]
+  ].filter(Boolean)
 
-  await app.register(cors, {
-    origin(origin, callback) {
-      if (!origin) {
-        callback(null, true)
-        return
-      }
+  await app.register(
+    cors,
+    {
+      origin(
+        origin,
+        callback,
+      ) {
+        if (!origin) {
+          callback(
+            null,
+            true,
+          )
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true)
-        return
-      }
+          return
+        }
 
-      callback(
-        new Error(
-          `Origin ${origin} is not allowed by CORS.`,
-        ),
-        false,
-      )
+        if (
+          allowedOrigins.includes(
+            origin,
+          )
+        ) {
+          callback(
+            null,
+            true,
+          )
+
+          return
+        }
+
+        callback(
+          new Error(
+            `Origin ${origin} is not allowed by CORS.`,
+          ),
+          false,
+        )
+      },
+
+      credentials:
+        true,
+
+      methods: [
+        'GET',
+        'HEAD',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+        'OPTIONS',
+      ],
+
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'Accept',
+      ],
     },
+  )
 
-    credentials: true,
-  })
+  await app.register(
+    rateLimit,
+    {
+      global:
+        true,
 
-  await app.register(rateLimit, {
-    global: true,
-    max: 100,
-    timeWindow: '1 minute',
-  })
+      max:
+        100,
+
+      timeWindow:
+        '1 minute',
+    },
+  )
 }

@@ -52,6 +52,10 @@ import {
 } from '../pages/LoginPage'
 
 import {
+  MembersPage,
+} from '../pages/MembersPage'
+
+import {
   NotFoundPage,
 } from '../pages/NotFoundPage'
 
@@ -167,6 +171,13 @@ export function AppRoutes() {
             path="/dashboard"
             element={
               <DashboardPage />
+            }
+          />
+
+          <Route
+            path="/members"
+            element={
+              <MembersPage />
             }
           />
         </Route>
