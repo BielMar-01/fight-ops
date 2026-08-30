@@ -100,6 +100,16 @@ export function AppLayout() {
       .join('')
       .toUpperCase()
 
+  const isStudent =
+    activeGym.role ===
+    'STUDENT'
+
+  const isOwnerOrAdmin =
+    activeGym.role ===
+      'OWNER' ||
+    activeGym.role ===
+      'ADMIN'
+
   return (
     <div
       className="app-shell"
@@ -250,6 +260,7 @@ export function AppLayout() {
         <nav
           className="app-navigation"
           aria-label="Navegação da área interna"
+          data-testid="app-navigation"
         >
           <span className="app-navigation-group-title">
             Principal
@@ -279,106 +290,374 @@ export function AppLayout() {
             </span>
           </NavLink>
 
-          <span className="app-navigation-group-title">
-            Gestão
-          </span>
-
-          {activeGym.role !==
-          'STUDENT' ? (
-            <NavLink
-              to="/members"
-              className={({
-                isActive,
-              }) =>
-                isActive
-                  ? 'app-nav-link active'
-                  : 'app-nav-link'
-              }
-              onClick={
-                closeSidebar
-              }
-              data-testid="nav-members-link"
-            >
-              <span className="app-nav-icon">
-                ◉
+          {!isStudent ? (
+            <>
+              <span className="app-navigation-group-title">
+                Gestão
               </span>
 
-              <span>
-                Membros
+              <NavLink
+                to="/members"
+                className={({
+                  isActive,
+                }) =>
+                  isActive
+                    ? 'app-nav-link active'
+                    : 'app-nav-link'
+                }
+                onClick={
+                  closeSidebar
+                }
+                data-testid="nav-members-link"
+              >
+                <span className="app-nav-icon">
+                  ◉
+                </span>
+
+                <span>
+                  Membros
+                </span>
+              </NavLink>
+
+              <NavLink
+                to="/students"
+                className={({
+                  isActive,
+                }) =>
+                  isActive
+                    ? 'app-nav-link active'
+                    : 'app-nav-link'
+                }
+                onClick={
+                  closeSidebar
+                }
+                data-testid="nav-students-link"
+              >
+                <span className="app-nav-icon">
+                  ◎
+                </span>
+
+                <span>
+                  Alunos
+                </span>
+              </NavLink>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-professors-disabled"
+              >
+                <span className="app-nav-icon">
+                  ◈
+                </span>
+
+                <span>
+                  Professores
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-modalities-disabled"
+              >
+                <span className="app-nav-icon">
+                  ◇
+                </span>
+
+                <span>
+                  Modalidades
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-graduations-disabled"
+              >
+                <span className="app-nav-icon">
+                  ◆
+                </span>
+
+                <span>
+                  Graduações
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <span className="app-navigation-group-title">
+                Academia
               </span>
-            </NavLink>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-classes-disabled"
+              >
+                <span className="app-nav-icon">
+                  ▦
+                </span>
+
+                <span>
+                  Turmas
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-lessons-disabled"
+              >
+                <span className="app-nav-icon">
+                  ▣
+                </span>
+
+                <span>
+                  Aulas
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-attendance-disabled"
+              >
+                <span className="app-nav-icon">
+                  ✓
+                </span>
+
+                <span>
+                  Presenças
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-calendar-disabled"
+              >
+                <span className="app-nav-icon">
+                  □
+                </span>
+
+                <span>
+                  Agenda
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <span className="app-navigation-group-title">
+                Comercial
+              </span>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-plans-disabled"
+              >
+                <span className="app-nav-icon">
+                  ≡
+                </span>
+
+                <span>
+                  Planos
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-enrollments-disabled"
+              >
+                <span className="app-nav-icon">
+                  +
+                </span>
+
+                <span>
+                  Matrículas
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <span className="app-navigation-group-title">
+                Financeiro
+              </span>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-monthly-fees-disabled"
+              >
+                <span className="app-nav-icon">
+                  $
+                </span>
+
+                <span>
+                  Mensalidades
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-payments-disabled"
+              >
+                <span className="app-nav-icon">
+                  $
+                </span>
+
+                <span>
+                  Pagamentos
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-finance-disabled"
+              >
+                <span className="app-nav-icon">
+                  $
+                </span>
+
+                <span>
+                  Financeiro
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <span className="app-navigation-group-title">
+                Evolução
+              </span>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-progression-disabled"
+              >
+                <span className="app-nav-icon">
+                  ↑
+                </span>
+
+                <span>
+                  Evolução dos alunos
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-student-graduations-disabled"
+              >
+                <span className="app-nav-icon">
+                  ★
+                </span>
+
+                <span>
+                  Graduações dos alunos
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-competitions-disabled"
+              >
+                <span className="app-nav-icon">
+                  ♢
+                </span>
+
+                <span>
+                  Competições
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <span className="app-navigation-group-title">
+                Relatórios
+              </span>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-reports-disabled"
+              >
+                <span className="app-nav-icon">
+                  ▤
+                </span>
+
+                <span>
+                  Relatórios
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+            </>
           ) : null}
 
-          {activeGym.role !==
-              'STUDENT' ? (
-                <NavLink
-                  to="/students"
-                  className={({
-                    isActive,
-                  }) =>
-                    isActive
-                      ? 'app-nav-link active'
-                      : 'app-nav-link'
-                  }
-                  onClick={
-                    closeSidebar
-                  }
-                  data-testid="nav-students-link"
-                >
-                  <span className="app-nav-icon">
-                    ◎
-                  </span>
-
-                  <span>
-                    Alunos
-                  </span>
-                </NavLink>
-              ) : null}
-
-          <div
-            className="app-nav-link disabled"
-            data-testid="nav-classes-disabled"
-          >
-            <span className="app-nav-icon">
-              ◇
-            </span>
-
-            <span>
-              Turmas
-            </span>
-
-            <small>
-              Em breve
-            </small>
-          </div>
-
-          <div
-            className="app-nav-link disabled"
-            data-testid="nav-finance-disabled"
-          >
-            <span className="app-nav-icon">
-              $
-            </span>
-
-            <span>
-              Financeiro
-            </span>
-
-            <small>
-              Em breve
-            </small>
-          </div>
-
-          {(
-            activeGym.role ===
-              'OWNER' ||
-            activeGym.role ===
-              'ADMIN'
-          ) ? (
+          {isOwnerOrAdmin ? (
             <>
               <span className="app-navigation-group-title">
                 Administração
               </span>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-audit-disabled"
+              >
+                <span className="app-nav-icon">
+                  ◷
+                </span>
+
+                <span>
+                  Auditoria
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
 
               <div
                 className="app-nav-link disabled"
@@ -390,6 +669,99 @@ export function AppLayout() {
 
                 <span>
                   Configurações
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+            </>
+          ) : null}
+
+          {isStudent ? (
+            <>
+              <span className="app-navigation-group-title">
+                Meu espaço
+              </span>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-student-profile-disabled"
+              >
+                <span className="app-nav-icon">
+                  ◉
+                </span>
+
+                <span>
+                  Meu perfil
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-student-classes-disabled"
+              >
+                <span className="app-nav-icon">
+                  ▦
+                </span>
+
+                <span>
+                  Minhas turmas
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-student-attendance-disabled"
+              >
+                <span className="app-nav-icon">
+                  ✓
+                </span>
+
+                <span>
+                  Minhas presenças
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-student-progression-disabled"
+              >
+                <span className="app-nav-icon">
+                  ↑
+                </span>
+
+                <span>
+                  Minha evolução
+                </span>
+
+                <small>
+                  Em breve
+                </small>
+              </div>
+
+              <div
+                className="app-nav-link disabled"
+                data-testid="nav-student-finance-disabled"
+              >
+                <span className="app-nav-icon">
+                  $
+                </span>
+
+                <span>
+                  Financeiro
                 </span>
 
                 <small>
