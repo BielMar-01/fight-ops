@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
@@ -92,6 +93,9 @@ export function AuthProvider({
   ] =
     useState(false)
 
+  const initializationStartedRef =
+    useRef(false)
+
   const clearAuthenticatedSession =
     useCallback(() => {
       clearAccessToken()
@@ -166,6 +170,15 @@ export function AuthProvider({
     )
 
   useEffect(() => {
+    if (
+      initializationStartedRef.current
+    ) {
+      return
+    }
+
+    initializationStartedRef.current =
+      true
+
     async function initializeSession() {
       try {
         await restoreSession()
@@ -177,7 +190,9 @@ export function AuthProvider({
     }
 
     void initializeSession()
-  }, [restoreSession])
+  }, [
+    restoreSession,
+  ])
 
   useEffect(() => {
     return subscribeToSessionExpired(

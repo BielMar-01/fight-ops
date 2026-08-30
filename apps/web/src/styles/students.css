@@ -1,0 +1,866 @@
+.students-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.students-header {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.students-header h1 {
+  margin: 4px 0 8px;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.students-header p {
+  margin: 0;
+  color: #9ca3af;
+  line-height: 1.6;
+}
+
+.students-eyebrow {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.students-total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: fit-content;
+  padding: 12px 16px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.students-total strong {
+  font-size: 1.4rem;
+}
+
+.students-total span {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+}
+
+.students-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  background: #18181b;
+}
+
+.students-search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.students-filter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.students-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.students-field label {
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.students-field input,
+.students-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #3f3f46;
+  border-radius: 9px;
+  outline: none;
+  background: #09090b;
+  color: #fafafa;
+  font: inherit;
+}
+
+.students-field input::placeholder {
+  color: #71717a;
+}
+
+.students-field input:focus,
+.students-field select:focus {
+  border-color: #ef4444;
+}
+
+.students-button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.students-button-primary {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.students-button-primary:hover {
+  background: #dc2626;
+}
+
+.students-button-secondary {
+  border-color: #3f3f46;
+  background: #18181b;
+  color: #e4e4e7;
+}
+
+.students-button-secondary:hover:not(:disabled) {
+  background: #27272a;
+}
+
+.students-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.students-list {
+  display: grid;
+  gap: 12px;
+}
+
+.student-card {
+  padding: 16px;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  background: #18181b;
+}
+
+.student-card-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.student-avatar {
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #27272a;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.student-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.student-name-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.student-name-row h2 {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.student-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.student-status-active {
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.student-status-inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+.student-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.students-empty,
+.students-state {
+  padding: 32px 20px;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  background: #18181b;
+  text-align: center;
+}
+
+.students-empty h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.students-empty p {
+  margin: 0;
+  color: #a1a1aa;
+}
+
+.students-state {
+  color: #a1a1aa;
+}
+
+.students-state-error {
+  color: #fca5a5;
+}
+
+.students-pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.students-pagination-info {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.students-pagination-info strong {
+  color: #f4f4f5;
+}
+
+@media (min-width: 768px) {
+  .students-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .students-filters {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .students-search-form {
+    flex: 1;
+    flex-direction: row;
+    align-items: flex-end;
+    max-width: 650px;
+  }
+
+  .students-filter-actions {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .students-filter-actions .students-field {
+    min-width: 150px;
+  }
+
+  .student-name-row {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .student-card {
+    padding: 20px;
+  }
+
+  .students-pagination {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .students-pagination-info {
+    min-width: 130px;
+  }
+}
+
+.students-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.student-modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.student-modal {
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  border: 1px solid #27272a;
+  border-radius: 18px 18px 0 0;
+  background: #111113;
+  box-shadow:
+    0 -20px 60px
+    rgba(0, 0, 0, 0.45);
+}
+
+.student-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border-bottom: 1px solid #27272a;
+}
+
+.student-modal-header h2 {
+  margin: 4px 0 6px;
+  font-size: 1.4rem;
+}
+
+.student-modal-header p {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 0.9rem;
+}
+
+.student-modal-close {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #3f3f46;
+  border-radius: 9px;
+  cursor: pointer;
+  background: #18181b;
+  color: #fafafa;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.student-modal-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.student-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.student-form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.student-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student-form-field > span {
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.student-form-field input,
+.student-form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #3f3f46;
+  border-radius: 9px;
+  outline: none;
+  background: #09090b;
+  color: #fafafa;
+  font: inherit;
+}
+
+.student-form-field input {
+  min-height: 42px;
+}
+
+.student-form-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.student-form-field input:focus,
+.student-form-field textarea:focus {
+  border-color: #ef4444;
+}
+
+.student-form-field input:disabled,
+.student-form-field textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.student-form-error {
+  padding: 12px 14px;
+  border: 1px solid
+    rgba(239, 68, 68, 0.35);
+  border-radius: 9px;
+  background:
+    rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+.student-modal-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+@media (min-width: 768px) {
+  .students-header-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .student-modal-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .student-modal {
+    max-width: 760px;
+    max-height: 90vh;
+    border-radius: 18px;
+  }
+
+  .student-modal-header,
+  .student-modal-form {
+    padding: 24px;
+  }
+
+  .student-form-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .student-form-field-full {
+    grid-column: 1 / -1;
+  }
+
+  .student-modal-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+.student-card-actions {
+  display: flex;
+  flex: 0 0 auto;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.student-card-actions .students-button {
+  width: 100%;
+}
+
+.student-detail-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.student-detail-summary > div:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.student-detail-summary strong {
+  color: #fafafa;
+  font-size: 1rem;
+}
+
+.student-detail-avatar {
+  display: flex;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #27272a;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.student-detail-metadata {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #09090b;
+}
+
+.student-detail-metadata > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.student-detail-metadata span {
+  color: #71717a;
+  font-size: 0.75rem;
+}
+
+.student-detail-metadata strong {
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.student-modal-state {
+  padding: 40px 24px;
+  color: #a1a1aa;
+  text-align: center;
+}
+
+.student-modal-state-error {
+  color: #fca5a5;
+}
+
+@media (min-width: 768px) {
+  .student-card-main {
+    align-items: center;
+  }
+
+  .student-card-actions {
+    width: auto;
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .student-card-actions .students-button {
+    width: auto;
+  }
+
+  .student-detail-metadata {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+}
+
+.students-button-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.students-button-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.students-button-danger-outline {
+  border-color: rgba(239, 68, 68, 0.55);
+  background: transparent;
+  color: #f87171;
+}
+
+.students-button-danger-outline:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.students-button-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.students-button-success:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.students-button-success-outline {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: transparent;
+  color: #86efac;
+}
+
+.students-button-success-outline:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.student-status-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #3f3f46;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.student-status-confirmation strong {
+  color: #fafafa;
+}
+
+.student-status-confirmation p {
+  margin: 6px 0 0;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.student-status-confirmation-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .student-status-confirmation {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .student-status-confirmation > div:first-child {
+    max-width: 520px;
+  }
+
+  .student-status-confirmation-actions {
+    flex-direction: row;
+    flex: 0 0 auto;
+  }
+}
+
+.students-access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 620px;
+  padding: 28px;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  background: #18181b;
+}
+
+.students-access-denied-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #f87171;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.students-access-denied h1 {
+  margin: 6px 0 10px;
+  color: #fafafa;
+  font-size: 1.5rem;
+}
+
+.students-access-denied p {
+  margin: 0;
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .students-page {
+    gap: 18px;
+  }
+
+  .students-header {
+    gap: 16px;
+  }
+
+  .students-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .students-header-actions {
+    width: 100%;
+  }
+
+  .students-header-actions .students-total,
+  .students-header-actions .students-button {
+    width: 100%;
+  }
+
+  .students-total {
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .students-filters {
+    padding: 14px;
+  }
+
+  .students-search-form,
+  .students-filter-actions {
+    width: 100%;
+  }
+
+  .students-search-form .students-button,
+  .students-filter-actions .students-button {
+    width: 100%;
+  }
+
+  .student-card-main {
+    flex-wrap: wrap;
+  }
+
+  .student-avatar {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .student-card-actions {
+    flex-basis: 100%;
+  }
+
+  .student-card-actions .students-button {
+    width: 100%;
+  }
+
+  .students-pagination {
+    gap: 10px;
+  }
+
+  .students-pagination .students-button {
+    width: 100%;
+  }
+
+  .student-modal {
+    max-height: 95vh;
+  }
+
+  .student-modal-header {
+    position: sticky;
+    z-index: 2;
+    top: 0;
+    background: #111113;
+  }
+
+  .student-modal-actions {
+    position: sticky;
+    z-index: 2;
+    bottom: 0;
+    margin-right: -20px;
+    margin-bottom: -20px;
+    margin-left: -20px;
+    padding: 14px 20px 20px;
+    border-top: 1px solid #27272a;
+    background: #111113;
+  }
+
+  .student-modal-actions .students-button {
+    width: 100%;
+  }
+
+  .student-status-confirmation-actions .students-button {
+    width: 100%;
+  }
+
+  .student-detail-metadata {
+    grid-template-columns: 1fr;
+  }
+
+  .students-access-denied {
+    padding: 22px;
+  }
+}
+
+.students-state-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.students-state-error strong {
+  color: #fca5a5;
+}
+
+.students-state-error span {
+  color: #a1a1aa;
+}
+
+.students-state-error .students-button {
+  margin-top: 4px;
+}
+
+.students-loading-spinner {
+  width: 24px;
+  height: 24px;
+  margin: 0 auto 10px;
+  border: 3px solid #27272a;
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: students-spin 0.8s linear infinite;
+}
+
+@keyframes students-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

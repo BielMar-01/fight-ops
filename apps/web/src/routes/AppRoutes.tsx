@@ -72,6 +72,10 @@ import {
 } from '../pages/ResetPasswordPage'
 
 import {
+  StudentsPage,
+} from '../pages/StudentsPage'
+
+import {
   VerifyResetCodePage,
 } from '../pages/VerifyResetCodePage'
 
@@ -178,6 +182,13 @@ export function AppRoutes() {
             path="/members"
             element={
               <MembersPage />
+            }
+          />
+
+          <Route
+            path="/students"
+            element={
+              <StudentsPage />
             }
           />
         </Route>

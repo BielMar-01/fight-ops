@@ -309,22 +309,31 @@ export function AppLayout() {
             </NavLink>
           ) : null}
 
-          <div
-            className="app-nav-link disabled"
-            data-testid="nav-students-disabled"
-          >
-            <span className="app-nav-icon">
-              ◎
-            </span>
+          {activeGym.role !==
+              'STUDENT' ? (
+                <NavLink
+                  to="/students"
+                  className={({
+                    isActive,
+                  }) =>
+                    isActive
+                      ? 'app-nav-link active'
+                      : 'app-nav-link'
+                  }
+                  onClick={
+                    closeSidebar
+                  }
+                  data-testid="nav-students-link"
+                >
+                  <span className="app-nav-icon">
+                    ◎
+                  </span>
 
-            <span>
-              Alunos
-            </span>
-
-            <small>
-              Em breve
-            </small>
-          </div>
+                  <span>
+                    Alunos
+                  </span>
+                </NavLink>
+              ) : null}
 
           <div
             className="app-nav-link disabled"

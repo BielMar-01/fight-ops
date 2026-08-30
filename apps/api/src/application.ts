@@ -25,6 +25,10 @@ import {
 } from './modules/public-site/public-site.routes.js'
 
 import {
+  studentRoutes,
+} from './modules/students/students.routes.js'
+
+import {
   registerCookiePlugin,
 } from './plugins/cookie.js'
 
@@ -117,6 +121,10 @@ export function configureApp(
 
   app.register(
     gymRoutes,
+  )
+
+  app.register(
+    studentRoutes,
   )
 
   return app

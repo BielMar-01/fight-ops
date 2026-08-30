@@ -33,9 +33,10 @@ model User {
   createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  memberships    GymMembership[]
-  sessions       UserSession[]
-  passwordResets PasswordReset[]
+  memberships     GymMembership[]
+  sessions        UserSession[]
+  passwordResets  PasswordReset[]
+  studentProfiles Student[]
 
   @@index([active])
   @@index([globalRole])
@@ -94,6 +95,7 @@ model Gym {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   memberships GymMembership[]
+  students    Student[]
 
   @@index([active])
   @@index([createdAt])
@@ -119,6 +121,33 @@ model GymMembership {
   @@index([gymId, role])
   @@index([gymId, active])
   @@map("gym_memberships")
+}
+
+model Student {
+  id               String    @id @default(uuid()) @db.Uuid
+  gymId            String    @map("gym_id") @db.Uuid
+  userId           String?   @map("user_id") @db.Uuid
+  name             String    @db.VarChar(150)
+  email            String?   @db.VarChar(255)
+  phone            String?   @db.VarChar(30)
+  birthDate        DateTime? @map("birth_date") @db.Date
+  emergencyContact String?   @map("emergency_contact") @db.VarChar(150)
+  emergencyPhone   String?   @map("emergency_phone") @db.VarChar(30)
+  notes            String?   @db.Text
+  active           Boolean   @default(true)
+  joinedAt         DateTime  @default(now()) @map("joined_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  gym  Gym   @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([gymId, userId], map: "uk_students_gym_user")
+  @@index([gymId])
+  @@index([gymId, active])
+  @@index([gymId, name])
+  @@index([userId])
+  @@map("students")
 }
 
 model SiteSetting {

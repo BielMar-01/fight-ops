@@ -1,41 +1,24 @@
-# Alunos
+# Módulo de Alunos
 
-## Status
-🟡 Próxima fase
+## 1. Objetivo
 
-## Decisão
-Aluno operacional será separado de conta de usuário.
+O módulo de Alunos é responsável pelo cadastro e gerenciamento operacional dos alunos vinculados a uma academia no FightOps.
+
+O aluno operacional é representado pela entidade `Student`.
+
+Um `Student` não é obrigatoriamente uma conta de acesso ao sistema.
+
+A separação principal é:
 
 ```text
-Student = cadastro operacional
-User = conta de autenticação
-GymMembership STUDENT = autorização de acesso
-```
+User
+=
+conta de autenticação
 
-Isso permite cadastrar aluno sem login.
+Student
+=
+registro operacional do aluno
 
-## Operações planejadas
-- listar;
-- consultar;
-- criar;
-- editar;
-- ativar/inativar;
-- busca;
-- filtro;
-- paginação.
-
-## Campos iniciais
-- nome;
-- e-mail;
-- telefone;
-- nascimento;
-- contato de emergência;
-- telefone de emergência;
-- observações;
-- status;
-- data de entrada.
-
-## Permissões planejadas
-OWNER/ADMIN/RECEPTIONIST: gestão.  
-PROFESSOR: consulta.  
-STUDENT: sem gestão.
+GymMembership com role STUDENT
+=
+autorização de acesso ao CT
