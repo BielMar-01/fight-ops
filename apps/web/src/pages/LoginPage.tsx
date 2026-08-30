@@ -13,6 +13,10 @@ import type {
 } from 'react-router-dom'
 
 import {
+  PasswordInput,
+} from '../components/auth/PasswordInput'
+
+import {
   useLogin,
 } from '../hooks/useAuth'
 
@@ -244,10 +248,9 @@ export function LoginPage() {
                   </Link>
                 </div>
 
-                <input
+                <PasswordInput
                   id="password"
                   name="password"
-                  type="password"
                   placeholder="Sua senha"
                   autoComplete="current-password"
                   required
@@ -255,14 +258,9 @@ export function LoginPage() {
                   disabled={
                     loginMutation.isPending
                   }
-                  data-testid="login-password-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setPassword(
-                      event.target.value,
-                    )
-                  }}
+                  inputTestId="login-password-input"
+                  toggleTestId="login-password-toggle"
+                  onChange={setPassword}
                 />
               </div>
 

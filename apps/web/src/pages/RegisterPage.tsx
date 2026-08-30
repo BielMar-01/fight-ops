@@ -8,6 +8,10 @@ import {
 } from 'react-router-dom'
 
 import {
+  PasswordInput,
+} from '../components/auth/PasswordInput'
+
+import {
   useRegister,
 } from '../hooks/useAuth'
 
@@ -168,11 +172,11 @@ export function RegisterPage() {
             </h1>
 
             <p>
-              Crie sua conta no
-              FightOps e prepare sua
-              academia para uma gestão
-              mais simples, organizada e
-              profissional.
+              Crie sua conta para
+              começar a organizar sua
+              academia, seus alunos e
+              sua operação em um só
+              lugar.
             </p>
           </div>
         </section>
@@ -187,8 +191,9 @@ export function RegisterPage() {
               </h2>
 
               <p>
-                Preencha seus dados para
-                começar.
+                Preencha seus dados
+                para começar a usar o
+                FightOps.
               </p>
             </div>
 
@@ -209,8 +214,6 @@ export function RegisterPage() {
                   type="text"
                   placeholder="Seu nome"
                   autoComplete="name"
-                  minLength={3}
-                  maxLength={150}
                   required
                   value={name}
                   disabled={
@@ -257,10 +260,6 @@ export function RegisterPage() {
               <div className="form-field">
                 <label htmlFor="phone">
                   Telefone
-                  <span className="field-optional">
-                    {' '}
-                    (opcional)
-                  </span>
                 </label>
 
                 <input
@@ -289,10 +288,9 @@ export function RegisterPage() {
                   Senha
                 </label>
 
-                <input
+                <PasswordInput
                   id="password"
                   name="password"
-                  type="password"
                   placeholder="Mínimo de 8 caracteres"
                   autoComplete="new-password"
                   minLength={8}
@@ -302,14 +300,9 @@ export function RegisterPage() {
                   disabled={
                     registerMutation.isPending
                   }
-                  data-testid="register-password-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setPassword(
-                      event.target.value,
-                    )
-                  }}
+                  inputTestId="register-password-input"
+                  toggleTestId="register-password-toggle"
+                  onChange={setPassword}
                 />
               </div>
 
@@ -318,10 +311,9 @@ export function RegisterPage() {
                   Confirmar senha
                 </label>
 
-                <input
+                <PasswordInput
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
                   placeholder="Repita sua senha"
                   autoComplete="new-password"
                   minLength={8}
@@ -331,14 +323,11 @@ export function RegisterPage() {
                   disabled={
                     registerMutation.isPending
                   }
-                  data-testid="register-confirm-password-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setConfirmPassword(
-                      event.target.value,
-                    )
-                  }}
+                  inputTestId="register-confirm-password-input"
+                  toggleTestId="register-confirm-password-toggle"
+                  onChange={
+                    setConfirmPassword
+                  }
                 />
               </div>
 

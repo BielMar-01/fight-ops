@@ -10,6 +10,10 @@ import {
 } from 'react-router-dom'
 
 import {
+  PasswordInput,
+} from '../components/auth/PasswordInput'
+
+import {
   useResetPassword,
 } from '../hooks/useAuth'
 
@@ -213,10 +217,9 @@ export function ResetPasswordPage() {
                   Nova senha
                 </label>
 
-                <input
+                <PasswordInput
                   id="password"
                   name="password"
-                  type="password"
                   placeholder="Mínimo de 8 caracteres"
                   autoComplete="new-password"
                   minLength={8}
@@ -226,14 +229,9 @@ export function ResetPasswordPage() {
                   disabled={
                     resetMutation.isPending
                   }
-                  data-testid="reset-password-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setPassword(
-                      event.target.value,
-                    )
-                  }}
+                  inputTestId="reset-password-input"
+                  toggleTestId="reset-password-toggle"
+                  onChange={setPassword}
                 />
               </div>
 
@@ -242,27 +240,25 @@ export function ResetPasswordPage() {
                   Confirmar nova senha
                 </label>
 
-                <input
+                <PasswordInput
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
                   placeholder="Repita a nova senha"
                   autoComplete="new-password"
                   minLength={8}
                   maxLength={128}
                   required
-                  value={confirmPassword}
+                  value={
+                    confirmPassword
+                  }
                   disabled={
                     resetMutation.isPending
                   }
-                  data-testid="reset-password-confirm-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setConfirmPassword(
-                      event.target.value,
-                    )
-                  }}
+                  inputTestId="reset-password-confirm-input"
+                  toggleTestId="reset-password-confirm-toggle"
+                  onChange={
+                    setConfirmPassword
+                  }
                 />
               </div>
 
