@@ -37,6 +37,7 @@ model User {
   sessions        UserSession[]
   passwordResets  PasswordReset[]
   studentProfiles Student[]
+  auditLogs       AuditLog[]
 
   @@index([active])
   @@index([globalRole])
@@ -96,6 +97,7 @@ model Gym {
 
   memberships GymMembership[]
   students    Student[]
+  auditLogs   AuditLog[]
 
   @@index([active])
   @@index([createdAt])
@@ -148,6 +150,34 @@ model Student {
   @@index([gymId, name])
   @@index([userId])
   @@map("students")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  gymId     String?  @map("gym_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  action    String   @db.VarChar(100)
+  entity    String   @db.VarChar(100)
+  entityId  String?  @map("entity_id") @db.VarChar(100)
+  oldValues Json?    @map("old_values")
+  newValues Json?    @map("new_values")
+  metadata  Json?
+  ipAddress String?  @map("ip_address") @db.VarChar(100)
+  userAgent String?  @map("user_agent") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  gym  Gym?  @relation(fields: [gymId], references: [id], onDelete: SetNull)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([gymId])
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([entityId])
+  @@index([createdAt])
+  @@index([gymId, createdAt])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
 }
 
 model SiteSetting {
