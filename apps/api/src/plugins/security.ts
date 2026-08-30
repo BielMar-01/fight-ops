@@ -10,6 +10,35 @@ import {
   env,
 } from '../config/env.js'
 
+function isLocalDevelopmentOrigin(
+  origin: string,
+) {
+  if (
+    env.NODE_ENV !==
+    'development'
+  ) {
+    return false
+  }
+
+  try {
+    const url =
+      new URL(origin)
+
+    return (
+      url.protocol ===
+        'http:' &&
+      (
+        url.hostname ===
+          'localhost' ||
+        url.hostname ===
+          '127.0.0.1'
+      )
+    )
+  } catch {
+    return false
+  }
+}
+
 export async function registerSecurityPlugins(
   app: FastifyInstance,
 ) {
@@ -18,7 +47,6 @@ export async function registerSecurityPlugins(
   )
 
   const allowedOrigins = [
-    'http://localhost:5173',
     env.FRONTEND_URL,
   ].filter(Boolean)
 
@@ -40,6 +68,19 @@ export async function registerSecurityPlugins(
 
         if (
           allowedOrigins.includes(
+            origin,
+          )
+        ) {
+          callback(
+            null,
+            true,
+          )
+
+          return
+        }
+
+        if (
+          isLocalDevelopmentOrigin(
             origin,
           )
         ) {
