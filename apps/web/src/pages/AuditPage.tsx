@@ -6,6 +6,10 @@ import {
 } from 'react'
 
 import {
+  AuditDetailsModal,
+} from '../components/audit/AuditDetailsModal'
+
+import {
   useGym,
 } from '../contexts/GymContext'
 
@@ -286,6 +290,14 @@ export function AuditPage() {
       string | null
     >(null)
 
+  const [
+    selectedAuditLog,
+    setSelectedAuditLog,
+  ] =
+    useState<AuditLog | null>(
+      null,
+    )
+
   const canViewAudit =
     activeGym?.role ===
       'OWNER' ||
@@ -497,6 +509,10 @@ export function AuditPage() {
     )
 
     setError(
+      null,
+    )
+
+    setSelectedAuditLog(
       null,
     )
   }, [
@@ -1102,6 +1118,21 @@ export function AuditPage() {
                       </strong>
                     </div>
                   </div>
+
+                  <div className="audit-card-actions">
+                    <button
+                      type="button"
+                      className="audit-button audit-button-secondary"
+                      data-testid={`audit-details-button-${auditLog.id}`}
+                      onClick={() => {
+                        setSelectedAuditLog(
+                          auditLog,
+                        )
+                      }}
+                    >
+                      Ver detalhes
+                    </button>
+                  </div>
                 </article>
               ),
             )}
@@ -1160,6 +1191,19 @@ export function AuditPage() {
           </div>
         </>
       )}
+
+      {selectedAuditLog ? (
+        <AuditDetailsModal
+          auditLog={
+            selectedAuditLog
+          }
+          onClose={() => {
+            setSelectedAuditLog(
+              null,
+            )
+          }}
+        />
+      ) : null}
     </section>
   )
 }
