@@ -81,6 +81,7 @@ async function generateUniqueSlug(
 export async function createGym(
   userId: string,
   input: CreateGymInput,
+  auditContext: GymAuditContext,
 ) {
   const user =
     await prisma.user.findUnique({
@@ -155,6 +156,60 @@ export async function createGym(
         return createdGym
       },
     )
+
+  await createAuditLog({
+    gymId:
+      gym.id,
+
+    userId:
+      auditContext.userId,
+
+    action:
+      'CREATE',
+
+    entity:
+      'GYM',
+
+    entityId:
+      gym.id,
+
+    newValues: {
+      id:
+        gym.id,
+
+      name:
+        gym.name,
+
+      slug:
+        gym.slug,
+
+      description:
+        gym.description,
+
+      phone:
+        gym.phone,
+
+      email:
+        gym.email,
+
+      active:
+        gym.active,
+    },
+
+    metadata: {
+      source:
+        'gyms',
+
+      creatorRole:
+        'OWNER',
+    },
+
+    ipAddress:
+      auditContext.ipAddress,
+
+    userAgent:
+      auditContext.userAgent,
+  })
 
   return gym
 }

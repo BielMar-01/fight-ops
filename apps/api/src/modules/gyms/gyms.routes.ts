@@ -90,6 +90,9 @@ export async function gymRoutes(
         await createGym(
           request.user.id,
           body,
+          getAuditContext(
+            request,
+          ),
         )
 
       return reply
