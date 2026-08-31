@@ -642,22 +642,28 @@ export function AppLayout() {
                 Administração
               </span>
 
-              <div
-                className="app-nav-link disabled"
-                data-testid="nav-audit-disabled"
-              >
-                <span className="app-nav-icon">
-                  ◷
-                </span>
+              <NavLink
+  to="/audit"
+  className={({
+    isActive,
+  }) =>
+    isActive
+      ? 'app-nav-link active'
+      : 'app-nav-link'
+  }
+  onClick={
+    closeSidebar
+  }
+  data-testid="nav-audit-link"
+>
+  <span className="app-nav-icon">
+    ◷
+  </span>
 
-                <span>
-                  Auditoria
-                </span>
-
-                <small>
-                  Em breve
-                </small>
-              </div>
+  <span>
+    Auditoria
+  </span>
+</NavLink>
 
               <div
                 className="app-nav-link disabled"

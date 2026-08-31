@@ -28,6 +28,10 @@ import {
 } from '../contexts/GymContext'
 
 import {
+  AuditPage,
+} from '../pages/AuditPage'
+
+import {
   DashboardPage,
 } from '../pages/DashboardPage'
 
@@ -189,6 +193,13 @@ export function AppRoutes() {
             path="/students"
             element={
               <StudentsPage />
+            }
+          />
+
+          <Route
+            path="/audit"
+            element={
+              <AuditPage />
             }
           />
         </Route>
