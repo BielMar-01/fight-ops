@@ -13,10 +13,18 @@ import {
   getAuditLogs,
 } from '../services/audit.service'
 
+import {
+  getGymMembers,
+} from '../services/gym-member.service'
+
 import type {
   AuditLog,
   AuditPagination,
 } from '../types/audit'
+
+import type {
+  GymMember,
+} from '../types/gym-member'
 
 import '../styles/audit.css'
 
@@ -84,6 +92,26 @@ const entityLabels: Record<
     'Sistema',
 }
 
+const roleLabels: Record<
+  string,
+  string
+> = {
+  OWNER:
+    'Proprietário',
+
+  ADMIN:
+    'Administrador',
+
+  RECEPTIONIST:
+    'Recepcionista',
+
+  PROFESSOR:
+    'Professor',
+
+  STUDENT:
+    'Aluno',
+}
+
 function getActionLabel(
   action: string,
 ) {
@@ -101,6 +129,16 @@ function getEntityLabel(
     entityLabels[
       entity
     ] ?? entity
+  )
+}
+
+function getRoleLabel(
+  role: string,
+) {
+  return (
+    roleLabels[
+      role
+    ] ?? role
   )
 }
 
@@ -165,6 +203,14 @@ export function AuditPage() {
     )
 
   const [
+    members,
+    setMembers,
+  ] =
+    useState<GymMember[]>(
+      [],
+    )
+
+  const [
     pagination,
     setPagination,
   ] =
@@ -187,6 +233,12 @@ export function AuditPage() {
   const [
     entityFilter,
     setEntityFilter,
+  ] =
+    useState('')
+
+  const [
+    userFilter,
+    setUserFilter,
   ] =
     useState('')
 
@@ -221,6 +273,12 @@ export function AuditPage() {
     useState(true)
 
   const [
+    membersLoading,
+    setMembersLoading,
+  ] =
+    useState(false)
+
+  const [
     error,
     setError,
   ] =
@@ -237,8 +295,64 @@ export function AuditPage() {
   const hasFilters =
     actionFilter.length > 0 ||
     entityFilter.length > 0 ||
+    userFilter.length > 0 ||
     appliedStartDate.length > 0 ||
     appliedEndDate.length > 0
+
+  const loadMembers =
+    useCallback(
+      async () => {
+        if (
+          !activeGym ||
+          !canViewAudit
+        ) {
+          setMembers(
+            [],
+          )
+
+          return
+        }
+
+        try {
+          setMembersLoading(
+            true,
+          )
+
+          const response =
+            await getGymMembers(
+              activeGym.id,
+            )
+
+          const sortedMembers =
+            [...response.members].sort(
+              (
+                first,
+                second,
+              ) =>
+                first.user.name.localeCompare(
+                  second.user.name,
+                  'pt-BR',
+                ),
+            )
+
+          setMembers(
+            sortedMembers,
+          )
+        } catch {
+          setMembers(
+            [],
+          )
+        } finally {
+          setMembersLoading(
+            false,
+          )
+        }
+      },
+      [
+        activeGym,
+        canViewAudit,
+      ],
+    )
 
   const loadAuditLogs =
     useCallback(
@@ -288,6 +402,10 @@ export function AuditPage() {
                   entityFilter ||
                   undefined,
 
+                userId:
+                  userFilter ||
+                  undefined,
+
                 startDate:
                   appliedStartDate ||
                   undefined,
@@ -329,10 +447,17 @@ export function AuditPage() {
         page,
         actionFilter,
         entityFilter,
+        userFilter,
         appliedStartDate,
         appliedEndDate,
       ],
     )
+
+  useEffect(() => {
+    void loadMembers()
+  }, [
+    loadMembers,
+  ])
 
   useEffect(() => {
     void loadAuditLogs()
@@ -348,6 +473,10 @@ export function AuditPage() {
     )
 
     setEntityFilter(
+      '',
+    )
+
+    setUserFilter(
       '',
     )
 
@@ -397,6 +526,10 @@ export function AuditPage() {
     )
 
     setEntityFilter(
+      '',
+    )
+
+    setUserFilter(
       '',
     )
 
@@ -661,6 +794,60 @@ export function AuditPage() {
               <option value="SYSTEM">
                 Sistema
               </option>
+            </select>
+          </div>
+
+          <div className="audit-field">
+            <label htmlFor="audit-user">
+              Usuário
+            </label>
+
+            <select
+              id="audit-user"
+              value={
+                userFilter
+              }
+              disabled={
+                membersLoading
+              }
+              data-testid="audit-user-filter"
+              onChange={(
+                event,
+              ) => {
+                setUserFilter(
+                  event.target
+                    .value,
+                )
+
+                setPage(1)
+              }}
+            >
+              <option value="">
+                {membersLoading
+                  ? 'Carregando usuários...'
+                  : 'Todos os usuários'}
+              </option>
+
+              {members.map(
+                (member) => (
+                  <option
+                    key={
+                      member.id
+                    }
+                    value={
+                      member.user.id
+                    }
+                  >
+                    {member.user.name} —{' '}
+                    {getRoleLabel(
+                      member.role,
+                    )}
+                    {!member.active
+                      ? ' — Inativo'
+                      : ''}
+                  </option>
+                ),
+              )}
             </select>
           </div>
         </div>
