@@ -1,8 +1,20 @@
-import type { FastifyInstance } from 'fastify'
+import type {
+  FastifyInstance,
+  FastifyRequest,
+} from 'fastify'
 
-import { AppError } from '../../http/app-error.js'
+import {
+  AppError,
+} from '../../http/app-error.js'
 
-import { authenticate } from './authenticate.js'
+import {
+  createAuditLog,
+} from '../audit/audit.service.js'
+
+import {
+  authenticate,
+} from './authenticate.js'
+
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -10,29 +22,49 @@ import {
   resetPasswordSchema,
   verifyPasswordResetSchema,
 } from './auth.schemas.js'
+
 import {
   authenticateUser,
   getAuthenticatedUser,
   registerUser,
 } from './auth.service.js'
+
 import {
   requestPasswordReset,
   resetPassword,
   verifyPasswordResetCode,
 } from './password-reset.service.js'
+
 import {
   clearRefreshTokenCookie,
   REFRESH_TOKEN_COOKIE_NAME,
   setRefreshTokenCookie,
 } from './refresh-cookie.js'
+
 import {
   createSession,
   revokeSession,
   rotateSession,
 } from './session.js'
+
 import {
   signAccessToken,
 } from './token.js'
+
+function getRequestContext(
+  request: FastifyRequest,
+) {
+  return {
+    ipAddress:
+      request.ip,
+
+    userAgent:
+      request.headers[
+        'user-agent'
+      ] ??
+      null,
+  }
+}
 
 export async function authRoutes(
   app: FastifyInstance,
@@ -41,7 +73,10 @@ export async function authRoutes(
     '/auth/status',
     {
       schema: {
-        tags: ['Auth'],
+        tags: [
+          'Auth',
+        ],
+
         summary:
           'Verificar disponibilidade do módulo de autenticação',
       },
@@ -49,8 +84,11 @@ export async function authRoutes(
 
     async () => {
       return {
-        status: 'ok',
-        module: 'auth',
+        status:
+          'ok',
+
+        module:
+          'auth',
       }
     },
   )
@@ -59,11 +97,16 @@ export async function authRoutes(
     '/auth/register',
     {
       schema: {
-        tags: ['Auth'],
-        summary: 'Cadastrar usuário',
+        tags: [
+          'Auth',
+        ],
+
+        summary:
+          'Cadastrar usuário',
 
         body: {
-          type: 'object',
+          type:
+            'object',
 
           required: [
             'name',
@@ -73,73 +116,104 @@ export async function authRoutes(
 
           properties: {
             name: {
-              type: 'string',
-              minLength: 3,
-              maxLength: 150,
+              type:
+                'string',
+
+              minLength:
+                3,
+
+              maxLength:
+                150,
             },
 
             email: {
-              type: 'string',
-              format: 'email',
-              maxLength: 255,
+              type:
+                'string',
+
+              format:
+                'email',
+
+              maxLength:
+                255,
             },
 
             password: {
-              type: 'string',
-              minLength: 8,
-              maxLength: 128,
+              type:
+                'string',
+
+              minLength:
+                8,
+
+              maxLength:
+                128,
             },
 
             phone: {
-              type: 'string',
-              minLength: 8,
-              maxLength: 30,
+              type:
+                'string',
+
+              minLength:
+                8,
+
+              maxLength:
+                30,
             },
           },
         },
 
         response: {
           201: {
-            type: 'object',
+            type:
+              'object',
 
             properties: {
               user: {
-                type: 'object',
+                type:
+                  'object',
 
                 properties: {
                   id: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   name: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   email: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   phone: {
                     anyOf: [
                       {
-                        type: 'string',
+                        type:
+                          'string',
                       },
+
                       {
-                        type: 'null',
+                        type:
+                          'null',
                       },
                     ],
                   },
 
                   globalRole: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   active: {
-                    type: 'boolean',
+                    type:
+                      'boolean',
                   },
 
                   createdAt: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
                 },
 
@@ -155,20 +229,27 @@ export async function authRoutes(
               },
             },
 
-            required: ['user'],
+            required: [
+              'user',
+            ],
           },
         },
       },
     },
 
-    async (request, reply) => {
+    async (
+      request,
+      reply,
+    ) => {
       const input =
         registerSchema.parse(
           request.body,
         )
 
       const user =
-        await registerUser(input)
+        await registerUser(
+          input,
+        )
 
       return reply
         .status(201)
@@ -182,11 +263,16 @@ export async function authRoutes(
     '/auth/login',
     {
       schema: {
-        tags: ['Auth'],
-        summary: 'Autenticar usuário',
+        tags: [
+          'Auth',
+        ],
+
+        summary:
+          'Autenticar usuário',
 
         body: {
-          type: 'object',
+          type:
+            'object',
 
           required: [
             'email',
@@ -195,44 +281,57 @@ export async function authRoutes(
 
           properties: {
             email: {
-              type: 'string',
-              format: 'email',
+              type:
+                'string',
+
+              format:
+                'email',
             },
 
             password: {
-              type: 'string',
-              minLength: 1,
+              type:
+                'string',
+
+              minLength:
+                1,
             },
           },
         },
 
         response: {
           200: {
-            type: 'object',
+            type:
+              'object',
 
             properties: {
               accessToken: {
-                type: 'string',
+                type:
+                  'string',
               },
 
               user: {
-                type: 'object',
+                type:
+                  'object',
 
                 properties: {
                   id: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   name: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   email: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   globalRole: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
                 },
 
@@ -254,7 +353,10 @@ export async function authRoutes(
       },
     },
 
-    async (request, reply) => {
+    async (
+      request,
+      reply,
+    ) => {
       const input =
         loginSchema.parse(
           request.body,
@@ -267,15 +369,20 @@ export async function authRoutes(
 
       const accessToken =
         await signAccessToken({
-          userId: user.id,
-          email: user.email,
+          userId:
+            user.id,
+
+          email:
+            user.email,
+
           globalRole:
             user.globalRole,
         })
 
       const refreshToken =
         await createSession({
-          userId: user.id,
+          userId:
+            user.id,
 
           userAgent:
             request.headers[
@@ -291,6 +398,36 @@ export async function authRoutes(
         refreshToken,
       )
 
+      const requestContext =
+        getRequestContext(
+          request,
+        )
+
+      await createAuditLog({
+        userId:
+          user.id,
+
+        action:
+          'LOGIN',
+
+        entity:
+          'AUTH',
+
+        entityId:
+          user.id,
+
+        metadata: {
+          source:
+            'auth-login',
+        },
+
+        ipAddress:
+          requestContext.ipAddress,
+
+        userAgent:
+          requestContext.userAgent,
+      })
+
       return reply
         .status(200)
         .send({
@@ -304,37 +441,47 @@ export async function authRoutes(
     '/auth/refresh',
     {
       schema: {
-        tags: ['Auth'],
+        tags: [
+          'Auth',
+        ],
+
         summary:
           'Renovar token de acesso',
 
         response: {
           200: {
-            type: 'object',
+            type:
+              'object',
 
             properties: {
               accessToken: {
-                type: 'string',
+                type:
+                  'string',
               },
 
               user: {
-                type: 'object',
+                type:
+                  'object',
 
                 properties: {
                   id: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   name: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   email: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   globalRole: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
                 },
 
@@ -356,7 +503,10 @@ export async function authRoutes(
       },
     },
 
-    async (request, reply) => {
+    async (
+      request,
+      reply,
+    ) => {
       const refreshToken =
         request.cookies[
           REFRESH_TOKEN_COOKIE_NAME
@@ -377,9 +527,12 @@ export async function authRoutes(
 
       const accessToken =
         await signAccessToken({
-          userId: result.user.id,
+          userId:
+            result.user.id,
+
           email:
             result.user.email,
+
           globalRole:
             result.user.globalRole,
         })
@@ -393,7 +546,9 @@ export async function authRoutes(
         .status(200)
         .send({
           accessToken,
-          user: result.user,
+
+          user:
+            result.user,
         })
     },
   )
@@ -402,28 +557,70 @@ export async function authRoutes(
     '/auth/logout',
     {
       schema: {
-        tags: ['Auth'],
+        tags: [
+          'Auth',
+        ],
+
         summary:
           'Encerrar sessão do usuário',
 
         response: {
           204: {
-            type: 'null',
+            type:
+              'null',
           },
         },
       },
     },
 
-    async (request, reply) => {
+    async (
+      request,
+      reply,
+    ) => {
       const refreshToken =
         request.cookies[
           REFRESH_TOKEN_COOKIE_NAME
         ]
 
       if (refreshToken) {
-        await revokeSession(
-          refreshToken,
-        )
+        const revokedSession =
+          await revokeSession(
+            refreshToken,
+          )
+
+        if (
+          revokedSession
+        ) {
+          const requestContext =
+            getRequestContext(
+              request,
+            )
+
+          await createAuditLog({
+            userId:
+              revokedSession.userId,
+
+            action:
+              'LOGOUT',
+
+            entity:
+              'AUTH',
+
+            entityId:
+              revokedSession.userId,
+
+            metadata: {
+              source:
+                'auth-logout',
+            },
+
+            ipAddress:
+              requestContext.ipAddress,
+
+            userAgent:
+              requestContext.userAgent,
+          })
+        }
       }
 
       clearRefreshTokenCookie(
@@ -439,47 +636,60 @@ export async function authRoutes(
   app.get(
     '/auth/me',
     {
-      preHandler: authenticate,
+      preHandler:
+        authenticate,
 
       schema: {
-        tags: ['Auth'],
+        tags: [
+          'Auth',
+        ],
+
         summary:
           'Consultar usuário autenticado',
 
         security: [
           {
-            bearerAuth: [],
+            bearerAuth:
+              [],
           },
         ],
 
         response: {
           200: {
-            type: 'object',
+            type:
+              'object',
 
             properties: {
               user: {
-                type: 'object',
+                type:
+                  'object',
 
                 properties: {
                   id: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   name: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   email: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   phone: {
                     anyOf: [
                       {
-                        type: 'string',
+                        type:
+                          'string',
                       },
+
                       {
-                        type: 'null',
+                        type:
+                          'null',
                       },
                     ],
                   },
@@ -487,35 +697,44 @@ export async function authRoutes(
                   avatarUrl: {
                     anyOf: [
                       {
-                        type: 'string',
+                        type:
+                          'string',
                       },
+
                       {
-                        type: 'null',
+                        type:
+                          'null',
                       },
                     ],
                   },
 
                   globalRole: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
 
                   active: {
-                    type: 'boolean',
+                    type:
+                      'boolean',
                   },
 
                   emailVerifiedAt: {
                     anyOf: [
                       {
-                        type: 'string',
+                        type:
+                          'string',
                       },
+
                       {
-                        type: 'null',
+                        type:
+                          'null',
                       },
                     ],
                   },
 
                   createdAt: {
-                    type: 'string',
+                    type:
+                      'string',
                   },
                 },
 
@@ -533,17 +752,24 @@ export async function authRoutes(
               },
             },
 
-            required: ['user'],
+            required: [
+              'user',
+            ],
           },
         },
       },
     },
 
-    async (request, reply) => {
+    async (
+      request,
+      reply,
+    ) => {
       const authenticatedUser =
         request.user
 
-      if (!authenticatedUser) {
+      if (
+        !authenticatedUser
+      ) {
         throw new AppError(
           'UNAUTHENTICATED',
           401,
@@ -563,50 +789,109 @@ export async function authRoutes(
         })
     },
   )
-    app.post(
+
+  app.post(
     '/auth/password/forgot',
     {
       schema: {
-        tags: ['Auth'],
-        summary: 'Solicitar recuperação de senha',
+        tags: [
+          'Auth',
+        ],
+
+        summary:
+          'Solicitar recuperação de senha',
 
         body: {
-          type: 'object',
-          required: ['email'],
+          type:
+            'object',
+
+          required: [
+            'email',
+          ],
 
           properties: {
             email: {
-              type: 'string',
-              format: 'email',
+              type:
+                'string',
+
+              format:
+                'email',
             },
           },
         },
 
         response: {
           202: {
-            type: 'object',
+            type:
+              'object',
 
             properties: {
               message: {
-                type: 'string',
+                type:
+                  'string',
               },
             },
 
-            required: ['message'],
+            required: [
+              'message',
+            ],
           },
         },
       },
     },
 
-    async (request, reply) => {
-      const input = forgotPasswordSchema.parse(request.body)
+    async (
+      request,
+      reply,
+    ) => {
+      const input =
+        forgotPasswordSchema.parse(
+          request.body,
+        )
 
-      await requestPasswordReset(input)
+      const result =
+        await requestPasswordReset(
+          input,
+        )
 
-      return reply.status(202).send({
-        message:
-          'Se o e-mail estiver cadastrado, enviaremos um código para redefinição da senha.',
-      })
+      if (result) {
+        const requestContext =
+          getRequestContext(
+            request,
+          )
+
+        await createAuditLog({
+          userId:
+            result.userId,
+
+          action:
+            'PASSWORD_RESET_REQUESTED',
+
+          entity:
+            'AUTH',
+
+          entityId:
+            result.userId,
+
+          metadata: {
+            source:
+              'password-forgot',
+          },
+
+          ipAddress:
+            requestContext.ipAddress,
+
+          userAgent:
+            requestContext.userAgent,
+        })
+      }
+
+      return reply
+        .status(202)
+        .send({
+          message:
+            'Se o e-mail estiver cadastrado, enviaremos um código para redefinição da senha.',
+        })
     },
   )
 
@@ -614,49 +899,83 @@ export async function authRoutes(
     '/auth/password/verify',
     {
       schema: {
-        tags: ['Auth'],
-        summary: 'Validar código de recuperação de senha',
+        tags: [
+          'Auth',
+        ],
+
+        summary:
+          'Validar código de recuperação de senha',
 
         body: {
-          type: 'object',
-          required: ['email', 'code'],
+          type:
+            'object',
+
+          required: [
+            'email',
+            'code',
+          ],
 
           properties: {
             email: {
-              type: 'string',
-              format: 'email',
+              type:
+                'string',
+
+              format:
+                'email',
             },
 
             code: {
-              type: 'string',
-              minLength: 6,
-              maxLength: 6,
+              type:
+                'string',
+
+              minLength:
+                6,
+
+              maxLength:
+                6,
             },
           },
         },
 
         response: {
           200: {
-            type: 'object',
+            type:
+              'object',
 
             properties: {
               resetToken: {
-                type: 'string',
+                type:
+                  'string',
               },
             },
 
-            required: ['resetToken'],
+            required: [
+              'resetToken',
+            ],
           },
         },
       },
     },
 
-    async (request, reply) => {
-      const input = verifyPasswordResetSchema.parse(request.body)
+    async (
+      request,
+      reply,
+    ) => {
+      const input =
+        verifyPasswordResetSchema.parse(
+          request.body,
+        )
 
-      const result = await verifyPasswordResetCode(input)
+      const result =
+        await verifyPasswordResetCode(
+          input,
+        )
 
-      return reply.status(200).send(result)
+      return reply
+        .status(200)
+        .send(
+          result,
+        )
     },
   )
 
@@ -664,40 +983,97 @@ export async function authRoutes(
     '/auth/password/reset',
     {
       schema: {
-        tags: ['Auth'],
-        summary: 'Definir nova senha',
+        tags: [
+          'Auth',
+        ],
+
+        summary:
+          'Definir nova senha',
 
         body: {
-          type: 'object',
-          required: ['resetToken', 'newPassword'],
+          type:
+            'object',
+
+          required: [
+            'resetToken',
+            'newPassword',
+          ],
 
           properties: {
             resetToken: {
-              type: 'string',
+              type:
+                'string',
             },
 
             newPassword: {
-              type: 'string',
-              minLength: 8,
-              maxLength: 128,
+              type:
+                'string',
+
+              minLength:
+                8,
+
+              maxLength:
+                128,
             },
           },
         },
 
         response: {
           204: {
-            type: 'null',
+            type:
+              'null',
           },
         },
       },
     },
 
-    async (request, reply) => {
-      const input = resetPasswordSchema.parse(request.body)
+    async (
+      request,
+      reply,
+    ) => {
+      const input =
+        resetPasswordSchema.parse(
+          request.body,
+        )
 
-      await resetPassword(input)
+      const result =
+        await resetPassword(
+          input,
+        )
 
-      return reply.status(204).send()
+      const requestContext =
+        getRequestContext(
+          request,
+        )
+
+      await createAuditLog({
+        userId:
+          result.userId,
+
+        action:
+          'PASSWORD_RESET_COMPLETED',
+
+        entity:
+          'AUTH',
+
+        entityId:
+          result.userId,
+
+        metadata: {
+          source:
+            'password-reset',
+        },
+
+        ipAddress:
+          requestContext.ipAddress,
+
+        userAgent:
+          requestContext.userAgent,
+      })
+
+      return reply
+        .status(204)
+        .send()
     },
   )
 }

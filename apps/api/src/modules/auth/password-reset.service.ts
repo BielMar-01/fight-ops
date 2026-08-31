@@ -4,12 +4,25 @@ import {
   randomInt,
 } from 'node:crypto'
 
-import { env } from '../../config/env.js'
-import { prisma } from '../../database/prisma.js'
-import { AppError } from '../../http/app-error.js'
+import {
+  env,
+} from '../../config/env.js'
 
-import { sendPasswordResetCode } from './email.service.js'
-import { hashPassword } from './password.js'
+import {
+  prisma,
+} from '../../database/prisma.js'
+
+import {
+  AppError,
+} from '../../http/app-error.js'
+
+import {
+  sendPasswordResetCode,
+} from './email.service.js'
+
+import {
+  hashPassword,
+} from './password.js'
 
 import type {
   ForgotPasswordInput,
@@ -17,69 +30,120 @@ import type {
   VerifyPasswordResetInput,
 } from './auth.schemas.js'
 
-function hashValue(value: string) {
-  return createHash('sha256').update(value).digest('hex')
+function hashValue(
+  value: string,
+) {
+  return createHash(
+    'sha256',
+  )
+    .update(value)
+    .digest('hex')
 }
 
 function generateCode() {
-  return randomInt(100000, 1000000).toString()
+  return randomInt(
+    100000,
+    1000000,
+  ).toString()
 }
 
 function generateResetToken() {
-  return randomBytes(64).toString('hex')
+  return randomBytes(
+    64,
+  ).toString('hex')
 }
 
 function getCodeExpirationDate() {
-  const expiresAt = new Date()
+  const expiresAt =
+    new Date()
 
   expiresAt.setMinutes(
-    expiresAt.getMinutes() + env.PASSWORD_RESET_CODE_EXPIRATION_MINUTES,
+    expiresAt.getMinutes() +
+      env.PASSWORD_RESET_CODE_EXPIRATION_MINUTES,
   )
 
   return expiresAt
 }
 
-export async function requestPasswordReset(input: ForgotPasswordInput) {
-  const user = await prisma.user.findUnique({
-    where: {
-      email: input.email,
-    },
-  })
+export async function requestPasswordReset(
+  input: ForgotPasswordInput,
+) {
+  const user =
+    await prisma.user.findUnique({
+      where: {
+        email:
+          input.email,
+      },
 
-  if (!user || !user.active) {
-    return
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        active: true,
+      },
+    })
+
+  if (
+    !user ||
+    !user.active
+  ) {
+    return null
   }
 
   await prisma.passwordReset.deleteMany({
     where: {
-      userId: user.id,
-      usedAt: null,
+      userId:
+        user.id,
+
+      usedAt:
+        null,
     },
   })
 
-  const code = generateCode()
+  const code =
+    generateCode()
 
   await prisma.passwordReset.create({
     data: {
-      userId: user.id,
-      codeHash: hashValue(code),
-      expiresAt: getCodeExpirationDate(),
+      userId:
+        user.id,
+
+      codeHash:
+        hashValue(
+          code,
+        ),
+
+      expiresAt:
+        getCodeExpirationDate(),
     },
   })
 
   await sendPasswordResetCode({
-    email: user.email,
-    name: user.name,
+    email:
+      user.email,
+
+    name:
+      user.name,
+
     code,
   })
+
+  return {
+    userId:
+      user.id,
+  }
 }
 
-export async function verifyPasswordResetCode(input: VerifyPasswordResetInput) {
-  const user = await prisma.user.findUnique({
-    where: {
-      email: input.email,
-    },
-  })
+export async function verifyPasswordResetCode(
+  input: VerifyPasswordResetInput,
+) {
+  const user =
+    await prisma.user.findUnique({
+      where: {
+        email:
+          input.email,
+      },
+    })
 
   if (!user) {
     throw new AppError(
@@ -89,18 +153,27 @@ export async function verifyPasswordResetCode(input: VerifyPasswordResetInput) {
     )
   }
 
-  const passwordReset = await prisma.passwordReset.findFirst({
-    where: {
-      userId: user.id,
-      usedAt: null,
-    },
+  const passwordReset =
+    await prisma.passwordReset.findFirst({
+      where: {
+        userId:
+          user.id,
 
-    orderBy: {
-      createdAt: 'desc',
-    },
-  })
+        usedAt:
+          null,
+      },
 
-  if (!passwordReset || passwordReset.expiresAt <= new Date()) {
+      orderBy: {
+        createdAt:
+          'desc',
+      },
+    })
+
+  if (
+    !passwordReset ||
+    passwordReset.expiresAt <=
+      new Date()
+  ) {
     throw new AppError(
       'INVALID_RESET_CODE',
       400,
@@ -108,7 +181,10 @@ export async function verifyPasswordResetCode(input: VerifyPasswordResetInput) {
     )
   }
 
-  if (passwordReset.attempts >= env.PASSWORD_RESET_MAX_ATTEMPTS) {
+  if (
+    passwordReset.attempts >=
+    env.PASSWORD_RESET_MAX_ATTEMPTS
+  ) {
     throw new AppError(
       'RESET_CODE_ATTEMPTS_EXCEEDED',
       429,
@@ -116,17 +192,25 @@ export async function verifyPasswordResetCode(input: VerifyPasswordResetInput) {
     )
   }
 
-  const codeHash = hashValue(input.code)
+  const codeHash =
+    hashValue(
+      input.code,
+    )
 
-  if (codeHash !== passwordReset.codeHash) {
+  if (
+    codeHash !==
+    passwordReset.codeHash
+  ) {
     await prisma.passwordReset.update({
       where: {
-        id: passwordReset.id,
+        id:
+          passwordReset.id,
       },
 
       data: {
         attempts: {
-          increment: 1,
+          increment:
+            1,
         },
       },
     })
@@ -138,16 +222,23 @@ export async function verifyPasswordResetCode(input: VerifyPasswordResetInput) {
     )
   }
 
-  const resetToken = generateResetToken()
+  const resetToken =
+    generateResetToken()
 
   await prisma.passwordReset.update({
     where: {
-      id: passwordReset.id,
+      id:
+        passwordReset.id,
     },
 
     data: {
-      verifiedAt: new Date(),
-      resetTokenHash: hashValue(resetToken),
+      verifiedAt:
+        new Date(),
+
+      resetTokenHash:
+        hashValue(
+          resetToken,
+        ),
     },
   })
 
@@ -156,20 +247,27 @@ export async function verifyPasswordResetCode(input: VerifyPasswordResetInput) {
   }
 }
 
-export async function resetPassword(input: ResetPasswordInput) {
-  const resetTokenHash = hashValue(input.resetToken)
+export async function resetPassword(
+  input: ResetPasswordInput,
+) {
+  const resetTokenHash =
+    hashValue(
+      input.resetToken,
+    )
 
-  const passwordReset = await prisma.passwordReset.findUnique({
-    where: {
-      resetTokenHash,
-    },
-  })
+  const passwordReset =
+    await prisma.passwordReset.findUnique({
+      where: {
+        resetTokenHash,
+      },
+    })
 
   if (
     !passwordReset ||
     !passwordReset.verifiedAt ||
     passwordReset.usedAt ||
-    passwordReset.expiresAt <= new Date()
+    passwordReset.expiresAt <=
+      new Date()
   ) {
     throw new AppError(
       'INVALID_RESET_TOKEN',
@@ -178,14 +276,19 @@ export async function resetPassword(input: ResetPasswordInput) {
     )
   }
 
-  const passwordHash = await hashPassword(input.newPassword)
+  const passwordHash =
+    await hashPassword(
+      input.newPassword,
+    )
 
-  const now = new Date()
+  const now =
+    new Date()
 
   await prisma.$transaction([
     prisma.user.update({
       where: {
-        id: passwordReset.userId,
+        id:
+          passwordReset.userId,
       },
 
       data: {
@@ -195,23 +298,34 @@ export async function resetPassword(input: ResetPasswordInput) {
 
     prisma.passwordReset.update({
       where: {
-        id: passwordReset.id,
+        id:
+          passwordReset.id,
       },
 
       data: {
-        usedAt: now,
+        usedAt:
+          now,
       },
     }),
 
     prisma.userSession.updateMany({
       where: {
-        userId: passwordReset.userId,
-        revokedAt: null,
+        userId:
+          passwordReset.userId,
+
+        revokedAt:
+          null,
       },
 
       data: {
-        revokedAt: now,
+        revokedAt:
+          now,
       },
     }),
   ])
+
+  return {
+    userId:
+      passwordReset.userId,
+  }
 }

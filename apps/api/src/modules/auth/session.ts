@@ -3,22 +3,37 @@ import {
   randomBytes,
 } from 'node:crypto'
 
-import { env } from '../../config/env.js'
-import { prisma } from '../../database/prisma.js'
-import { AppError } from '../../http/app-error.js'
+import {
+  env,
+} from '../../config/env.js'
 
-function hashRefreshToken(token: string) {
-  return createHash('sha256')
+import {
+  prisma,
+} from '../../database/prisma.js'
+
+import {
+  AppError,
+} from '../../http/app-error.js'
+
+function hashRefreshToken(
+  token: string,
+) {
+  return createHash(
+    'sha256',
+  )
     .update(token)
     .digest('hex')
 }
 
 function generateRefreshToken() {
-  return randomBytes(64).toString('hex')
+  return randomBytes(
+    64,
+  ).toString('hex')
 }
 
 function getRefreshExpirationDate() {
-  const expiresAt = new Date()
+  const expiresAt =
+    new Date()
 
   expiresAt.setDate(
     expiresAt.getDate() +
@@ -41,14 +56,23 @@ export async function createSession(
     generateRefreshToken()
 
   const tokenHash =
-    hashRefreshToken(refreshToken)
+    hashRefreshToken(
+      refreshToken,
+    )
 
   await prisma.userSession.create({
     data: {
-      userId: input.userId,
+      userId:
+        input.userId,
+
       tokenHash,
-      userAgent: input.userAgent,
-      ipAddress: input.ipAddress,
+
+      userAgent:
+        input.userAgent,
+
+      ipAddress:
+        input.ipAddress,
+
       expiresAt:
         getRefreshExpirationDate(),
     },
@@ -61,7 +85,9 @@ export async function rotateSession(
   refreshToken: string,
 ) {
   const tokenHash =
-    hashRefreshToken(refreshToken)
+    hashRefreshToken(
+      refreshToken,
+    )
 
   const session =
     await prisma.userSession.findUnique({
@@ -70,7 +96,8 @@ export async function rotateSession(
       },
 
       include: {
-        user: true,
+        user:
+          true,
       },
     })
 
@@ -82,7 +109,9 @@ export async function rotateSession(
     )
   }
 
-  if (session.revokedAt) {
+  if (
+    session.revokedAt
+  ) {
     throw new AppError(
       'SESSION_REVOKED',
       401,
@@ -90,7 +119,10 @@ export async function rotateSession(
     )
   }
 
-  if (session.expiresAt <= new Date()) {
+  if (
+    session.expiresAt <=
+    new Date()
+  ) {
     throw new AppError(
       'SESSION_EXPIRED',
       401,
@@ -98,7 +130,9 @@ export async function rotateSession(
     )
   }
 
-  if (!session.user.active) {
+  if (
+    !session.user.active
+  ) {
     throw new AppError(
       'USER_INACTIVE',
       403,
@@ -116,24 +150,36 @@ export async function rotateSession(
 
   await prisma.userSession.update({
     where: {
-      id: session.id,
+      id:
+        session.id,
     },
 
     data: {
-      tokenHash: newTokenHash,
-      lastUsedAt: new Date(),
+      tokenHash:
+        newTokenHash,
+
+      lastUsedAt:
+        new Date(),
+
       expiresAt:
         getRefreshExpirationDate(),
     },
   })
 
   return {
-    refreshToken: newRefreshToken,
+    refreshToken:
+      newRefreshToken,
 
     user: {
-      id: session.user.id,
-      name: session.user.name,
-      email: session.user.email,
+      id:
+        session.user.id,
+
+      name:
+        session.user.name,
+
+      email:
+        session.user.email,
+
       globalRole:
         session.user.globalRole,
     },
@@ -144,30 +190,45 @@ export async function revokeSession(
   refreshToken: string,
 ) {
   const tokenHash =
-    hashRefreshToken(refreshToken)
+    hashRefreshToken(
+      refreshToken,
+    )
 
   const session =
     await prisma.userSession.findUnique({
       where: {
         tokenHash,
       },
+
+      select: {
+        id: true,
+        userId: true,
+        revokedAt: true,
+      },
     })
 
   if (!session) {
-    return
+    return null
   }
 
-  if (session.revokedAt) {
-    return
+  if (
+    !session.revokedAt
+  ) {
+    await prisma.userSession.update({
+      where: {
+        id:
+          session.id,
+      },
+
+      data: {
+        revokedAt:
+          new Date(),
+      },
+    })
   }
 
-  await prisma.userSession.update({
-    where: {
-      id: session.id,
-    },
-
-    data: {
-      revokedAt: new Date(),
-    },
-  })
+  return {
+    userId:
+      session.userId,
+  }
 }
