@@ -1,4 +1,5 @@
 import {
+  type FormEvent,
   useCallback,
   useEffect,
   useState,
@@ -178,6 +179,42 @@ export function AuditPage() {
     useState(1)
 
   const [
+    actionFilter,
+    setActionFilter,
+  ] =
+    useState('')
+
+  const [
+    entityFilter,
+    setEntityFilter,
+  ] =
+    useState('')
+
+  const [
+    startDateInput,
+    setStartDateInput,
+  ] =
+    useState('')
+
+  const [
+    endDateInput,
+    setEndDateInput,
+  ] =
+    useState('')
+
+  const [
+    appliedStartDate,
+    setAppliedStartDate,
+  ] =
+    useState('')
+
+  const [
+    appliedEndDate,
+    setAppliedEndDate,
+  ] =
+    useState('')
+
+  const [
     loading,
     setLoading,
   ] =
@@ -196,6 +233,12 @@ export function AuditPage() {
       'OWNER' ||
     activeGym?.role ===
       'ADMIN'
+
+  const hasFilters =
+    actionFilter.length > 0 ||
+    entityFilter.length > 0 ||
+    appliedStartDate.length > 0 ||
+    appliedEndDate.length > 0
 
   const loadAuditLogs =
     useCallback(
@@ -236,6 +279,22 @@ export function AuditPage() {
 
                 limit:
                   PAGE_LIMIT,
+
+                action:
+                  actionFilter ||
+                  undefined,
+
+                entity:
+                  entityFilter ||
+                  undefined,
+
+                startDate:
+                  appliedStartDate ||
+                  undefined,
+
+                endDate:
+                  appliedEndDate ||
+                  undefined,
               },
             )
 
@@ -268,6 +327,10 @@ export function AuditPage() {
         activeGym,
         canViewAudit,
         page,
+        actionFilter,
+        entityFilter,
+        appliedStartDate,
+        appliedEndDate,
       ],
     )
 
@@ -279,10 +342,82 @@ export function AuditPage() {
 
   useEffect(() => {
     setPage(1)
-    setError(null)
+
+    setActionFilter(
+      '',
+    )
+
+    setEntityFilter(
+      '',
+    )
+
+    setStartDateInput(
+      '',
+    )
+
+    setEndDateInput(
+      '',
+    )
+
+    setAppliedStartDate(
+      '',
+    )
+
+    setAppliedEndDate(
+      '',
+    )
+
+    setError(
+      null,
+    )
   }, [
     activeGym?.id,
   ])
+
+  function handlePeriodSubmit(
+    event:
+      FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault()
+
+    setPage(1)
+
+    setAppliedStartDate(
+      startDateInput,
+    )
+
+    setAppliedEndDate(
+      endDateInput,
+    )
+  }
+
+  function handleClearFilters() {
+    setActionFilter(
+      '',
+    )
+
+    setEntityFilter(
+      '',
+    )
+
+    setStartDateInput(
+      '',
+    )
+
+    setEndDateInput(
+      '',
+    )
+
+    setAppliedStartDate(
+      '',
+    )
+
+    setAppliedEndDate(
+      '',
+    )
+
+    setPage(1)
+  }
 
   function handlePreviousPage() {
     setPage(
@@ -401,13 +536,221 @@ export function AuditPage() {
           </strong>
 
           <p>
-            Os registros de auditoria
-            ajudam a identificar ações
-            administrativas e
-            alterações realizadas
+            Utilize os filtros para
+            localizar ações específicas
             dentro da academia.
           </p>
         </div>
+      </div>
+
+      <div
+        className="audit-filters"
+        data-testid="audit-filters"
+      >
+        <div className="audit-filter-grid">
+          <div className="audit-field">
+            <label htmlFor="audit-action">
+              Ação
+            </label>
+
+            <select
+              id="audit-action"
+              value={
+                actionFilter
+              }
+              data-testid="audit-action-filter"
+              onChange={(
+                event,
+              ) => {
+                setActionFilter(
+                  event.target
+                    .value,
+                )
+
+                setPage(1)
+              }}
+            >
+              <option value="">
+                Todas
+              </option>
+
+              <option value="CREATE">
+                Criação
+              </option>
+
+              <option value="UPDATE">
+                Alteração
+              </option>
+
+              <option value="STATUS_CHANGE">
+                Alteração de status
+              </option>
+
+              <option value="DELETE">
+                Exclusão
+              </option>
+
+              <option value="LOGIN">
+                Login
+              </option>
+
+              <option value="LOGOUT">
+                Logout
+              </option>
+
+              <option value="PASSWORD_RESET_REQUESTED">
+                Recuperação solicitada
+              </option>
+
+              <option value="PASSWORD_RESET_COMPLETED">
+                Senha redefinida
+              </option>
+
+              <option value="PASSWORD_RESET_REQUESTED_BY_ADMIN">
+                Reset por administrador
+              </option>
+            </select>
+          </div>
+
+          <div className="audit-field">
+            <label htmlFor="audit-entity">
+              Entidade
+            </label>
+
+            <select
+              id="audit-entity"
+              value={
+                entityFilter
+              }
+              data-testid="audit-entity-filter"
+              onChange={(
+                event,
+              ) => {
+                setEntityFilter(
+                  event.target
+                    .value,
+                )
+
+                setPage(1)
+              }}
+            >
+              <option value="">
+                Todas
+              </option>
+
+              <option value="USER">
+                Usuário
+              </option>
+
+              <option value="GYM">
+                Academia
+              </option>
+
+              <option value="GYM_MEMBERSHIP">
+                Membro
+              </option>
+
+              <option value="STUDENT">
+                Aluno
+              </option>
+
+              <option value="AUTH">
+                Autenticação
+              </option>
+
+              <option value="SYSTEM">
+                Sistema
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <form
+          className="audit-period-form"
+          onSubmit={
+            handlePeriodSubmit
+          }
+        >
+          <div className="audit-field">
+            <label htmlFor="audit-start-date">
+              Data inicial
+            </label>
+
+            <input
+              id="audit-start-date"
+              type="date"
+              value={
+                startDateInput
+              }
+              data-testid="audit-start-date-input"
+              onChange={(
+                event,
+              ) => {
+                setStartDateInput(
+                  event.target
+                    .value,
+                )
+              }}
+            />
+          </div>
+
+          <div className="audit-field">
+            <label htmlFor="audit-end-date">
+              Data final
+            </label>
+
+            <input
+              id="audit-end-date"
+              type="date"
+              value={
+                endDateInput
+              }
+              min={
+                startDateInput ||
+                undefined
+              }
+              data-testid="audit-end-date-input"
+              onChange={(
+                event,
+              ) => {
+                setEndDateInput(
+                  event.target
+                    .value,
+                )
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="audit-button audit-button-primary"
+            data-testid="audit-period-apply-button"
+          >
+            Aplicar período
+          </button>
+        </form>
+
+        {hasFilters ? (
+          <div className="audit-filter-footer">
+            <span
+              className="audit-filter-active"
+              data-testid="audit-filters-active"
+            >
+              Filtros aplicados
+            </span>
+
+            <button
+              type="button"
+              className="audit-button audit-button-secondary"
+              data-testid="audit-clear-filters-button"
+              onClick={
+                handleClearFilters
+              }
+            >
+              Limpar filtros
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {loading ? (
@@ -464,10 +807,23 @@ export function AuditPage() {
           </h2>
 
           <p>
-            Ainda não existem registros
-            de auditoria para esta
-            academia.
+            {hasFilters
+              ? 'Nenhum registro corresponde aos filtros informados.'
+              : 'Ainda não existem registros de auditoria para esta academia.'}
           </p>
+
+          {hasFilters ? (
+            <button
+              type="button"
+              className="audit-button audit-button-secondary"
+              data-testid="audit-empty-clear-filters-button"
+              onClick={
+                handleClearFilters
+              }
+            >
+              Limpar filtros
+            </button>
+          ) : null}
         </div>
       ) : (
         <>
