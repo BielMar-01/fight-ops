@@ -121,6 +121,50 @@ export const updateGymMemberStatusBodySchema =
       z.boolean(),
   })
 
+export const resetGymMemberPasswordBodySchema =
+  z
+    .object({
+      password:
+        z
+          .string()
+          .min(
+            8,
+            'A senha deve possuir pelo menos 8 caracteres.',
+          )
+          .max(
+            128,
+            'A senha deve possuir no máximo 128 caracteres.',
+          )
+          .regex(
+            /[a-z]/,
+            'A senha deve possuir pelo menos uma letra minúscula.',
+          )
+          .regex(
+            /[A-Z]/,
+            'A senha deve possuir pelo menos uma letra maiúscula.',
+          )
+          .regex(
+            /\d/,
+            'A senha deve possuir pelo menos um número.',
+          ),
+
+      confirmPassword:
+        z.string(),
+    })
+    .refine(
+      (data) =>
+        data.password ===
+        data.confirmPassword,
+      {
+        message:
+          'As senhas não coincidem.',
+
+        path: [
+          'confirmPassword',
+        ],
+      },
+    )
+
 export type CreateGymBody =
   z.infer<
     typeof createGymBodySchema
@@ -149,4 +193,9 @@ export type UpdateGymMemberRoleBody =
 export type UpdateGymMemberStatusBody =
   z.infer<
     typeof updateGymMemberStatusBodySchema
+  >
+
+export type ResetGymMemberPasswordBody =
+  z.infer<
+    typeof resetGymMemberPasswordBodySchema
   >

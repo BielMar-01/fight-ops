@@ -16,10 +16,15 @@ import {
 } from './gym-access.js'
 
 import {
+  resetGymMemberPassword,
+} from './gym-member-password.service.js'
+
+import {
   addGymMemberBodySchema,
   createGymBodySchema,
   gymMemberParamsSchema,
   gymParamsSchema,
+  resetGymMemberPasswordBodySchema,
   updateGymMemberRoleBodySchema,
   updateGymMemberStatusBodySchema,
 } from './gyms.schemas.js'
@@ -367,6 +372,73 @@ export async function gymRoutes(
 
       return reply.send({
         member,
+      })
+    },
+  )
+
+  app.patch(
+    '/gyms/:gymId/members/:memberId/password',
+    {
+      preHandler: [
+        authenticate,
+
+        requireGymRole(
+          'OWNER',
+          'ADMIN',
+        ),
+      ],
+    },
+    async (
+      request,
+      reply,
+    ) => {
+      if (
+        !request.user ||
+        !request.gymMembership
+      ) {
+        throw new AppError(
+          'GYM_MEMBERSHIP_REQUIRED',
+          403,
+          'Vínculo com a academia não encontrado.',
+        )
+      }
+
+      const params =
+        gymMemberParamsSchema.parse(
+          request.params,
+        )
+
+      const body =
+        resetGymMemberPasswordBodySchema.parse(
+          request.body,
+        )
+
+      await resetGymMemberPassword(
+        {
+          gymId:
+            params.gymId,
+
+          memberId:
+            params.memberId,
+
+          actorUserId:
+            request.user.id,
+
+          actorRole:
+            request.gymMembership.role,
+
+          password:
+            body.password,
+        },
+
+        getAuditContext(
+          request,
+        ),
+      )
+
+      return reply.send({
+        message:
+          'Senha redefinida com sucesso.',
       })
     },
   )
