@@ -50,3 +50,12 @@ export interface UpdateGymMemberStatusInput {
 export interface UpdateGymMemberResponse {
   member: GymMember
 }
+
+export interface ResetGymMemberPasswordInput {
+  password: string
+  confirmPassword: string
+}
+
+export interface ResetGymMemberPasswordResponse {
+  message: string
+}

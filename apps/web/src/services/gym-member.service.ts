@@ -6,6 +6,8 @@ import type {
   AddGymMemberInput,
   AddGymMemberResponse,
   GymMembersResponse,
+  ResetGymMemberPasswordInput,
+  ResetGymMemberPasswordResponse,
   UpdateGymMemberResponse,
   UpdateGymMemberRoleInput,
   UpdateGymMemberStatusInput,
@@ -74,6 +76,29 @@ export function updateGymMemberStatus(
 ) {
   return apiRequest<UpdateGymMemberResponse>(
     `/gyms/${gymId}/members/${memberId}/status`,
+    {
+      method: 'PATCH',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
+      body:
+        JSON.stringify(
+          input,
+        ),
+    },
+  )
+}
+
+export function resetGymMemberPassword(
+  gymId: string,
+  memberId: string,
+  input: ResetGymMemberPasswordInput,
+) {
+  return apiRequest<ResetGymMemberPasswordResponse>(
+    `/gyms/${gymId}/members/${memberId}/password`,
     {
       method: 'PATCH',
 

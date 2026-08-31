@@ -770,3 +770,384 @@
     justify-content: space-between;
   }
 }
+
+/* =========================================================
+   MEMBER PASSWORD RESET
+   ========================================================= */
+
+.member-security-section {
+  display: grid;
+
+  gap: 12px;
+
+  padding: 16px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 12px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--color-background) 80%,
+      transparent
+    );
+}
+
+.member-security-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.member-security-content > div {
+  display: grid;
+
+  gap: 4px;
+}
+
+.member-security-label {
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.68rem;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.05em;
+
+  text-transform:
+    uppercase;
+}
+
+.member-security-content strong {
+  font-size: 0.9rem;
+}
+
+.member-security-content p,
+.member-security-help {
+  margin: 0;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.75rem;
+
+  line-height: 1.55;
+}
+
+.member-security-unavailable {
+  display: inline-flex;
+
+  width: fit-content;
+
+  align-items: center;
+
+  min-height: 30px;
+
+  padding: 0 10px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 100px;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.68rem;
+
+  font-weight: 700;
+}
+
+.member-security-help {
+  padding-top: 10px;
+
+  border-top:
+    1px solid
+    var(--border-color);
+}
+
+.member-password-target {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 12px;
+
+  background:
+    var(--color-background);
+}
+
+.member-password-target > div:last-child {
+  min-width: 0;
+
+  display: grid;
+
+  gap: 4px;
+}
+
+.member-password-target strong {
+  overflow: hidden;
+
+  color:
+    var(--color-text);
+
+  font-size: 0.85rem;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.member-password-target span {
+  overflow: hidden;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.72rem;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.member-password-warning {
+  display: grid;
+
+  gap: 5px;
+
+  padding: 14px;
+
+  border:
+    1px solid
+    rgba(
+      245,
+      158,
+      11,
+      0.3
+    );
+
+  border-radius: 12px;
+
+  background:
+    rgba(
+      245,
+      158,
+      11,
+      0.06
+    );
+}
+
+.member-password-warning strong {
+  color:
+    #fbbf24;
+
+  font-size: 0.8rem;
+}
+
+.member-password-warning p {
+  margin: 0;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.75rem;
+
+  line-height: 1.55;
+}
+
+.member-password-rules {
+  padding: 14px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 10px;
+
+  background:
+    var(--color-background);
+}
+
+.member-password-rules strong {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 0.76rem;
+}
+
+.member-password-rules ul {
+  display: grid;
+
+  gap: 5px;
+
+  margin: 0;
+
+  padding-left: 20px;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.72rem;
+
+  line-height: 1.45;
+}
+
+.member-password-success {
+  display: flex;
+
+  gap: 14px;
+
+  margin-bottom: 16px;
+
+  padding: 18px;
+
+  border:
+    1px solid
+    rgba(
+      34,
+      197,
+      94,
+      0.3
+    );
+
+  border-radius: 12px;
+
+  background:
+    rgba(
+      34,
+      197,
+      94,
+      0.06
+    );
+}
+
+.member-password-success-icon {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      34,
+      197,
+      94,
+      0.15
+    );
+
+  color:
+    rgb(
+      74,
+      222,
+      128
+    );
+
+  font-size: 1rem;
+
+  font-weight: 900;
+}
+
+.member-password-success > div:last-child {
+  display: grid;
+
+  gap: 5px;
+}
+
+.member-password-success strong {
+  color:
+    rgb(
+      74,
+      222,
+      128
+    );
+
+  font-size: 0.85rem;
+}
+
+.member-password-success p {
+  margin: 0;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.75rem;
+
+  line-height: 1.55;
+}
+
+.member-password-security-note {
+  display: grid;
+
+  gap: 5px;
+
+  margin-bottom: 18px;
+
+  padding: 14px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 12px;
+
+  background:
+    var(--color-background);
+}
+
+.member-password-security-note strong {
+  font-size: 0.78rem;
+}
+
+.member-password-security-note p {
+  margin: 0;
+
+  color:
+    var(--color-text-muted);
+
+  font-size: 0.72rem;
+
+  line-height: 1.5;
+}
+
+.member-password-single-action {
+  grid-template-columns:
+    1fr;
+}
+
+@media (min-width: 640px) {
+  .member-security-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .member-security-content > div {
+    max-width: 310px;
+  }
+
+  .member-security-content .button {
+    flex-shrink: 0;
+  }
+}

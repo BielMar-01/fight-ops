@@ -5,6 +5,10 @@ import {
 } from 'react'
 
 import {
+  ResetGymMemberPasswordModal,
+} from './ResetGymMemberPasswordModal'
+
+import {
   ApiError,
 } from '../../services/api'
 
@@ -58,6 +62,12 @@ export function ManageGymMemberModal({
       null,
     )
 
+  const [
+    passwordResetOpen,
+    setPasswordResetOpen,
+  ] =
+    useState(false)
+
   const canManageRole =
     useMemo(
       () => {
@@ -90,6 +100,50 @@ export function ManageGymMemberModal({
       [
         actorRole,
         member.role,
+      ],
+    )
+
+  const canResetPassword =
+    useMemo(
+      () => {
+        if (
+          !member.active ||
+          !member.user.active
+        ) {
+          return false
+        }
+
+        if (
+          member.role ===
+          'OWNER'
+        ) {
+          return false
+        }
+
+        if (
+          actorRole ===
+          'OWNER'
+        ) {
+          return true
+        }
+
+        if (
+          actorRole ===
+          'ADMIN'
+        ) {
+          return (
+            member.role !==
+            'ADMIN'
+          )
+        }
+
+        return false
+      },
+      [
+        actorRole,
+        member.active,
+        member.role,
+        member.user.active,
       ],
     )
 
@@ -127,7 +181,8 @@ export function ManageGymMemberModal({
         if (
           event.key ===
           'Escape' &&
-          !isSubmitting
+          !isSubmitting &&
+          !passwordResetOpen
         ) {
           onClose()
         }
@@ -148,6 +203,7 @@ export function ManageGymMemberModal({
     [
       isSubmitting,
       onClose,
+      passwordResetOpen,
     ],
   )
 
@@ -257,6 +313,29 @@ export function ManageGymMemberModal({
     }
   }
 
+  if (
+    passwordResetOpen
+  ) {
+    return (
+      <ResetGymMemberPasswordModal
+        gymId={
+          gymId
+        }
+        member={
+          member
+        }
+        onBack={() => {
+          setPasswordResetOpen(
+            false,
+          )
+        }}
+        onCompleted={() => {
+          onClose()
+        }}
+      />
+    )
+  }
+
   return (
     <div
       className="member-modal-backdrop"
@@ -327,7 +406,8 @@ export function ManageGymMemberModal({
               data-testid="member-manage-role-select"
               onChange={(event) => {
                 const selectedRole =
-                  event.target.value as GymRole
+                  event.target
+                    .value as GymRole
 
                 setRole(
                   selectedRole,
@@ -346,18 +426,16 @@ export function ManageGymMemberModal({
                       availableRole
                     }
                   >
-                    {
-                      availableRole ===
-                      'ADMIN'
-                        ? 'Administrador'
-                        : availableRole ===
+                    {availableRole ===
+                    'ADMIN'
+                      ? 'Administrador'
+                      : availableRole ===
                           'RECEPTIONIST'
-                          ? 'Recepção'
-                          : availableRole ===
+                        ? 'Recepção'
+                        : availableRole ===
                             'PROFESSOR'
-                            ? 'Professor'
-                            : 'Aluno'
-                    }
+                          ? 'Professor'
+                          : 'Aluno'}
                   </option>
                 ),
               )}
@@ -416,6 +494,68 @@ export function ManageGymMemberModal({
               </button>
             ) : null}
           </div>
+
+          <section
+            className="member-security-section"
+            aria-labelledby="member-security-title"
+          >
+            <div className="member-security-content">
+              <div>
+                <span className="member-security-label">
+                  Segurança da conta
+                </span>
+
+                <strong
+                  id="member-security-title"
+                >
+                  Senha de acesso
+                </strong>
+
+                <p>
+                  Redefina a senha do
+                  usuário e encerre as
+                  sessões que estiverem
+                  abertas.
+                </p>
+              </div>
+
+              {canResetPassword ? (
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  disabled={
+                    isSubmitting
+                  }
+                  data-testid="member-manage-reset-password-button"
+                  onClick={() => {
+                    setError(
+                      null,
+                    )
+
+                    setPasswordResetOpen(
+                      true,
+                    )
+                  }}
+                >
+                  Redefinir senha
+                </button>
+              ) : (
+                <span className="member-security-unavailable">
+                  Indisponível
+                </span>
+              )}
+            </div>
+
+            {!canResetPassword ? (
+              <p className="member-security-help">
+                A redefinição de senha
+                não está disponível
+                para este vínculo ou
+                para o seu nível de
+                acesso.
+              </p>
+            ) : null}
+          </section>
 
           {error ? (
             <div
