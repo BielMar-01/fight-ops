@@ -44,3 +44,15 @@ export interface CreateAuditLogInput {
   ipAddress?: string | null
   userAgent?: string | null
 }
+
+export interface ListAuditLogsInput {
+  page: number
+  limit: number
+
+  action?: string
+  entity?: string
+  userId?: string
+
+  startDate?: string
+  endDate?: string
+}

@@ -13,6 +13,10 @@ import {
 } from './http/error-handler.js'
 
 import {
+  auditRoutes,
+} from './modules/audit/audit.routes.js'
+
+import {
   authRoutes,
 } from './modules/auth/auth.routes.js'
 
@@ -125,6 +129,10 @@ export function configureApp(
 
   app.register(
     studentRoutes,
+  )
+
+  app.register(
+    auditRoutes,
   )
 
   return app
