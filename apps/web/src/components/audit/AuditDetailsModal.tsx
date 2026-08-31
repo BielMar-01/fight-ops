@@ -12,6 +12,18 @@ interface AuditDetailsModalProps {
   onClose: () => void
 }
 
+interface ComparisonRow {
+  key: string
+  label: string
+  oldValue:
+    | AuditJsonValue
+    | undefined
+  newValue:
+    | AuditJsonValue
+    | undefined
+  changed: boolean
+}
+
 const actionLabels: Record<
   string,
   string
@@ -67,13 +79,91 @@ const entityLabels: Record<
     'Sistema',
 }
 
+const roleLabels: Record<
+  string,
+  string
+> = {
+  OWNER:
+    'Proprietário',
+
+  ADMIN:
+    'Administrador',
+
+  RECEPTIONIST:
+    'Recepcionista',
+
+  PROFESSOR:
+    'Professor',
+
+  STUDENT:
+    'Aluno',
+}
+
+const fieldLabels: Record<
+  string,
+  string
+> = {
+  id:
+    'ID',
+
+  name:
+    'Nome',
+
+  email:
+    'E-mail',
+
+  phone:
+    'Telefone',
+
+  birthDate:
+    'Data de nascimento',
+
+  emergencyContact:
+    'Contato de emergência',
+
+  emergencyPhone:
+    'Telefone de emergência',
+
+  notes:
+    'Observações',
+
+  active:
+    'Status',
+
+  role:
+    'Função',
+
+  joinedAt:
+    'Data de entrada',
+
+  hireDate:
+    'Data de contratação',
+
+  userId:
+    'Usuário',
+
+  gymId:
+    'Academia',
+
+  createdAt:
+    'Criado em',
+
+  updatedAt:
+    'Atualizado em',
+
+  avatarUrl:
+    'Avatar',
+
+  bio:
+    'Biografia',
+}
+
 function getActionLabel(
   action: string,
 ) {
   return (
-    actionLabels[
-      action
-    ] ?? action
+    actionLabels[action] ??
+    action
   )
 }
 
@@ -81,9 +171,17 @@ function getEntityLabel(
   entity: string,
 ) {
   return (
-    entityLabels[
-      entity
-    ] ?? entity
+    entityLabels[entity] ??
+    entity
+  )
+}
+
+function getFieldLabel(
+  field: string,
+) {
+  return (
+    fieldLabels[field] ??
+    field
   )
 }
 
@@ -111,6 +209,229 @@ function formatDateTime(
         'medium',
     },
   ).format(date)
+}
+
+function isRecord(
+  value:
+    | AuditJsonValue
+    | null,
+): value is Record<
+  string,
+  AuditJsonValue
+> {
+  return (
+    value !== null &&
+    typeof value ===
+      'object' &&
+    !Array.isArray(
+      value,
+    )
+  )
+}
+
+function areValuesEqual(
+  first:
+    | AuditJsonValue
+    | undefined,
+  second:
+    | AuditJsonValue
+    | undefined,
+) {
+  return (
+    JSON.stringify(first) ===
+    JSON.stringify(second)
+  )
+}
+
+function getComparisonRows(
+  oldValues:
+    | AuditJsonValue
+    | null,
+  newValues:
+    | AuditJsonValue
+    | null,
+) {
+  const oldRecord =
+    isRecord(oldValues)
+      ? oldValues
+      : {}
+
+  const newRecord =
+    isRecord(newValues)
+      ? newValues
+      : {}
+
+  const keys =
+    Array.from(
+      new Set([
+        ...Object.keys(
+          oldRecord,
+        ),
+
+        ...Object.keys(
+          newRecord,
+        ),
+      ]),
+    )
+
+  return keys.map(
+    (key): ComparisonRow => {
+      const oldValue =
+        oldRecord[key]
+
+      const newValue =
+        newRecord[key]
+
+      return {
+        key,
+
+        label:
+          getFieldLabel(
+            key,
+          ),
+
+        oldValue,
+
+        newValue,
+
+        changed:
+          !areValuesEqual(
+            oldValue,
+            newValue,
+          ),
+      }
+    },
+  )
+}
+
+function formatBoolean(
+  field: string,
+  value: boolean,
+) {
+  if (
+    field === 'active'
+  ) {
+    return value
+      ? 'Ativo'
+      : 'Inativo'
+  }
+
+  return value
+    ? 'Sim'
+    : 'Não'
+}
+
+function formatPossibleDate(
+  field: string,
+  value: string,
+) {
+  const dateFields = [
+    'birthDate',
+    'joinedAt',
+    'hireDate',
+    'createdAt',
+    'updatedAt',
+  ]
+
+  if (
+    !dateFields.includes(
+      field,
+    )
+  ) {
+    return value
+  }
+
+  const date =
+    new Date(value)
+
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
+    return value
+  }
+
+  if (
+    field ===
+    'birthDate'
+  ) {
+    return new Intl.DateTimeFormat(
+      'pt-BR',
+    ).format(date)
+  }
+
+  return new Intl.DateTimeFormat(
+    'pt-BR',
+    {
+      dateStyle:
+        'short',
+
+      timeStyle:
+        'short',
+    },
+  ).format(date)
+}
+
+function formatValue(
+  field: string,
+  value:
+    | AuditJsonValue
+    | undefined,
+) {
+  if (
+    value === undefined
+  ) {
+    return '—'
+  }
+
+  if (
+    value === null
+  ) {
+    return 'Não informado'
+  }
+
+  if (
+    typeof value ===
+    'boolean'
+  ) {
+    return formatBoolean(
+      field,
+      value,
+    )
+  }
+
+  if (
+    typeof value ===
+    'number'
+  ) {
+    return String(value)
+  }
+
+  if (
+    typeof value ===
+    'string'
+  ) {
+    if (
+      field === 'role'
+    ) {
+      return (
+        roleLabels[value] ??
+        value
+      )
+    }
+
+    return formatPossibleDate(
+      field,
+      value,
+    )
+  }
+
+  return JSON.stringify(
+    value,
+    null,
+    2,
+  )
 }
 
 function formatJsonValue(
@@ -161,6 +482,34 @@ export function AuditDetailsModal({
   }, [
     onClose,
   ])
+
+  const comparisonRows =
+    getComparisonRows(
+      auditLog.oldValues,
+      auditLog.newValues,
+    )
+
+  const changedRows =
+    comparisonRows.filter(
+      (row) =>
+        row.changed,
+    )
+
+  const rowsToDisplay =
+    changedRows.length > 0
+      ? changedRows
+      : comparisonRows
+
+  const hasComparison =
+    rowsToDisplay.length > 0
+
+  const isCreate =
+    auditLog.action ===
+    'CREATE'
+
+  const isDelete =
+    auditLog.action ===
+    'DELETE'
 
   const oldValues =
     formatJsonValue(
@@ -334,99 +683,229 @@ export function AuditDetailsModal({
             </div>
           </div>
 
-          <div className="audit-change-grid">
+          {hasComparison ? (
             <section
-              className="audit-json-section"
-              data-testid="audit-details-old-values"
+              className="audit-comparison-section"
+              data-testid="audit-details-comparison"
             >
-              <div className="audit-json-header">
-                <span className="audit-json-indicator audit-json-indicator-old" />
-
+              <div className="audit-comparison-heading">
                 <div>
-                  <strong>
-                    Valores anteriores
-                  </strong>
+                  <span className="audit-eyebrow">
+                    Alterações
+                  </span>
+
+                  <h3>
+                    {isCreate
+                      ? 'Dados criados'
+                      : isDelete
+                        ? 'Dados removidos'
+                        : 'Antes e depois'}
+                  </h3>
 
                   <p>
-                    Estado registrado
-                    antes da alteração.
+                    {isCreate
+                      ? 'Valores registrados durante a criação.'
+                      : isDelete
+                        ? 'Valores existentes antes da remoção.'
+                        : 'Somente os campos alterados são destacados.'}
                   </p>
                 </div>
+
+                {!isCreate &&
+                !isDelete &&
+                changedRows.length >
+                  0 ? (
+                  <span
+                    className="audit-change-count"
+                    data-testid="audit-change-count"
+                  >
+                    {
+                      changedRows.length
+                    }{' '}
+                    {changedRows.length ===
+                    1
+                      ? 'campo alterado'
+                      : 'campos alterados'}
+                  </span>
+                ) : null}
               </div>
 
-              {oldValues ? (
-                <pre>
-                  {oldValues}
-                </pre>
-              ) : (
-                <div className="audit-json-empty">
-                  Nenhum valor anterior
-                  registrado.
-                </div>
-              )}
-            </section>
+              <div className="audit-comparison-list">
+                {rowsToDisplay.map(
+                  (row) => (
+                    <div
+                      key={
+                        row.key
+                      }
+                      className={
+                        row.changed
+                          ? 'audit-comparison-row changed'
+                          : 'audit-comparison-row'
+                      }
+                      data-testid={`audit-comparison-field-${row.key}`}
+                    >
+                      <div className="audit-comparison-field">
+                        <span>
+                          Campo
+                        </span>
 
+                        <strong>
+                          {
+                            row.label
+                          }
+                        </strong>
+                      </div>
+
+                      {!isCreate ? (
+                        <div className="audit-comparison-value audit-comparison-old">
+                          <span>
+                            Antes
+                          </span>
+
+                          <strong>
+                            {formatValue(
+                              row.key,
+                              row.oldValue,
+                            )}
+                          </strong>
+                        </div>
+                      ) : null}
+
+                      {!isDelete ? (
+                        <div className="audit-comparison-value audit-comparison-new">
+                          <span>
+                            Depois
+                          </span>
+
+                          <strong>
+                            {formatValue(
+                              row.key,
+                              row.newValue,
+                            )}
+                          </strong>
+                        </div>
+                      ) : null}
+                    </div>
+                  ),
+                )}
+              </div>
+            </section>
+          ) : (
             <section
-              className="audit-json-section"
-              data-testid="audit-details-new-values"
+              className="audit-no-comparison"
+              data-testid="audit-details-no-comparison"
             >
-              <div className="audit-json-header">
-                <span className="audit-json-indicator audit-json-indicator-new" />
+              <strong>
+                Nenhuma alteração de
+                campos registrada
+              </strong>
 
-                <div>
-                  <strong>
-                    Novos valores
-                  </strong>
-
-                  <p>
-                    Estado registrado
-                    depois da alteração.
-                  </p>
-                </div>
-              </div>
-
-              {newValues ? (
-                <pre>
-                  {newValues}
-                </pre>
-              ) : (
-                <div className="audit-json-empty">
-                  Nenhum novo valor
-                  registrado.
-                </div>
-              )}
+              <p>
+                Este evento não possui
+                valores anteriores ou
+                posteriores para
+                comparação.
+              </p>
             </section>
-          </div>
+          )}
 
-          <section
-            className="audit-json-section"
-            data-testid="audit-details-metadata"
+          <details
+            className="audit-raw-details"
+            data-testid="audit-details-raw-data"
           >
-            <div className="audit-json-header">
-              <div>
-                <strong>
-                  Metadata
-                </strong>
+            <summary>
+              Dados técnicos
+            </summary>
 
-                <p>
-                  Informações adicionais
-                  registradas durante a
-                  operação.
-                </p>
+            <div className="audit-raw-content">
+              <div className="audit-change-grid">
+                <section className="audit-json-section">
+                  <div className="audit-json-header">
+                    <div>
+                      <strong>
+                        Valores anteriores
+                      </strong>
+
+                      <p>
+                        Conteúdo bruto
+                        registrado antes
+                        da operação.
+                      </p>
+                    </div>
+                  </div>
+
+                  {oldValues ? (
+                    <pre>
+                      {oldValues}
+                    </pre>
+                  ) : (
+                    <div className="audit-json-empty">
+                      Nenhum valor
+                      anterior
+                      registrado.
+                    </div>
+                  )}
+                </section>
+
+                <section className="audit-json-section">
+                  <div className="audit-json-header">
+                    <div>
+                      <strong>
+                        Novos valores
+                      </strong>
+
+                      <p>
+                        Conteúdo bruto
+                        registrado após
+                        a operação.
+                      </p>
+                    </div>
+                  </div>
+
+                  {newValues ? (
+                    <pre>
+                      {newValues}
+                    </pre>
+                  ) : (
+                    <div className="audit-json-empty">
+                      Nenhum novo valor
+                      registrado.
+                    </div>
+                  )}
+                </section>
               </div>
+
+              <section
+                className="audit-json-section"
+                data-testid="audit-details-metadata"
+              >
+                <div className="audit-json-header">
+                  <div>
+                    <strong>
+                      Metadata
+                    </strong>
+
+                    <p>
+                      Informações
+                      adicionais da
+                      operação.
+                    </p>
+                  </div>
+                </div>
+
+                {metadata ? (
+                  <pre>
+                    {metadata}
+                  </pre>
+                ) : (
+                  <div className="audit-json-empty">
+                    Nenhuma metadata
+                    registrada.
+                  </div>
+                )}
+              </section>
             </div>
-
-            {metadata ? (
-              <pre>
-                {metadata}
-              </pre>
-            ) : (
-              <div className="audit-json-empty">
-                Nenhuma metadata
-                registrada.
-              </div>
-            )}
-          </section>
+          </details>
         </div>
 
         <footer className="audit-modal-footer">
