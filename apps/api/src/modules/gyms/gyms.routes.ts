@@ -1,5 +1,6 @@
 import type {
   FastifyInstance,
+  FastifyRequest,
 } from 'fastify'
 
 import {
@@ -32,6 +33,32 @@ import {
   updateGymMemberRole,
   updateGymMemberStatus,
 } from './gyms.service.js'
+
+function getAuditContext(
+  request: FastifyRequest,
+) {
+  if (!request.user) {
+    throw new AppError(
+      'UNAUTHENTICATED',
+      401,
+      'Usuário não autenticado.',
+    )
+  }
+
+  return {
+    userId:
+      request.user.id,
+
+    ipAddress:
+      request.ip,
+
+    userAgent:
+      request.headers[
+        'user-agent'
+      ] ??
+      null,
+  }
+}
 
 export async function gymRoutes(
   app: FastifyInstance,
@@ -202,7 +229,10 @@ export async function gymRoutes(
           request.body,
         )
 
-      if (!request.gymMembership) {
+      if (
+        !request.user ||
+        !request.gymMembership
+      ) {
         throw new AppError(
           'GYM_MEMBERSHIP_REQUIRED',
           403,
@@ -215,6 +245,9 @@ export async function gymRoutes(
           params.gymId,
           request.gymMembership.role,
           body,
+          getAuditContext(
+            request,
+          ),
         )
 
       return reply
@@ -269,6 +302,9 @@ export async function gymRoutes(
           request.user.id,
           request.gymMembership.role,
           body,
+          getAuditContext(
+            request,
+          ),
         )
 
       return reply.send({
@@ -321,6 +357,9 @@ export async function gymRoutes(
           request.user.id,
           request.gymMembership.role,
           body,
+          getAuditContext(
+            request,
+          ),
         )
 
       return reply.send({

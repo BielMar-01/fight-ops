@@ -6,6 +6,10 @@ import {
   AppError,
 } from '../../http/app-error.js'
 
+import {
+  createAuditLog,
+} from '../audit/audit.service.js'
+
 import type {
   AddGymMemberInput,
   CreateGymInput,
@@ -13,6 +17,12 @@ import type {
   UpdateGymMemberRoleInput,
   UpdateGymMemberStatusInput,
 } from './gyms.types.js'
+
+interface GymAuditContext {
+  userId: string
+  ipAddress?: string | null
+  userAgent?: string | null
+}
 
 function normalizeSlugValue(
   value: string,
@@ -300,6 +310,7 @@ export async function addGymMember(
   gymId: string,
   actorRole: GymRole,
   input: AddGymMemberInput,
+  auditContext: GymAuditContext,
 ) {
   if (
     actorRole !== 'OWNER' &&
@@ -365,40 +376,92 @@ export async function addGymMember(
     )
   }
 
-  return prisma.gymMembership.create({
-    data: {
-      userId:
-        user.id,
+  const member =
+    await prisma.gymMembership.create({
+      data: {
+        userId:
+          user.id,
 
-      gymId,
+        gymId,
 
-      role:
-        input.role,
+        role:
+          input.role,
 
-      active:
-        true,
-    },
+        active:
+          true,
+      },
 
-    select: {
-      id: true,
-      role: true,
-      active: true,
-      joinedAt: true,
-      createdAt: true,
-      updatedAt: true,
+      select: {
+        id: true,
+        role: true,
+        active: true,
+        joinedAt: true,
+        createdAt: true,
+        updatedAt: true,
 
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          avatarUrl: true,
-          active: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatarUrl: true,
+            active: true,
+          },
         },
       },
+    })
+
+  await createAuditLog({
+    gymId,
+
+    userId:
+      auditContext.userId,
+
+    action:
+      'CREATE',
+
+    entity:
+      'GYM_MEMBERSHIP',
+
+    entityId:
+      member.id,
+
+    newValues: {
+      membershipId:
+        member.id,
+
+      memberUserId:
+        member.user.id,
+
+      memberName:
+        member.user.name,
+
+      memberEmail:
+        member.user.email,
+
+      role:
+        member.role,
+
+      active:
+        member.active,
     },
+
+    metadata: {
+      source:
+        'gym-members',
+
+      actorRole,
+    },
+
+    ipAddress:
+      auditContext.ipAddress,
+
+    userAgent:
+      auditContext.userAgent,
   })
+
+  return member
 }
 
 export async function updateGymMemberRole(
@@ -407,6 +470,7 @@ export async function updateGymMemberRole(
   actorUserId: string,
   actorRole: GymRole,
   input: UpdateGymMemberRoleInput,
+  auditContext: GymAuditContext,
 ) {
   const membership =
     await prisma.gymMembership.findFirst({
@@ -489,37 +553,91 @@ export async function updateGymMemberRole(
     )
   }
 
-  return prisma.gymMembership.update({
-    where: {
-      id:
-        membership.id,
-    },
+  const previousRole =
+    membership.role
 
-    data: {
-      role:
-        input.role,
-    },
+  const member =
+    await prisma.gymMembership.update({
+      where: {
+        id:
+          membership.id,
+      },
 
-    select: {
-      id: true,
-      role: true,
-      active: true,
-      joinedAt: true,
-      createdAt: true,
-      updatedAt: true,
+      data: {
+        role:
+          input.role,
+      },
 
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          avatarUrl: true,
-          active: true,
+      select: {
+        id: true,
+        role: true,
+        active: true,
+        joinedAt: true,
+        createdAt: true,
+        updatedAt: true,
+
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatarUrl: true,
+            active: true,
+          },
         },
       },
+    })
+
+  await createAuditLog({
+    gymId,
+
+    userId:
+      auditContext.userId,
+
+    action:
+      'UPDATE',
+
+    entity:
+      'GYM_MEMBERSHIP',
+
+    entityId:
+      member.id,
+
+    oldValues: {
+      role:
+        previousRole,
     },
+
+    newValues: {
+      role:
+        member.role,
+    },
+
+    metadata: {
+      source:
+        'gym-members',
+
+      memberUserId:
+        member.user.id,
+
+      memberName:
+        member.user.name,
+
+      memberEmail:
+        member.user.email,
+
+      actorRole,
+    },
+
+    ipAddress:
+      auditContext.ipAddress,
+
+    userAgent:
+      auditContext.userAgent,
   })
+
+  return member
 }
 
 export async function updateGymMemberStatus(
@@ -528,6 +646,7 @@ export async function updateGymMemberStatus(
   actorUserId: string,
   actorRole: GymRole,
   input: UpdateGymMemberStatusInput,
+  auditContext: GymAuditContext,
 ) {
   const membership =
     await prisma.gymMembership.findFirst({
@@ -604,35 +723,92 @@ export async function updateGymMemberStatus(
     )
   }
 
-  return prisma.gymMembership.update({
-    where: {
-      id:
-        membership.id,
-    },
+  const previousActive =
+    membership.active
 
-    data: {
-      active:
-        input.active,
-    },
+  const member =
+    await prisma.gymMembership.update({
+      where: {
+        id:
+          membership.id,
+      },
 
-    select: {
-      id: true,
-      role: true,
-      active: true,
-      joinedAt: true,
-      createdAt: true,
-      updatedAt: true,
+      data: {
+        active:
+          input.active,
+      },
 
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          avatarUrl: true,
-          active: true,
+      select: {
+        id: true,
+        role: true,
+        active: true,
+        joinedAt: true,
+        createdAt: true,
+        updatedAt: true,
+
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatarUrl: true,
+            active: true,
+          },
         },
       },
+    })
+
+  await createAuditLog({
+    gymId,
+
+    userId:
+      auditContext.userId,
+
+    action:
+      'STATUS_CHANGE',
+
+    entity:
+      'GYM_MEMBERSHIP',
+
+    entityId:
+      member.id,
+
+    oldValues: {
+      active:
+        previousActive,
     },
+
+    newValues: {
+      active:
+        member.active,
+    },
+
+    metadata: {
+      source:
+        'gym-members',
+
+      memberUserId:
+        member.user.id,
+
+      memberName:
+        member.user.name,
+
+      memberEmail:
+        member.user.email,
+
+      memberRole:
+        member.role,
+
+      actorRole,
+    },
+
+    ipAddress:
+      auditContext.ipAddress,
+
+    userAgent:
+      auditContext.userAgent,
   })
+
+  return member
 }
