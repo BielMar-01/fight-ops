@@ -6,12 +6,22 @@ import {
   AppError,
 } from '../../http/app-error.js'
 
+import {
+  createAuditLog,
+} from '../audit/audit.service.js'
+
 import type {
   CreateStudentInput,
   ListStudentsInput,
   UpdateStudentInput,
   UpdateStudentStatusInput,
 } from './students.types.js'
+
+interface StudentAuditContext {
+  userId: string
+  ipAddress?: string | null
+  userAgent?: string | null
+}
 
 function normalizeOptionalText(
   value?: string | null,
@@ -40,6 +50,18 @@ function parseJoinedAt(
 ) {
   if (!value) {
     return new Date()
+  }
+
+  return new Date(
+    `${value}T00:00:00.000Z`,
+  )
+}
+
+function parseOptionalJoinedAt(
+  value?: string | null,
+) {
+  if (!value) {
+    return undefined
   }
 
   return new Date(
@@ -213,6 +235,7 @@ export async function getStudentById(
 export async function createStudent(
   gymId: string,
   input: CreateStudentInput,
+  auditContext: StudentAuditContext,
 ) {
   const student =
     await prisma.student.create({
@@ -276,6 +299,36 @@ export async function createStudent(
       },
     })
 
+  await createAuditLog({
+    gymId,
+
+    userId:
+      auditContext.userId,
+
+    action:
+      'CREATE',
+
+    entity:
+      'STUDENT',
+
+    entityId:
+      student.id,
+
+    newValues:
+      student,
+
+    metadata: {
+      source:
+        'students',
+    },
+
+    ipAddress:
+      auditContext.ipAddress,
+
+    userAgent:
+      auditContext.userAgent,
+  })
+
   return student
 }
 
@@ -283,11 +336,18 @@ export async function updateStudent(
   gymId: string,
   studentId: string,
   input: UpdateStudentInput,
+  auditContext: StudentAuditContext,
 ) {
-  await getStudentById(
-    gymId,
-    studentId,
-  )
+  const currentStudent =
+    await getStudentById(
+      gymId,
+      studentId,
+    )
+
+  const joinedAt =
+    parseOptionalJoinedAt(
+      input.joinedAt,
+    )
 
   const student =
     await prisma.student.update({
@@ -330,10 +390,11 @@ export async function updateStudent(
             input.notes,
           ),
 
-        joinedAt:
-          parseJoinedAt(
-            input.joinedAt,
-          ),
+        ...(joinedAt
+          ? {
+              joinedAt,
+            }
+          : {}),
       },
 
       select: {
@@ -354,6 +415,39 @@ export async function updateStudent(
       },
     })
 
+  await createAuditLog({
+    gymId,
+
+    userId:
+      auditContext.userId,
+
+    action:
+      'UPDATE',
+
+    entity:
+      'STUDENT',
+
+    entityId:
+      student.id,
+
+    oldValues:
+      currentStudent,
+
+    newValues:
+      student,
+
+    metadata: {
+      source:
+        'students',
+    },
+
+    ipAddress:
+      auditContext.ipAddress,
+
+    userAgent:
+      auditContext.userAgent,
+  })
+
   return student
 }
 
@@ -361,6 +455,7 @@ export async function updateStudentStatus(
   gymId: string,
   studentId: string,
   input: UpdateStudentStatusInput,
+  auditContext: StudentAuditContext,
 ) {
   const currentStudent =
     await getStudentById(
@@ -412,6 +507,46 @@ export async function updateStudentStatus(
         updatedAt: true,
       },
     })
+
+  await createAuditLog({
+    gymId,
+
+    userId:
+      auditContext.userId,
+
+    action:
+      'STATUS_CHANGE',
+
+    entity:
+      'STUDENT',
+
+    entityId:
+      student.id,
+
+    oldValues: {
+      active:
+        currentStudent.active,
+    },
+
+    newValues: {
+      active:
+        student.active,
+    },
+
+    metadata: {
+      source:
+        'students',
+
+      studentName:
+        student.name,
+    },
+
+    ipAddress:
+      auditContext.ipAddress,
+
+    userAgent:
+      auditContext.userAgent,
+  })
 
   return student
 }

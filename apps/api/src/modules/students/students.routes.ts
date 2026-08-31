@@ -1,5 +1,6 @@
 import type {
   FastifyInstance,
+  FastifyRequest,
 } from 'fastify'
 
 import {
@@ -27,11 +28,41 @@ import {
   updateStudentStatus,
 } from './students.service.js'
 
+import {
+  AppError,
+} from '../../http/app-error.js'
+
 const security = [
   {
     bearerAuth: [],
   },
 ]
+
+function getAuditContext(
+  request: FastifyRequest,
+) {
+  if (!request.user) {
+    throw new AppError(
+      'AUTH_USER_NOT_FOUND',
+      401,
+      'Usuário autenticado não encontrado.',
+    )
+  }
+
+  return {
+    userId:
+      request.user.id,
+
+    ipAddress:
+      request.ip,
+
+    userAgent:
+      request.headers[
+        'user-agent'
+      ] ??
+      null,
+  }
+}
 
 const gymIdParamsSchema = {
   type:
@@ -650,6 +681,9 @@ export async function studentRoutes(
         await createStudent(
           params.gymId,
           body,
+          getAuditContext(
+            request,
+          ),
         )
 
       return reply
@@ -730,6 +764,9 @@ export async function studentRoutes(
           params.gymId,
           params.studentId,
           body,
+          getAuditContext(
+            request,
+          ),
         )
 
       return reply.send({
@@ -824,6 +861,9 @@ export async function studentRoutes(
           params.gymId,
           params.studentId,
           body,
+          getAuditContext(
+            request,
+          ),
         )
 
       return reply.send({
