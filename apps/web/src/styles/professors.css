@@ -1,0 +1,504 @@
+.professors-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.professors-header {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.professors-header h1 {
+  margin: 4px 0 8px;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.professors-header p {
+  margin: 0;
+  color: #9ca3af;
+  line-height: 1.6;
+}
+
+.professors-eyebrow {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.professors-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.professors-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  background: #18181b;
+}
+
+.professors-summary-card > span {
+  color: #a1a1aa;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.professors-summary-card strong {
+  color: #fafafa;
+  font-size: 1.7rem;
+}
+
+.professors-summary-card small {
+  color: #71717a;
+  font-size: 0.8rem;
+}
+
+.professors-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  background: #18181b;
+}
+
+.professors-search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.professors-filter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.professors-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.professors-field label {
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.professors-field input,
+.professors-field select {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #3f3f46;
+  border-radius: 9px;
+  outline: none;
+  background: #09090b;
+  color: #fafafa;
+  font: inherit;
+}
+
+.professors-field input::placeholder {
+  color: #71717a;
+}
+
+.professors-field input:focus,
+.professors-field select:focus {
+  border-color: #ef4444;
+}
+
+.professors-button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.professors-button-primary {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.professors-button-primary:hover {
+  background: #dc2626;
+}
+
+.professors-button-secondary {
+  border-color: #3f3f46;
+  background: #18181b;
+  color: #e4e4e7;
+}
+
+.professors-button-secondary:hover:not(:disabled) {
+  background: #27272a;
+}
+
+.professors-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.professors-list {
+  display: grid;
+  gap: 12px;
+}
+
+.professor-card {
+  padding: 16px;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  background: #18181b;
+}
+
+.professor-card-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.professor-avatar {
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #27272a;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.professor-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.professor-name-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.professor-name-row h2 {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.professor-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.professor-status-active {
+  background:
+    rgba(
+      34,
+      197,
+      94,
+      0.12
+    );
+  color: #86efac;
+}
+
+.professor-status-inactive {
+  background:
+    rgba(
+      239,
+      68,
+      68,
+      0.12
+    );
+  color: #fca5a5;
+}
+
+.professor-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.professor-hire-date {
+  display: block;
+  margin-top: 8px;
+  color: #71717a;
+  font-size: 0.8rem;
+}
+
+.professors-empty,
+.professors-state {
+  padding: 32px 20px;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  background: #18181b;
+  text-align: center;
+}
+
+.professors-empty h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.professors-empty p {
+  margin: 0;
+  color: #a1a1aa;
+}
+
+.professors-state {
+  color: #a1a1aa;
+}
+
+.professors-state-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.professors-state-error strong {
+  color: #fca5a5;
+}
+
+.professors-state-error span {
+  color: #a1a1aa;
+}
+
+.professors-state-error .professors-button {
+  margin-top: 4px;
+}
+
+.professors-loading-spinner {
+  width: 24px;
+  height: 24px;
+  margin: 0 auto 10px;
+  border: 3px solid #27272a;
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation:
+    professors-spin
+    0.8s linear infinite;
+}
+
+.professors-pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.professors-pagination-info {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.professors-pagination-info strong {
+  color: #f4f4f5;
+}
+
+.professors-access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 620px;
+  padding: 28px;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  background: #18181b;
+}
+
+.professors-access-denied-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 18px;
+  border: 1px solid
+    rgba(
+      239,
+      68,
+      68,
+      0.35
+    );
+  border-radius: 12px;
+  background:
+    rgba(
+      239,
+      68,
+      68,
+      0.08
+    );
+  color: #f87171;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.professors-access-denied h1 {
+  margin: 6px 0 10px;
+  color: #fafafa;
+  font-size: 1.5rem;
+}
+
+.professors-access-denied p {
+  margin: 0;
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+
+@keyframes professors-spin {
+  to {
+    transform:
+      rotate(
+        360deg
+      );
+  }
+}
+
+@media (min-width: 768px) {
+  .professors-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .professors-summary {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+  }
+
+  .professors-filters {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .professors-search-form {
+    flex: 1;
+    flex-direction: row;
+    align-items: flex-end;
+    max-width: 650px;
+  }
+
+  .professors-filter-actions {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .professors-filter-actions
+    .professors-field {
+    min-width: 150px;
+  }
+
+  .professor-card {
+    padding: 20px;
+  }
+
+  .professor-card-main {
+    align-items: center;
+  }
+
+  .professor-name-row {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .professors-pagination {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .professors-pagination-info {
+    min-width: 130px;
+  }
+}
+
+@media (max-width: 767px) {
+  .professors-page {
+    gap: 18px;
+  }
+
+  .professors-header {
+    gap: 16px;
+  }
+
+  .professors-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .professors-filters {
+    padding: 14px;
+  }
+
+  .professors-search-form,
+  .professors-filter-actions {
+    width: 100%;
+  }
+
+  .professors-search-form
+    .professors-button,
+  .professors-filter-actions
+    .professors-button {
+    width: 100%;
+  }
+
+  .professor-card-main {
+    flex-wrap: wrap;
+  }
+
+  .professor-avatar {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .professors-pagination {
+    gap: 10px;
+  }
+
+  .professors-pagination
+    .professors-button {
+    width: 100%;
+  }
+
+  .professors-access-denied {
+    padding: 22px;
+  }
+}

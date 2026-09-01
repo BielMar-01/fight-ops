@@ -342,9 +342,19 @@ export function AppLayout() {
                 </span>
               </NavLink>
 
-              <div
-                className="app-nav-link disabled"
-                data-testid="nav-professors-disabled"
+              <NavLink
+                to="/professors"
+                className={({
+                  isActive,
+                }) =>
+                  isActive
+                    ? 'app-nav-link active'
+                    : 'app-nav-link'
+                }
+                onClick={
+                  closeSidebar
+                }
+                data-testid="nav-professors-link"
               >
                 <span className="app-nav-icon">
                   ◈
@@ -353,11 +363,7 @@ export function AppLayout() {
                 <span>
                   Professores
                 </span>
-
-                <small>
-                  Em breve
-                </small>
-              </div>
+              </NavLink>
 
               <div
                 className="app-nav-link disabled"

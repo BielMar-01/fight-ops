@@ -80,6 +80,10 @@ import {
 } from '../pages/StudentsPage'
 
 import {
+  ProfessorsPage,
+} from '../pages/ProfessorsPage'
+
+import {
   VerifyResetCodePage,
 } from '../pages/VerifyResetCodePage'
 
@@ -197,7 +201,14 @@ export function AppRoutes() {
           />
 
           <Route
-            path="/audit"
+            path="/professors"
+            element={
+              <ProfessorsPage />
+            }
+          />
+
+          <Route
+            path="/professors"
             element={
               <AuditPage />
             }
