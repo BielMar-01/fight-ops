@@ -10,6 +10,10 @@ import {
 } from '../components/professors/AddProfessorModal'
 
 import {
+  ManageProfessorModal,
+} from '../components/professors/ManageProfessorModal'
+
+import {
   useGym,
 } from '../contexts/GymContext'
 
@@ -131,6 +135,13 @@ export function ProfessorsPage() {
     isAddModalOpen,
     setIsAddModalOpen,
   ] = useState(false)
+
+  const [
+    selectedProfessorId,
+    setSelectedProfessorId,
+  ] = useState<string | null>(
+    null,
+  )
 
   const canViewProfessors =
     activeGym?.role ===
@@ -340,6 +351,10 @@ export function ProfessorsPage() {
     setIsAddModalOpen(
       false,
     )
+
+    setSelectedProfessorId(
+      null,
+    )
   }, [
     activeGym?.id,
   ])
@@ -410,6 +425,13 @@ export function ProfessorsPage() {
     }
 
     await loadSummary()
+  }
+
+  async function handleProfessorUpdated() {
+    await Promise.all([
+      loadProfessors(),
+      loadSummary(),
+    ])
   }
 
   const hasFilters =
@@ -780,6 +802,21 @@ export function ProfessorsPage() {
                           </span>
                         ) : null}
                       </div>
+
+                      <div className="professor-card-actions">
+                        <button
+                          type="button"
+                          className="professors-button professors-button-secondary"
+                          data-testid={`professor-view-button-${professor.id}`}
+                          onClick={() => {
+                            setSelectedProfessorId(
+                              professor.id,
+                            )
+                          }}
+                        >
+                          Ver detalhes
+                        </button>
+                      </div>
                     </div>
                   </article>
                 ),
@@ -854,6 +891,30 @@ export function ProfessorsPage() {
           }}
           onCreated={
             handleProfessorCreated
+          }
+        />
+      ) : null}
+
+      {selectedProfessorId &&
+      activeGym &&
+      canViewProfessors ? (
+        <ManageProfessorModal
+          gymId={
+            activeGym.id
+          }
+          professorId={
+            selectedProfessorId
+          }
+          canEdit={
+            canManageProfessors
+          }
+          onClose={() => {
+            setSelectedProfessorId(
+              null,
+            )
+          }}
+          onUpdated={
+            handleProfessorUpdated
           }
         />
       ) : null}
