@@ -6,6 +6,10 @@ import {
 } from 'react'
 
 import {
+  AddProfessorModal,
+} from '../components/professors/AddProfessorModal'
+
+import {
   useGym,
 } from '../contexts/GymContext'
 
@@ -123,6 +127,11 @@ export function ProfessorsPage() {
     null,
   )
 
+  const [
+    isAddModalOpen,
+    setIsAddModalOpen,
+  ] = useState(false)
+
   const canViewProfessors =
     activeGym?.role ===
       'OWNER' ||
@@ -132,6 +141,12 @@ export function ProfessorsPage() {
       'RECEPTIONIST' ||
     activeGym?.role ===
       'PROFESSOR'
+
+  const canManageProfessors =
+    activeGym?.role ===
+      'OWNER' ||
+    activeGym?.role ===
+      'ADMIN'
 
   const loadSummary =
     useCallback(
@@ -321,6 +336,10 @@ export function ProfessorsPage() {
     setStatusFilter(
       'all',
     )
+
+    setIsAddModalOpen(
+      false,
+    )
   }, [
     activeGym?.id,
   ])
@@ -370,6 +389,29 @@ export function ProfessorsPage() {
     )
   }
 
+  async function handleProfessorCreated() {
+    setPage(1)
+
+    setSearchInput('')
+
+    setAppliedSearch('')
+
+    setStatusFilter(
+      'all',
+    )
+
+    if (page === 1) {
+      await Promise.all([
+        loadProfessors(),
+        loadSummary(),
+      ])
+
+      return
+    }
+
+    await loadSummary()
+  }
+
   const hasFilters =
     appliedSearch.length > 0 ||
     statusFilter !== 'all'
@@ -417,367 +459,404 @@ export function ProfessorsPage() {
   }
 
   return (
-    <section
-      className="professors-page"
-      data-testid="professors-page"
-    >
-      <header className="professors-header">
-        <div>
-          <span className="professors-eyebrow">
-            Gestão acadêmica
-          </span>
-
-          <h1>
-            Professores
-          </h1>
-
-          <p>
-            Consulte os professores
-            cadastrados na academia
-            selecionada.
-          </p>
-        </div>
-      </header>
-
-      <div
-        className="professors-summary"
-        data-testid="professors-summary"
+    <>
+      <section
+        className="professors-page"
+        data-testid="professors-page"
       >
-        <div
-          className="professors-summary-card"
-          data-testid="professors-summary-total"
-        >
-          <span>
-            Total
-          </span>
+        <header className="professors-header">
+          <div>
+            <span className="professors-eyebrow">
+              Gestão acadêmica
+            </span>
 
-          <strong>
-            {summary.total}
-          </strong>
+            <h1>
+              Professores
+            </h1>
 
-          <small>
-            Professores cadastrados
-          </small>
-        </div>
-
-        <div
-          className="professors-summary-card"
-          data-testid="professors-summary-active"
-        >
-          <span>
-            Ativos
-          </span>
-
-          <strong>
-            {summary.active}
-          </strong>
-
-          <small>
-            Professores ativos
-          </small>
-        </div>
-
-        <div
-          className="professors-summary-card"
-          data-testid="professors-summary-inactive"
-        >
-          <span>
-            Inativos
-          </span>
-
-          <strong>
-            {summary.inactive}
-          </strong>
-
-          <small>
-            Professores inativos
-          </small>
-        </div>
-      </div>
-
-      <div
-        className="professors-filters"
-        data-testid="professors-filters"
-      >
-        <form
-          className="professors-search-form"
-          onSubmit={
-            handleSearch
-          }
-        >
-          <div className="professors-field">
-            <label
-              htmlFor="professors-search"
-            >
-              Buscar professor
-            </label>
-
-            <input
-              id="professors-search"
-              type="search"
-              value={
-                searchInput
-              }
-              placeholder="Nome, e-mail ou telefone"
-              data-testid="professors-search-input"
-              onChange={(
-                event,
-              ) => {
-                setSearchInput(
-                  event.target
-                    .value,
-                )
-              }}
-            />
+            <p>
+              Consulte e gerencie os
+              professores cadastrados
+              na academia selecionada.
+            </p>
           </div>
 
-          <button
-            type="submit"
-            className="professors-button professors-button-primary"
-            data-testid="professors-search-button"
-          >
-            Buscar
-          </button>
-        </form>
-
-        <div className="professors-filter-actions">
-          <div className="professors-field">
-            <label
-              htmlFor="professors-status"
-            >
-              Status
-            </label>
-
-            <select
-              id="professors-status"
-              value={
-                statusFilter
-              }
-              data-testid="professors-status-filter"
-              onChange={(
-                event,
-              ) => {
-                setStatusFilter(
-                  event.target
-                    .value as StatusFilter,
-                )
-
-                setPage(1)
-              }}
-            >
-              <option value="all">
-                Todos
-              </option>
-
-              <option value="active">
-                Ativos
-              </option>
-
-              <option value="inactive">
-                Inativos
-              </option>
-            </select>
-          </div>
-
-          {hasFilters ? (
-            <button
-              type="button"
-              className="professors-button professors-button-secondary"
-              data-testid="professors-clear-filters-button"
-              onClick={
-                handleClearFilters
-              }
-            >
-              Limpar filtros
-            </button>
+          {canManageProfessors ? (
+            <div className="professors-header-actions">
+              <button
+                type="button"
+                className="professors-button professors-button-primary"
+                data-testid="professors-add-button"
+                onClick={() => {
+                  setIsAddModalOpen(
+                    true,
+                  )
+                }}
+              >
+                Novo professor
+              </button>
+            </div>
           ) : null}
-        </div>
-      </div>
+        </header>
 
-      {loading ? (
         <div
-          className="professors-state"
-          data-testid="professors-loading"
+          className="professors-summary"
+          data-testid="professors-summary"
         >
           <div
-            className="professors-loading-spinner"
-            aria-hidden="true"
-          />
-
-          <span>
-            Carregando professores...
-          </span>
-        </div>
-      ) : error ? (
-        <div
-          className="professors-state professors-state-error"
-          data-testid="professors-error"
-        >
-          <strong>
-            Não foi possível carregar os professores
-          </strong>
-
-          <span>
-            {error}
-          </span>
-
-          <button
-            type="button"
-            className="professors-button professors-button-secondary"
-            data-testid="professors-retry-button"
-            onClick={() => {
-              void loadProfessors()
-              void loadSummary()
-            }}
+            className="professors-summary-card"
+            data-testid="professors-summary-total"
           >
-            Tentar novamente
-          </button>
-        </div>
-      ) : professors.length ===
-        0 ? (
-        <div
-          className="professors-empty"
-          data-testid="professors-empty"
-        >
-          <h2>
-            Nenhum professor encontrado
-          </h2>
+            <span>
+              Total
+            </span>
 
-          <p>
-            {hasFilters
-              ? 'Nenhum professor corresponde aos filtros informados.'
-              : 'Ainda não existem professores cadastrados nesta academia.'}
-          </p>
-        </div>
-      ) : (
-        <>
-          <div
-            className="professors-list"
-            data-testid="professors-list"
-          >
-            {professors.map(
-              (
-                professor,
-              ) => (
-                <article
-                  key={
-                    professor.id
-                  }
-                  className="professor-card"
-                  data-testid={`professor-card-${professor.id}`}
-                >
-                  <div className="professor-card-main">
-                    <div className="professor-avatar">
-                      {professor.name
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
+            <strong>
+              {summary.total}
+            </strong>
 
-                    <div className="professor-info">
-                      <div className="professor-name-row">
-                        <h2>
-                          {
-                            professor.name
-                          }
-                        </h2>
-
-                        <span
-                          className={
-                            professor.active
-                              ? 'professor-status professor-status-active'
-                              : 'professor-status professor-status-inactive'
-                          }
-                          data-testid={`professor-status-${professor.id}`}
-                        >
-                          {professor.active
-                            ? 'Ativo'
-                            : 'Inativo'}
-                        </span>
-                      </div>
-
-                      <div className="professor-contact">
-                        <span>
-                          {professor.email ??
-                            'E-mail não informado'}
-                        </span>
-
-                        <span>
-                          {professor.phone ??
-                            'Telefone não informado'}
-                        </span>
-                      </div>
-
-                      {professor.hireDate ? (
-                        <span className="professor-hire-date">
-                          Contratação:{' '}
-                          {new Intl.DateTimeFormat(
-                            'pt-BR',
-                          ).format(
-                            new Date(
-                              professor.hireDate,
-                            ),
-                          )}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </article>
-              ),
-            )}
+            <small>
+              Professores cadastrados
+            </small>
           </div>
 
           <div
-            className="professors-pagination"
-            data-testid="professors-pagination"
+            className="professors-summary-card"
+            data-testid="professors-summary-active"
           >
-            <button
-              type="button"
-              className="professors-button professors-button-secondary"
-              disabled={
-                !hasPreviousPage
-              }
-              data-testid="professors-pagination-previous"
-              onClick={
-                handlePreviousPage
-              }
-            >
-              Anterior
-            </button>
+            <span>
+              Ativos
+            </span>
 
-            <span
-              className="professors-pagination-info"
-              data-testid="professors-pagination-info"
+            <strong>
+              {summary.active}
+            </strong>
+
+            <small>
+              Professores ativos
+            </small>
+          </div>
+
+          <div
+            className="professors-summary-card"
+            data-testid="professors-summary-inactive"
+          >
+            <span>
+              Inativos
+            </span>
+
+            <strong>
+              {summary.inactive}
+            </strong>
+
+            <small>
+              Professores inativos
+            </small>
+          </div>
+        </div>
+
+        <div
+          className="professors-filters"
+          data-testid="professors-filters"
+        >
+          <form
+            className="professors-search-form"
+            onSubmit={
+              handleSearch
+            }
+          >
+            <div className="professors-field">
+              <label
+                htmlFor="professors-search"
+              >
+                Buscar professor
+              </label>
+
+              <input
+                id="professors-search"
+                type="search"
+                value={
+                  searchInput
+                }
+                placeholder="Nome, e-mail ou telefone"
+                data-testid="professors-search-input"
+                onChange={(
+                  event,
+                ) => {
+                  setSearchInput(
+                    event.target
+                      .value,
+                  )
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="professors-button professors-button-primary"
+              data-testid="professors-search-button"
             >
-              Página{' '}
-              <strong>
-                {
-                  pagination.page
+              Buscar
+            </button>
+          </form>
+
+          <div className="professors-filter-actions">
+            <div className="professors-field">
+              <label
+                htmlFor="professors-status"
+              >
+                Status
+              </label>
+
+              <select
+                id="professors-status"
+                value={
+                  statusFilter
                 }
-              </strong>{' '}
-              de{' '}
-              <strong>
-                {
-                  pagination.totalPages
+                data-testid="professors-status-filter"
+                onChange={(
+                  event,
+                ) => {
+                  setStatusFilter(
+                    event.target
+                      .value as StatusFilter,
+                  )
+
+                  setPage(1)
+                }}
+              >
+                <option value="all">
+                  Todos
+                </option>
+
+                <option value="active">
+                  Ativos
+                </option>
+
+                <option value="inactive">
+                  Inativos
+                </option>
+              </select>
+            </div>
+
+            {hasFilters ? (
+              <button
+                type="button"
+                className="professors-button professors-button-secondary"
+                data-testid="professors-clear-filters-button"
+                onClick={
+                  handleClearFilters
                 }
-              </strong>
+              >
+                Limpar filtros
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        {loading ? (
+          <div
+            className="professors-state"
+            data-testid="professors-loading"
+          >
+            <div
+              className="professors-loading-spinner"
+              aria-hidden="true"
+            />
+
+            <span>
+              Carregando professores...
+            </span>
+          </div>
+        ) : error ? (
+          <div
+            className="professors-state professors-state-error"
+            data-testid="professors-error"
+          >
+            <strong>
+              Não foi possível carregar os professores
+            </strong>
+
+            <span>
+              {error}
             </span>
 
             <button
               type="button"
               className="professors-button professors-button-secondary"
-              disabled={
-                !hasNextPage
-              }
-              data-testid="professors-pagination-next"
-              onClick={
-                handleNextPage
-              }
+              data-testid="professors-retry-button"
+              onClick={() => {
+                void loadProfessors()
+                void loadSummary()
+              }}
             >
-              Próxima
+              Tentar novamente
             </button>
           </div>
-        </>
-      )}
-    </section>
+        ) : professors.length ===
+          0 ? (
+          <div
+            className="professors-empty"
+            data-testid="professors-empty"
+          >
+            <h2>
+              Nenhum professor encontrado
+            </h2>
+
+            <p>
+              {hasFilters
+                ? 'Nenhum professor corresponde aos filtros informados.'
+                : 'Ainda não existem professores cadastrados nesta academia.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div
+              className="professors-list"
+              data-testid="professors-list"
+            >
+              {professors.map(
+                (
+                  professor,
+                ) => (
+                  <article
+                    key={
+                      professor.id
+                    }
+                    className="professor-card"
+                    data-testid={`professor-card-${professor.id}`}
+                  >
+                    <div className="professor-card-main">
+                      <div className="professor-avatar">
+                        {professor.name
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+
+                      <div className="professor-info">
+                        <div className="professor-name-row">
+                          <h2>
+                            {
+                              professor.name
+                            }
+                          </h2>
+
+                          <span
+                            className={
+                              professor.active
+                                ? 'professor-status professor-status-active'
+                                : 'professor-status professor-status-inactive'
+                            }
+                            data-testid={`professor-status-${professor.id}`}
+                          >
+                            {professor.active
+                              ? 'Ativo'
+                              : 'Inativo'}
+                          </span>
+                        </div>
+
+                        <div className="professor-contact">
+                          <span>
+                            {professor.email ??
+                              'E-mail não informado'}
+                          </span>
+
+                          <span>
+                            {professor.phone ??
+                              'Telefone não informado'}
+                          </span>
+                        </div>
+
+                        {professor.hireDate ? (
+                          <span className="professor-hire-date">
+                            Contratação:{' '}
+                            {new Intl.DateTimeFormat(
+                              'pt-BR',
+                            ).format(
+                              new Date(
+                                professor.hireDate,
+                              ),
+                            )}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </article>
+                ),
+              )}
+            </div>
+
+            <div
+              className="professors-pagination"
+              data-testid="professors-pagination"
+            >
+              <button
+                type="button"
+                className="professors-button professors-button-secondary"
+                disabled={
+                  !hasPreviousPage
+                }
+                data-testid="professors-pagination-previous"
+                onClick={
+                  handlePreviousPage
+                }
+              >
+                Anterior
+              </button>
+
+              <span
+                className="professors-pagination-info"
+                data-testid="professors-pagination-info"
+              >
+                Página{' '}
+                <strong>
+                  {
+                    pagination.page
+                  }
+                </strong>{' '}
+                de{' '}
+                <strong>
+                  {
+                    pagination.totalPages
+                  }
+                </strong>
+              </span>
+
+              <button
+                type="button"
+                className="professors-button professors-button-secondary"
+                disabled={
+                  !hasNextPage
+                }
+                data-testid="professors-pagination-next"
+                onClick={
+                  handleNextPage
+                }
+              >
+                Próxima
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {isAddModalOpen &&
+      activeGym &&
+      canManageProfessors ? (
+        <AddProfessorModal
+          gymId={
+            activeGym.id
+          }
+          onClose={() => {
+            setIsAddModalOpen(
+              false,
+            )
+          }}
+          onCreated={
+            handleProfessorCreated
+          }
+        />
+      ) : null}
+    </>
   )
 }
