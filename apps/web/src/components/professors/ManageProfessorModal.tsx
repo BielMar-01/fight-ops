@@ -12,6 +12,7 @@ import {
 import {
   getProfessorById,
   updateProfessor,
+  updateProfessorStatus,
 } from '../../services/professor.service'
 
 import type {
@@ -127,6 +128,16 @@ export function ManageProfessorModal({
   const [
     isSubmitting,
     setIsSubmitting,
+  ] = useState(false)
+
+  const [
+    isChangingStatus,
+    setIsChangingStatus,
+  ] = useState(false)
+
+  const [
+    isConfirmingStatus,
+    setIsConfirmingStatus,
   ] = useState(false)
 
   const [
@@ -256,7 +267,20 @@ export function ManageProfessorModal({
         return
       }
 
-      if (isSubmitting) {
+      if (
+        isSubmitting ||
+        isChangingStatus
+      ) {
+        return
+      }
+
+      if (
+        isConfirmingStatus
+      ) {
+        setIsConfirmingStatus(
+          false,
+        )
+
         return
       }
 
@@ -295,6 +319,8 @@ export function ManageProfessorModal({
     }
   }, [
     isSubmitting,
+    isChangingStatus,
+    isConfirmingStatus,
     mode,
     professor,
     onClose,
@@ -348,13 +374,18 @@ export function ManageProfessorModal({
   function handleStartEdit() {
     if (
       !canEdit ||
-      isSubmitting
+      isSubmitting ||
+      isChangingStatus
     ) {
       return
     }
 
     setError(
       null,
+    )
+
+    setIsConfirmingStatus(
+      false,
     )
 
     setMode(
@@ -391,6 +422,7 @@ export function ManageProfessorModal({
       !canEdit ||
       !professor ||
       isSubmitting ||
+      isChangingStatus ||
       !hasChanges
     ) {
       return
@@ -497,6 +529,70 @@ export function ManageProfessorModal({
     }
   }
 
+  async function handleConfirmStatusChange() {
+    if (
+      !professor ||
+      !canEdit ||
+      isChangingStatus ||
+      isSubmitting
+    ) {
+      return
+    }
+
+    setError(
+      null,
+    )
+
+    setIsChangingStatus(
+      true,
+    )
+
+    try {
+      const response =
+        await updateProfessorStatus(
+          gymId,
+          professorId,
+          {
+            active:
+              !professor.active,
+          },
+        )
+
+      setProfessor(
+        response.professor,
+      )
+
+      applyProfessorValues(
+        response.professor,
+      )
+
+      setIsConfirmingStatus(
+        false,
+      )
+
+      await onUpdated()
+    } catch (caughtError) {
+      if (
+        caughtError instanceof
+        ApiError
+      ) {
+        setError(
+          caughtError.message,
+        )
+
+        return
+      }
+
+      setError(
+        'Não foi possível alterar o status do professor.',
+      )
+    } finally {
+      setIsChangingStatus(
+        false,
+      )
+    }
+  }
+
   const isEditing =
     mode === 'edit'
 
@@ -515,7 +611,8 @@ export function ManageProfessorModal({
         if (
           event.target ===
             event.currentTarget &&
-          !isSubmitting
+          !isSubmitting &&
+          !isChangingStatus
         ) {
           onClose()
         }
@@ -554,7 +651,8 @@ export function ManageProfessorModal({
             className="professor-modal-close"
             aria-label="Fechar"
             disabled={
-              isSubmitting
+              isSubmitting ||
+              isChangingStatus
             }
             data-testid="professor-manage-close-button"
             onClick={
@@ -842,6 +940,67 @@ export function ManageProfessorModal({
               </div>
             </div>
 
+            {isConfirmingStatus ? (
+              <div
+                className="professor-status-confirmation"
+                data-testid="professor-status-confirmation"
+              >
+                <div>
+                  <strong>
+                    {professor.active
+                      ? 'Inativar professor?'
+                      : 'Ativar professor?'}
+                  </strong>
+
+                  <p>
+                    {professor.active
+                      ? 'O professor ficará inativo, mas continuará armazenado no histórico da academia.'
+                      : 'O professor voltará a aparecer como ativo nas operações da academia.'}
+                  </p>
+                </div>
+
+                <div className="professor-status-confirmation-actions">
+                  <button
+                    type="button"
+                    className="professors-button professors-button-secondary"
+                    disabled={
+                      isChangingStatus
+                    }
+                    data-testid="professor-status-cancel-button"
+                    onClick={() => {
+                      setIsConfirmingStatus(
+                        false,
+                      )
+                    }}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      professor.active
+                        ? 'professors-button professors-button-danger'
+                        : 'professors-button professors-button-success'
+                    }
+                    disabled={
+                      isChangingStatus
+                    }
+                    data-testid="professor-status-confirm-button"
+                    onClick={() => {
+                      void handleConfirmStatusChange()
+                    }}
+                  >
+                    {isChangingStatus
+                      ? 'Alterando...'
+                      : professor.active
+                        ? 'Confirmar inativação'
+                        : 'Confirmar ativação'}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             {error ? (
               <div
                 className="professor-form-error"
@@ -888,6 +1047,9 @@ export function ManageProfessorModal({
                   <button
                     type="button"
                     className="professors-button professors-button-secondary"
+                    disabled={
+                      isChangingStatus
+                    }
                     data-testid="professor-manage-close-footer-button"
                     onClick={
                       onClose
@@ -897,16 +1059,47 @@ export function ManageProfessorModal({
                   </button>
 
                   {canEdit ? (
-                    <button
-                      type="button"
-                      className="professors-button professors-button-primary"
-                      data-testid="professor-manage-edit-button"
-                      onClick={
-                        handleStartEdit
-                      }
-                    >
-                      Editar professor
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className={
+                          professor.active
+                            ? 'professors-button professors-button-danger-outline'
+                            : 'professors-button professors-button-success-outline'
+                        }
+                        disabled={
+                          isChangingStatus
+                        }
+                        data-testid="professor-manage-status-button"
+                        onClick={() => {
+                          setError(
+                            null,
+                          )
+
+                          setIsConfirmingStatus(
+                            true,
+                          )
+                        }}
+                      >
+                        {professor.active
+                          ? 'Inativar professor'
+                          : 'Ativar professor'}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="professors-button professors-button-primary"
+                        disabled={
+                          isChangingStatus
+                        }
+                        data-testid="professor-manage-edit-button"
+                        onClick={
+                          handleStartEdit
+                        }
+                      >
+                        Editar professor
+                      </button>
+                    </>
                   ) : null}
                 </>
               )}

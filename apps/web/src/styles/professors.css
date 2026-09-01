@@ -886,3 +886,117 @@
     grid-template-columns: 1fr;
   }
 }
+
+.professors-button-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.professors-button-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.professors-button-danger-outline {
+  border-color:
+    rgba(
+      239,
+      68,
+      68,
+      0.55
+    );
+  background: transparent;
+  color: #f87171;
+}
+
+.professors-button-danger-outline:hover:not(:disabled) {
+  background:
+    rgba(
+      239,
+      68,
+      68,
+      0.1
+    );
+}
+
+.professors-button-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.professors-button-success:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.professors-button-success-outline {
+  border-color:
+    rgba(
+      34,
+      197,
+      94,
+      0.5
+    );
+  background: transparent;
+  color: #86efac;
+}
+
+.professors-button-success-outline:hover:not(:disabled) {
+  background:
+    rgba(
+      34,
+      197,
+      94,
+      0.1
+    );
+}
+
+.professor-status-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #3f3f46;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.professor-status-confirmation strong {
+  color: #fafafa;
+}
+
+.professor-status-confirmation p {
+  margin: 6px 0 0;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.professor-status-confirmation-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .professor-status-confirmation {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .professor-status-confirmation
+    > div:first-child {
+    max-width: 520px;
+  }
+
+  .professor-status-confirmation-actions {
+    flex: 0 0 auto;
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 767px) {
+  .professor-status-confirmation-actions
+    .professors-button {
+    width: 100%;
+  }
+}
