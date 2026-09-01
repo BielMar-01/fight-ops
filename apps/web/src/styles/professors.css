@@ -1000,3 +1000,89 @@
     width: 100%;
   }
 }
+
+/* =========================================================
+   PROFESSOR MOBILE MODAL FIX
+   ========================================================= */
+
+@media (max-width: 767px) {
+  .professor-modal {
+    display: flex;
+    flex-direction: column;
+
+    max-height:
+      calc(
+        100dvh - 24px
+      );
+
+    overflow-y: auto;
+
+    overscroll-behavior:
+      contain;
+  }
+
+  .professor-modal-header {
+    position: sticky;
+    z-index: 5;
+    top: 0;
+
+    flex-shrink: 0;
+
+    background: #111113;
+  }
+
+  .professor-modal-form {
+    flex: 1;
+
+    min-height: 0;
+
+    padding-bottom: 24px;
+  }
+
+  /*
+   * Importante:
+   * não deixar o footer cobrir a confirmação
+   * de ativação/inativação.
+   */
+  .professor-modal-actions {
+    position: static;
+
+    z-index: auto;
+
+    flex-shrink: 0;
+
+    margin:
+      0
+      -20px
+      -20px;
+
+    padding:
+      14px
+      20px
+      20px;
+
+    border-top:
+      1px solid
+      #27272a;
+
+    background: #111113;
+  }
+
+  .professor-status-confirmation {
+    width: 100%;
+
+    box-sizing:
+      border-box;
+
+    flex-shrink: 0;
+  }
+
+  .professor-status-confirmation-actions {
+    width: 100%;
+  }
+
+  .professor-status-confirmation-actions
+    .professors-button {
+    width: 100%;
+  }
+}

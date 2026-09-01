@@ -864,3 +864,87 @@
     transform: rotate(360deg);
   }
 }
+
+/* =========================================================
+   STUDENT MOBILE MODAL FIX
+   ========================================================= */
+
+@media (max-width: 767px) {
+  .student-modal {
+    display: flex;
+    flex-direction: column;
+
+    max-height:
+      calc(
+        100dvh - 24px
+      );
+
+    overflow-y: auto;
+
+    overscroll-behavior:
+      contain;
+  }
+
+  .student-modal-header {
+    position: sticky;
+    z-index: 5;
+    top: 0;
+
+    flex-shrink: 0;
+
+    background: #111113;
+  }
+
+  .student-modal-form {
+    flex: 1;
+
+    min-height: 0;
+
+    padding-bottom: 24px;
+  }
+
+  /*
+   * O footer deixa de cobrir a confirmação.
+   */
+  .student-modal-actions {
+    position: static;
+
+    z-index: auto;
+
+    flex-shrink: 0;
+
+    margin:
+      0
+      -20px
+      -20px;
+
+    padding:
+      14px
+      20px
+      20px;
+
+    border-top:
+      1px solid
+      #27272a;
+
+    background: #111113;
+  }
+
+  .student-status-confirmation {
+    width: 100%;
+
+    box-sizing:
+      border-box;
+
+    flex-shrink: 0;
+  }
+
+  .student-status-confirmation-actions {
+    width: 100%;
+  }
+
+  .student-status-confirmation-actions
+    .students-button {
+    width: 100%;
+  }
+}

@@ -1151,3 +1151,266 @@
     flex-shrink: 0;
   }
 }
+
+/* =========================================================
+   MEMBERS RESPONSIVE CARDS
+   ========================================================= */
+
+/*
+ * Desktop mantém a tabela tradicional.
+ * Tablet e mobile transformam cada TR em um card.
+ */
+@media (max-width: 1100px) {
+  .members-table-card {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .members-table-wrapper {
+    overflow: visible;
+  }
+
+  .members-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .members-table thead {
+    display: none;
+  }
+
+  .members-table tbody {
+    display: grid;
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+    gap: 14px;
+  }
+
+  .members-table tr {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0;
+
+    overflow: hidden;
+
+    border:
+      1px solid
+      var(--border-color);
+
+    border-radius: 14px;
+
+    background:
+      var(--color-surface);
+  }
+
+  .members-table td {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 12px 16px;
+
+    border-bottom:
+      1px solid
+      var(--border-color);
+
+    font-size: 0.8rem;
+  }
+
+  .members-table td:first-child {
+    display: block;
+    padding: 16px;
+  }
+
+  .members-table td:last-child {
+    border-bottom: 0;
+  }
+
+  /*
+   * Labels equivalentes às colunas da tabela.
+   */
+  .members-table td:nth-child(2)::before {
+    content: 'Papel';
+  }
+
+  .members-table td:nth-child(3)::before {
+    content: 'Telefone';
+  }
+
+  .members-table td:nth-child(4)::before {
+    content: 'Status';
+  }
+
+  .members-table td:nth-child(5)::before {
+    content: 'Desde';
+  }
+
+  .members-table td:nth-child(6)::before {
+    content: 'Ações';
+  }
+
+  .members-table td:not(:first-child)::before {
+    flex: 0 0 auto;
+
+    color:
+      var(--color-text-muted);
+
+    font-size: 0.65rem;
+
+    font-weight: 800;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
+  }
+
+  .member-user-cell {
+    width: 100%;
+  }
+
+  .member-user-cell > div:last-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .member-user-cell strong,
+  .member-user-cell span {
+    display: block;
+    max-width: 100%;
+  }
+
+  .member-action-button {
+    min-width: 100px;
+  }
+}
+
+/* =========================================================
+   MEMBERS MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .members-page {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .members-header {
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+
+  .members-header h1 {
+    font-size: 2rem;
+  }
+
+  .members-header > div {
+    min-width: 0;
+  }
+
+  .members-header .button {
+    width: 100%;
+  }
+
+  .members-summary {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+
+    gap: 8px;
+  }
+
+  .members-summary article {
+    padding: 14px 12px;
+  }
+
+  .members-summary span {
+    font-size: 0.65rem;
+  }
+
+  .members-summary strong {
+    font-size: 1.4rem;
+  }
+
+  .members-table tbody {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .members-table tr {
+    width: 100%;
+  }
+
+  .members-table td {
+    width: auto;
+  }
+
+  .member-avatar {
+    width: 42px;
+    height: 42px;
+  }
+
+  .member-user-cell strong {
+    font-size: 0.85rem;
+  }
+
+  .member-user-cell span {
+    margin-top: 3px;
+    font-size: 0.7rem;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .member-action-button {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  /*
+   * A linha de ações fica vertical para o botão
+   * realmente ocupar o card inteiro.
+   */
+  .members-table td:nth-child(6) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .members-table td:nth-child(6)::before {
+    align-self: flex-start;
+  }
+}
+
+/* =========================================================
+   MEMBERS VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+  .members-summary {
+    gap: 6px;
+  }
+
+  .members-summary article {
+    padding: 12px 10px;
+  }
+
+  .members-summary strong {
+    font-size: 1.3rem;
+  }
+
+  .members-table td {
+    padding: 11px 14px;
+  }
+
+  .members-table td:first-child {
+    padding: 14px;
+  }
+}
