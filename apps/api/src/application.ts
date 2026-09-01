@@ -25,6 +25,10 @@ import {
 } from './modules/gyms/gyms.routes.js'
 
 import {
+  professorRoutes,
+} from './modules/professors/professors.routes.js'
+
+import {
   publicSiteRoutes,
 } from './modules/public-site/public-site.routes.js'
 
@@ -129,6 +133,10 @@ export function configureApp(
 
   app.register(
     studentRoutes,
+  )
+
+  app.register(
+    professorRoutes,
   )
 
   app.register(
