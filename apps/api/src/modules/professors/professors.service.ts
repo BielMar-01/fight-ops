@@ -13,6 +13,8 @@ import {
 import type {
   CreateProfessorInput,
   ListProfessorsQuery,
+  UpdateProfessorInput,
+  UpdateProfessorStatusInput,
 } from './professors.types.js'
 
 function parseOptionalDate(
@@ -37,6 +39,26 @@ function normalizeOptionalText(
     ? normalized
     : null
 }
+
+const professorSelect = {
+  id: true,
+  gymId: true,
+  userId: true,
+
+  name: true,
+  email: true,
+  phone: true,
+  birthDate: true,
+
+  bio: true,
+  notes: true,
+  hireDate: true,
+
+  active: true,
+
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.ProfessorSelect
 
 export async function listProfessors(
   gymId: string,
@@ -67,6 +89,7 @@ export async function listProfessors(
                 name: {
                   contains:
                     search,
+
                   mode:
                     'insensitive',
                 },
@@ -76,6 +99,7 @@ export async function listProfessors(
                 email: {
                   contains:
                     search,
+
                   mode:
                     'insensitive',
                 },
@@ -119,25 +143,8 @@ export async function listProfessors(
         take:
           limit,
 
-        select: {
-          id: true,
-          gymId: true,
-          userId: true,
-
-          name: true,
-          email: true,
-          phone: true,
-          birthDate: true,
-
-          bio: true,
-          notes: true,
-          hireDate: true,
-
-          active: true,
-
-          createdAt: true,
-          updatedAt: true,
-        },
+        select:
+          professorSelect,
       }),
 
       prisma.professor.count({
@@ -174,25 +181,8 @@ export async function getProfessorById(
         gymId,
       },
 
-      select: {
-        id: true,
-        gymId: true,
-        userId: true,
-
-        name: true,
-        email: true,
-        phone: true,
-        birthDate: true,
-
-        bio: true,
-        notes: true,
-        hireDate: true,
-
-        active: true,
-
-        createdAt: true,
-        updatedAt: true,
-      },
+      select:
+        professorSelect,
     })
 
   if (!professor) {
@@ -249,25 +239,96 @@ export async function createProfessor(
           ),
       },
 
-      select: {
-        id: true,
-        gymId: true,
-        userId: true,
+      select:
+        professorSelect,
+    })
 
-        name: true,
-        email: true,
-        phone: true,
-        birthDate: true,
+  return professor
+}
 
-        bio: true,
-        notes: true,
-        hireDate: true,
+export async function updateProfessor(
+  gymId: string,
+  professorId: string,
+  input: UpdateProfessorInput,
+) {
+  await getProfessorById(
+    gymId,
+    professorId,
+  )
 
-        active: true,
-
-        createdAt: true,
-        updatedAt: true,
+  const professor =
+    await prisma.professor.update({
+      where: {
+        id:
+          professorId,
       },
+
+      data: {
+        name:
+          input.name.trim(),
+
+        email:
+          normalizeOptionalText(
+            input.email,
+          ),
+
+        phone:
+          normalizeOptionalText(
+            input.phone,
+          ),
+
+        birthDate:
+          parseOptionalDate(
+            input.birthDate,
+          ),
+
+        bio:
+          normalizeOptionalText(
+            input.bio,
+          ),
+
+        notes:
+          normalizeOptionalText(
+            input.notes,
+          ),
+
+        hireDate:
+          parseOptionalDate(
+            input.hireDate,
+          ),
+      },
+
+      select:
+        professorSelect,
+    })
+
+  return professor
+}
+
+export async function updateProfessorStatus(
+  gymId: string,
+  professorId: string,
+  input: UpdateProfessorStatusInput,
+) {
+  await getProfessorById(
+    gymId,
+    professorId,
+  )
+
+  const professor =
+    await prisma.professor.update({
+      where: {
+        id:
+          professorId,
+      },
+
+      data: {
+        active:
+          input.active,
+      },
+
+      select:
+        professorSelect,
     })
 
   return professor

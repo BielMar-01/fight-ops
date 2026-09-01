@@ -15,17 +15,27 @@ import {
   listProfessorsQuerySchema,
   professorListParamsSchema,
   professorParamsSchema,
+  updateProfessorBodySchema,
+  updateProfessorStatusBodySchema,
 } from './professors.schemas.js'
 
 import {
   createProfessor,
   getProfessorById,
   listProfessors,
+  updateProfessor,
+  updateProfessorStatus,
 } from './professors.service.js'
 
 export async function professorRoutes(
   app: FastifyInstance,
 ) {
+  /*
+   * =========================================================
+   * LIST
+   * =========================================================
+   */
+
   app.get(
     '/gyms/:gymId/professors',
     {
@@ -66,6 +76,12 @@ export async function professorRoutes(
     },
   )
 
+  /*
+   * =========================================================
+   * DETAILS
+   * =========================================================
+   */
+
   app.get(
     '/gyms/:gymId/professors/:professorId',
     {
@@ -101,6 +117,12 @@ export async function professorRoutes(
     },
   )
 
+  /*
+   * =========================================================
+   * CREATE
+   * =========================================================
+   */
+
   app.post(
     '/gyms/:gymId/professors',
     {
@@ -134,10 +156,102 @@ export async function professorRoutes(
         )
 
       return reply
-        .status(201)
+        .status(
+          201,
+        )
         .send({
           professor,
         })
+    },
+  )
+
+  /*
+   * =========================================================
+   * UPDATE
+   * =========================================================
+   */
+
+  app.put(
+    '/gyms/:gymId/professors/:professorId',
+    {
+      preHandler: [
+        authenticate,
+
+        requireGymRole(
+          'OWNER',
+          'ADMIN',
+        ),
+      ],
+    },
+    async (
+      request,
+      reply,
+    ) => {
+      const params =
+        professorParamsSchema.parse(
+          request.params,
+        )
+
+      const body =
+        updateProfessorBodySchema.parse(
+          request.body,
+        )
+
+      const professor =
+        await updateProfessor(
+          params.gymId,
+          params.professorId,
+          body,
+        )
+
+      return reply.send({
+        professor,
+      })
+    },
+  )
+
+  /*
+   * =========================================================
+   * STATUS
+   * =========================================================
+   */
+
+  app.patch(
+    '/gyms/:gymId/professors/:professorId/status',
+    {
+      preHandler: [
+        authenticate,
+
+        requireGymRole(
+          'OWNER',
+          'ADMIN',
+        ),
+      ],
+    },
+    async (
+      request,
+      reply,
+    ) => {
+      const params =
+        professorParamsSchema.parse(
+          request.params,
+        )
+
+      const body =
+        updateProfessorStatusBodySchema.parse(
+          request.body,
+        )
+
+      const professor =
+        await updateProfessorStatus(
+          params.gymId,
+          params.professorId,
+          body,
+        )
+
+      return reply.send({
+        professor,
+      })
     },
   )
 }
