@@ -38,6 +38,7 @@ model User {
   passwordResets  PasswordReset[]
   studentProfiles Student[]
   auditLogs       AuditLog[]
+  professors      Professor[]
 
   @@index([active])
   @@index([globalRole])
@@ -98,6 +99,7 @@ model Gym {
   memberships GymMembership[]
   students    Student[]
   auditLogs   AuditLog[]
+  professors  Professor[]
 
   @@index([active])
   @@index([createdAt])
@@ -265,4 +267,32 @@ model SeoSetting {
   page PublicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   @@map("seo_settings")
+}
+
+model Professor {
+  id     String  @id @default(uuid()) @db.Uuid
+  gymId  String  @db.Uuid
+  userId String? @db.Uuid
+
+  name      String
+  email     String?
+  phone     String?
+  birthDate DateTime?
+
+  bio   String?
+  notes String?
+
+  hireDate DateTime?
+  active   Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gym  Gym   @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([gymId])
+  @@index([gymId, active])
+  @@index([gymId, name])
+  @@index([userId])
 }
