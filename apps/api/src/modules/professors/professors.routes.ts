@@ -3,6 +3,10 @@ import type {
 } from 'fastify'
 
 import {
+  createAuditLog,
+} from '../audit/audit.service.js'
+
+import {
   authenticate,
 } from '../auth/authenticate.js'
 
@@ -155,6 +159,39 @@ export async function professorRoutes(
           body,
         )
 
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'CREATE',
+
+        entity:
+          'PROFESSOR',
+
+        entityId:
+          professor.id,
+
+        newValues:
+          professor,
+
+        metadata: {
+          source:
+            'professors',
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
+
       return reply
         .status(
           201,
@@ -197,12 +234,54 @@ export async function professorRoutes(
           request.body,
         )
 
+      const previousProfessor =
+        await getProfessorById(
+          params.gymId,
+          params.professorId,
+        )
+
       const professor =
         await updateProfessor(
           params.gymId,
           params.professorId,
           body,
         )
+
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'UPDATE',
+
+        entity:
+          'PROFESSOR',
+
+        entityId:
+          professor.id,
+
+        oldValues:
+          previousProfessor,
+
+        newValues:
+          professor,
+
+        metadata: {
+          source:
+            'professors',
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
 
       return reply.send({
         professor,
@@ -242,12 +321,58 @@ export async function professorRoutes(
           request.body,
         )
 
+      const previousProfessor =
+        await getProfessorById(
+          params.gymId,
+          params.professorId,
+        )
+
       const professor =
         await updateProfessorStatus(
           params.gymId,
           params.professorId,
           body,
         )
+
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'STATUS_CHANGE',
+
+        entity:
+          'PROFESSOR',
+
+        entityId:
+          professor.id,
+
+        oldValues: {
+          active:
+            previousProfessor.active,
+        },
+
+        newValues: {
+          active:
+            professor.active,
+        },
+
+        metadata: {
+          source:
+            'professors',
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
 
       return reply.send({
         professor,

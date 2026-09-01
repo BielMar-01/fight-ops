@@ -14,6 +14,7 @@ export type AuditEntity =
   | 'GYM'
   | 'GYM_MEMBERSHIP'
   | 'STUDENT'
+  | 'PROFESSOR'
   | 'AUTH'
   | 'SYSTEM'
 
