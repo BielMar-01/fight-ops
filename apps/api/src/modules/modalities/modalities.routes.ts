@@ -3,6 +3,10 @@ import type {
 } from 'fastify'
 
 import {
+  createAuditLog,
+} from '../audit/audit.service.js'
+
+import {
   authenticate,
 } from '../auth/authenticate.js'
 
@@ -155,6 +159,39 @@ export async function modalityRoutes(
           body,
         )
 
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'CREATE',
+
+        entity:
+          'MODALITY',
+
+        entityId:
+          modality.id,
+
+        newValues:
+          modality,
+
+        metadata: {
+          source:
+            'modalities',
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
+
       return reply
         .status(
           201,
@@ -197,12 +234,54 @@ export async function modalityRoutes(
           request.body,
         )
 
+      const previousModality =
+        await getModalityById(
+          params.gymId,
+          params.modalityId,
+        )
+
       const modality =
         await updateModality(
           params.gymId,
           params.modalityId,
           body,
         )
+
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'UPDATE',
+
+        entity:
+          'MODALITY',
+
+        entityId:
+          modality.id,
+
+        oldValues:
+          previousModality,
+
+        newValues:
+          modality,
+
+        metadata: {
+          source:
+            'modalities',
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
 
       return reply.send({
         modality,
@@ -242,12 +321,58 @@ export async function modalityRoutes(
           request.body,
         )
 
+      const previousModality =
+        await getModalityById(
+          params.gymId,
+          params.modalityId,
+        )
+
       const modality =
         await updateModalityStatus(
           params.gymId,
           params.modalityId,
           body,
         )
+
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'STATUS_CHANGE',
+
+        entity:
+          'MODALITY',
+
+        entityId:
+          modality.id,
+
+        oldValues: {
+          active:
+            previousModality.active,
+        },
+
+        newValues: {
+          active:
+            modality.active,
+        },
+
+        metadata: {
+          source:
+            'modalities',
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
 
       return reply.send({
         modality,
