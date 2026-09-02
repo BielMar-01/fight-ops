@@ -100,6 +100,7 @@ model Gym {
   students    Student[]
   auditLogs   AuditLog[]
   professors  Professor[]
+  modalities  Modality[]
 
   @@index([active])
   @@index([createdAt])
@@ -295,4 +296,23 @@ model Professor {
   @@index([gymId, active])
   @@index([gymId, name])
   @@index([userId])
+}
+
+model Modality {
+  id          String   @id @default(uuid()) @db.Uuid
+  gymId       String   @map("gym_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  color       String?  @db.VarChar(7)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  gym Gym @relation(fields: [gymId], references: [id], onDelete: Restrict)
+
+  @@unique([gymId, name], map: "uk_modalities_gym_name")
+  @@index([gymId])
+  @@index([gymId, active])
+  @@index([gymId, name])
+  @@map("modalities")
 }
