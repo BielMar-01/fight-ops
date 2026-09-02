@@ -25,6 +25,10 @@ import {
 } from './modules/gyms/gyms.routes.js'
 
 import {
+  modalityRoutes,
+} from './modules/modalities/modalities.routes.js'
+
+import {
   professorRoutes,
 } from './modules/professors/professors.routes.js'
 
@@ -137,6 +141,10 @@ export function configureApp(
 
   app.register(
     professorRoutes,
+  )
+
+  app.register(
+    modalityRoutes,
   )
 
   app.register(
