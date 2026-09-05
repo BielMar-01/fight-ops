@@ -60,12 +60,20 @@ import {
 } from '../pages/MembersPage'
 
 import {
+  ModalitiesPage,
+} from '../pages/ModalitiesPage'
+
+import {
   NotFoundPage,
 } from '../pages/NotFoundPage'
 
 import {
   PricingPage,
 } from '../pages/PricingPage'
+
+import {
+  ProfessorsPage,
+} from '../pages/ProfessorsPage'
 
 import {
   RegisterPage,
@@ -78,10 +86,6 @@ import {
 import {
   StudentsPage,
 } from '../pages/StudentsPage'
-
-import {
-  ProfessorsPage,
-} from '../pages/ProfessorsPage'
 
 import {
   VerifyResetCodePage,
@@ -204,6 +208,13 @@ export function AppRoutes() {
             path="/professors"
             element={
               <ProfessorsPage />
+            }
+          />
+
+          <Route
+            path="/modalities"
+            element={
+              <ModalitiesPage />
             }
           />
 

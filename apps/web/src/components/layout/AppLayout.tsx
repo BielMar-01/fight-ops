@@ -365,22 +365,28 @@ export function AppLayout() {
                 </span>
               </NavLink>
 
-              <div
-                className="app-nav-link disabled"
-                data-testid="nav-modalities-disabled"
-              >
-                <span className="app-nav-icon">
-                  ◇
-                </span>
+              <NavLink
+  to="/modalities"
+  className={({
+    isActive,
+  }) =>
+    isActive
+      ? 'app-nav-link active'
+      : 'app-nav-link'
+  }
+  onClick={
+    closeSidebar
+  }
+  data-testid="nav-modalities-link"
+>
+  <span className="app-nav-icon">
+    ◇
+  </span>
 
-                <span>
-                  Modalidades
-                </span>
-
-                <small>
-                  Em breve
-                </small>
-              </div>
+  <span>
+    Modalidades
+  </span>
+</NavLink>
 
               <div
                 className="app-nav-link disabled"
