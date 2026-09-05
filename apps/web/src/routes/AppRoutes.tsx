@@ -208,7 +208,7 @@ export function AppRoutes() {
           />
 
           <Route
-            path="/professors"
+            path="/audit"
             element={
               <AuditPage />
             }
