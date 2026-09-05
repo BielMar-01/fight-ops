@@ -101,6 +101,11 @@ export async function createModality(
       method:
         'POST',
 
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
       body:
         JSON.stringify(
           input,
@@ -120,6 +125,11 @@ export async function updateModality(
       method:
         'PUT',
 
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
       body:
         JSON.stringify(
           input,
@@ -138,6 +148,11 @@ export async function updateModalityStatus(
     {
       method:
         'PATCH',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
 
       body:
         JSON.stringify(

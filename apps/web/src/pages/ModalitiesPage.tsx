@@ -6,6 +6,10 @@ import {
 } from 'react'
 
 import {
+  AddModalityModal,
+} from '../components/modalities/AddModalityModal'
+
+import {
   useGym,
 } from '../contexts/GymContext'
 
@@ -122,6 +126,11 @@ export function ModalitiesPage() {
   ] = useState<string | null>(
     null,
   )
+
+  const [
+    isAddModalOpen,
+    setIsAddModalOpen,
+  ] = useState(false)
 
   const canViewModalities =
     activeGym?.role ===
@@ -327,6 +336,10 @@ export function ModalitiesPage() {
     setStatusFilter(
       'all',
     )
+
+    setIsAddModalOpen(
+      false,
+    )
   }, [
     activeGym?.id,
   ])
@@ -376,6 +389,37 @@ export function ModalitiesPage() {
     )
   }
 
+  async function handleModalityCreated() {
+    setPage(1)
+
+    setSearchInput('')
+
+    setAppliedSearch('')
+
+    setStatusFilter(
+      'all',
+    )
+
+    /*
+     * Se já estivermos na página 1,
+     * recarregamos imediatamente.
+     *
+     * Se estivermos em outra página,
+     * a mudança de page disparará
+     * loadModalities via useEffect.
+     */
+    if (page === 1) {
+      await Promise.all([
+        loadModalities(),
+        loadSummary(),
+      ])
+
+      return
+    }
+
+    await loadSummary()
+  }
+
   const hasFilters =
     appliedSearch.length > 0 ||
     statusFilter !== 'all'
@@ -423,383 +467,406 @@ export function ModalitiesPage() {
   }
 
   return (
-    <section
-      className="modalities-page"
-      data-testid="modalities-page"
-    >
-      <header className="modalities-header">
-        <div>
-          <span className="modalities-eyebrow">
-            Gestão acadêmica
-          </span>
-
-          <h1>
-            Modalidades
-          </h1>
-
-          <p>
-            Consulte as modalidades
-            disponíveis na academia
-            selecionada.
-          </p>
-        </div>
-
-        {canManageModalities ? (
-          <div className="modalities-header-actions">
-            <button
-              type="button"
-              className="modalities-button modalities-button-primary"
-              data-testid="modalities-add-button"
-              disabled
-              title="Cadastro disponível na próxima etapa"
-            >
-              Nova modalidade
-            </button>
-          </div>
-        ) : null}
-      </header>
-
-      <div
-        className="modalities-summary"
-        data-testid="modalities-summary"
+    <>
+      <section
+        className="modalities-page"
+        data-testid="modalities-page"
       >
-        <div
-          className="modalities-summary-card"
-          data-testid="modalities-summary-total"
-        >
-          <span>
-            Total
-          </span>
+        <header className="modalities-header">
+          <div>
+            <span className="modalities-eyebrow">
+              Gestão acadêmica
+            </span>
 
-          <strong>
-            {summary.total}
-          </strong>
+            <h1>
+              Modalidades
+            </h1>
 
-          <small>
-            Modalidades cadastradas
-          </small>
-        </div>
-
-        <div
-          className="modalities-summary-card"
-          data-testid="modalities-summary-active"
-        >
-          <span>
-            Ativas
-          </span>
-
-          <strong>
-            {summary.active}
-          </strong>
-
-          <small>
-            Modalidades ativas
-          </small>
-        </div>
-
-        <div
-          className="modalities-summary-card"
-          data-testid="modalities-summary-inactive"
-        >
-          <span>
-            Inativas
-          </span>
-
-          <strong>
-            {summary.inactive}
-          </strong>
-
-          <small>
-            Modalidades inativas
-          </small>
-        </div>
-      </div>
-
-      <div
-        className="modalities-filters"
-        data-testid="modalities-filters"
-      >
-        <form
-          className="modalities-search-form"
-          onSubmit={
-            handleSearch
-          }
-        >
-          <div className="modalities-field">
-            <label
-              htmlFor="modalities-search"
-            >
-              Buscar modalidade
-            </label>
-
-            <input
-              id="modalities-search"
-              type="search"
-              value={
-                searchInput
-              }
-              placeholder="Nome da modalidade"
-              data-testid="modalities-search-input"
-              onChange={(
-                event,
-              ) => {
-                setSearchInput(
-                  event.target
-                    .value,
-                )
-              }}
-            />
+            <p>
+              Consulte e gerencie as
+              modalidades disponíveis
+              na academia selecionada.
+            </p>
           </div>
 
-          <button
-            type="submit"
-            className="modalities-button modalities-button-primary"
-            data-testid="modalities-search-button"
-          >
-            Buscar
-          </button>
-        </form>
-
-        <div className="modalities-filter-actions">
-          <div className="modalities-field">
-            <label
-              htmlFor="modalities-status"
-            >
-              Status
-            </label>
-
-            <select
-              id="modalities-status"
-              value={
-                statusFilter
-              }
-              data-testid="modalities-status-filter"
-              onChange={(
-                event,
-              ) => {
-                setStatusFilter(
-                  event.target
-                    .value as StatusFilter,
-                )
-
-                setPage(1)
-              }}
-            >
-              <option value="all">
-                Todas
-              </option>
-
-              <option value="active">
-                Ativas
-              </option>
-
-              <option value="inactive">
-                Inativas
-              </option>
-            </select>
-          </div>
-
-          {hasFilters ? (
-            <button
-              type="button"
-              className="modalities-button modalities-button-secondary"
-              data-testid="modalities-clear-filters-button"
-              onClick={
-                handleClearFilters
-              }
-            >
-              Limpar filtros
-            </button>
+          {canManageModalities ? (
+            <div className="modalities-header-actions">
+              <button
+                type="button"
+                className="modalities-button modalities-button-primary"
+                data-testid="modalities-add-button"
+                onClick={() => {
+                  setIsAddModalOpen(
+                    true,
+                  )
+                }}
+              >
+                Nova modalidade
+              </button>
+            </div>
           ) : null}
-        </div>
-      </div>
+        </header>
 
-      {loading ? (
         <div
-          className="modalities-state"
-          data-testid="modalities-loading"
+          className="modalities-summary"
+          data-testid="modalities-summary"
         >
           <div
-            className="modalities-loading-spinner"
-            aria-hidden="true"
-          />
-
-          <span>
-            Carregando modalidades...
-          </span>
-        </div>
-      ) : error ? (
-        <div
-          className="modalities-state modalities-state-error"
-          data-testid="modalities-error"
-        >
-          <strong>
-            Não foi possível carregar as modalidades
-          </strong>
-
-          <span>
-            {error}
-          </span>
-
-          <button
-            type="button"
-            className="modalities-button modalities-button-secondary"
-            data-testid="modalities-retry-button"
-            onClick={() => {
-              void loadModalities()
-              void loadSummary()
-            }}
+            className="modalities-summary-card"
+            data-testid="modalities-summary-total"
           >
-            Tentar novamente
-          </button>
-        </div>
-      ) : modalities.length ===
-        0 ? (
-        <div
-          className="modalities-empty"
-          data-testid="modalities-empty"
-        >
-          <h2>
-            Nenhuma modalidade encontrada
-          </h2>
+            <span>
+              Total
+            </span>
 
-          <p>
-            {hasFilters
-              ? 'Nenhuma modalidade corresponde aos filtros informados.'
-              : 'Ainda não existem modalidades cadastradas nesta academia.'}
-          </p>
-        </div>
-      ) : (
-        <>
-          <div
-            className="modalities-list"
-            data-testid="modalities-list"
-          >
-            {modalities.map(
-              (
-                modality,
-              ) => (
-                <article
-                  key={
-                    modality.id
-                  }
-                  className="modality-card"
-                  data-testid={`modality-card-${modality.id}`}
-                >
-                  <div className="modality-card-main">
-                    <div
-                      className="modality-color"
-                      data-testid={`modality-color-${modality.id}`}
-                      style={
-                        modality.color
-                          ? {
-                              backgroundColor:
-                                modality.color,
-                            }
-                          : undefined
-                      }
-                    >
-                      {!modality.color
-                        ? modality.name
-                            .charAt(0)
-                            .toUpperCase()
-                        : null}
-                    </div>
+            <strong>
+              {summary.total}
+            </strong>
 
-                    <div className="modality-info">
-                      <div className="modality-name-row">
-                        <h2>
-                          {
-                            modality.name
-                          }
-                        </h2>
-
-                        <span
-                          className={
-                            modality.active
-                              ? 'modality-status modality-status-active'
-                              : 'modality-status modality-status-inactive'
-                          }
-                          data-testid={`modality-status-${modality.id}`}
-                        >
-                          {modality.active
-                            ? 'Ativa'
-                            : 'Inativa'}
-                        </span>
-                      </div>
-
-                      <p className="modality-description">
-                        {modality.description ??
-                          'Descrição não informada.'}
-                      </p>
-
-                      {modality.color ? (
-                        <span className="modality-color-value">
-                          Cor:{' '}
-                          {
-                            modality.color
-                          }
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </article>
-              ),
-            )}
+            <small>
+              Modalidades cadastradas
+            </small>
           </div>
 
           <div
-            className="modalities-pagination"
-            data-testid="modalities-pagination"
+            className="modalities-summary-card"
+            data-testid="modalities-summary-active"
           >
-            <button
-              type="button"
-              className="modalities-button modalities-button-secondary"
-              disabled={
-                !hasPreviousPage
-              }
-              data-testid="modalities-pagination-previous"
-              onClick={
-                handlePreviousPage
-              }
-            >
-              Anterior
-            </button>
+            <span>
+              Ativas
+            </span>
 
-            <span
-              className="modalities-pagination-info"
-              data-testid="modalities-pagination-info"
+            <strong>
+              {summary.active}
+            </strong>
+
+            <small>
+              Modalidades ativas
+            </small>
+          </div>
+
+          <div
+            className="modalities-summary-card"
+            data-testid="modalities-summary-inactive"
+          >
+            <span>
+              Inativas
+            </span>
+
+            <strong>
+              {summary.inactive}
+            </strong>
+
+            <small>
+              Modalidades inativas
+            </small>
+          </div>
+        </div>
+
+        <div
+          className="modalities-filters"
+          data-testid="modalities-filters"
+        >
+          <form
+            className="modalities-search-form"
+            onSubmit={
+              handleSearch
+            }
+          >
+            <div className="modalities-field">
+              <label
+                htmlFor="modalities-search"
+              >
+                Buscar modalidade
+              </label>
+
+              <input
+                id="modalities-search"
+                type="search"
+                value={
+                  searchInput
+                }
+                placeholder="Nome da modalidade"
+                data-testid="modalities-search-input"
+                onChange={(
+                  event,
+                ) => {
+                  setSearchInput(
+                    event.target
+                      .value,
+                  )
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="modalities-button modalities-button-primary"
+              data-testid="modalities-search-button"
             >
-              Página{' '}
-              <strong>
-                {
-                  pagination.page
+              Buscar
+            </button>
+          </form>
+
+          <div className="modalities-filter-actions">
+            <div className="modalities-field">
+              <label
+                htmlFor="modalities-status"
+              >
+                Status
+              </label>
+
+              <select
+                id="modalities-status"
+                value={
+                  statusFilter
                 }
-              </strong>{' '}
-              de{' '}
-              <strong>
-                {
-                  pagination.totalPages
+                data-testid="modalities-status-filter"
+                onChange={(
+                  event,
+                ) => {
+                  setStatusFilter(
+                    event.target
+                      .value as StatusFilter,
+                  )
+
+                  setPage(1)
+                }}
+              >
+                <option value="all">
+                  Todas
+                </option>
+
+                <option value="active">
+                  Ativas
+                </option>
+
+                <option value="inactive">
+                  Inativas
+                </option>
+              </select>
+            </div>
+
+            {hasFilters ? (
+              <button
+                type="button"
+                className="modalities-button modalities-button-secondary"
+                data-testid="modalities-clear-filters-button"
+                onClick={
+                  handleClearFilters
                 }
-              </strong>
+              >
+                Limpar filtros
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        {loading ? (
+          <div
+            className="modalities-state"
+            data-testid="modalities-loading"
+          >
+            <div
+              className="modalities-loading-spinner"
+              aria-hidden="true"
+            />
+
+            <span>
+              Carregando modalidades...
+            </span>
+          </div>
+        ) : error ? (
+          <div
+            className="modalities-state modalities-state-error"
+            data-testid="modalities-error"
+          >
+            <strong>
+              Não foi possível carregar as modalidades
+            </strong>
+
+            <span>
+              {error}
             </span>
 
             <button
               type="button"
               className="modalities-button modalities-button-secondary"
-              disabled={
-                !hasNextPage
-              }
-              data-testid="modalities-pagination-next"
-              onClick={
-                handleNextPage
-              }
+              data-testid="modalities-retry-button"
+              onClick={() => {
+                void loadModalities()
+                void loadSummary()
+              }}
             >
-              Próxima
+              Tentar novamente
             </button>
           </div>
-        </>
-      )}
-    </section>
+        ) : modalities.length ===
+          0 ? (
+          <div
+            className="modalities-empty"
+            data-testid="modalities-empty"
+          >
+            <h2>
+              Nenhuma modalidade encontrada
+            </h2>
+
+            <p>
+              {hasFilters
+                ? 'Nenhuma modalidade corresponde aos filtros informados.'
+                : 'Ainda não existem modalidades cadastradas nesta academia.'}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div
+              className="modalities-list"
+              data-testid="modalities-list"
+            >
+              {modalities.map(
+                (
+                  modality,
+                ) => (
+                  <article
+                    key={
+                      modality.id
+                    }
+                    className="modality-card"
+                    data-testid={`modality-card-${modality.id}`}
+                  >
+                    <div className="modality-card-main">
+                      <div
+                        className="modality-color"
+                        data-testid={`modality-color-${modality.id}`}
+                        style={
+                          modality.color
+                            ? {
+                                backgroundColor:
+                                  modality.color,
+                              }
+                            : undefined
+                        }
+                      >
+                        {!modality.color
+                          ? modality.name
+                              .charAt(0)
+                              .toUpperCase()
+                          : null}
+                      </div>
+
+                      <div className="modality-info">
+                        <div className="modality-name-row">
+                          <h2>
+                            {
+                              modality.name
+                            }
+                          </h2>
+
+                          <span
+                            className={
+                              modality.active
+                                ? 'modality-status modality-status-active'
+                                : 'modality-status modality-status-inactive'
+                            }
+                            data-testid={`modality-status-${modality.id}`}
+                          >
+                            {modality.active
+                              ? 'Ativa'
+                              : 'Inativa'}
+                          </span>
+                        </div>
+
+                        <p className="modality-description">
+                          {modality.description ??
+                            'Descrição não informada.'}
+                        </p>
+
+                        {modality.color ? (
+                          <span className="modality-color-value">
+                            Cor:{' '}
+                            {
+                              modality.color
+                            }
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </article>
+                ),
+              )}
+            </div>
+
+            <div
+              className="modalities-pagination"
+              data-testid="modalities-pagination"
+            >
+              <button
+                type="button"
+                className="modalities-button modalities-button-secondary"
+                disabled={
+                  !hasPreviousPage
+                }
+                data-testid="modalities-pagination-previous"
+                onClick={
+                  handlePreviousPage
+                }
+              >
+                Anterior
+              </button>
+
+              <span
+                className="modalities-pagination-info"
+                data-testid="modalities-pagination-info"
+              >
+                Página{' '}
+                <strong>
+                  {
+                    pagination.page
+                  }
+                </strong>{' '}
+                de{' '}
+                <strong>
+                  {
+                    pagination.totalPages
+                  }
+                </strong>
+              </span>
+
+              <button
+                type="button"
+                className="modalities-button modalities-button-secondary"
+                disabled={
+                  !hasNextPage
+                }
+                data-testid="modalities-pagination-next"
+                onClick={
+                  handleNextPage
+                }
+              >
+                Próxima
+              </button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {isAddModalOpen &&
+      activeGym &&
+      canManageModalities ? (
+        <AddModalityModal
+          gymId={
+            activeGym.id
+          }
+          onClose={() => {
+            setIsAddModalOpen(
+              false,
+            )
+          }}
+          onCreated={
+            handleModalityCreated
+          }
+        />
+      ) : null}
+    </>
   )
 }
