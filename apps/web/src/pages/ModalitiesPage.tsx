@@ -10,6 +10,10 @@ import {
 } from '../components/modalities/AddModalityModal'
 
 import {
+  ManageModalityModal,
+} from '../components/modalities/ManageModalityModal'
+
+import {
   useGym,
 } from '../contexts/GymContext'
 
@@ -131,6 +135,13 @@ export function ModalitiesPage() {
     isAddModalOpen,
     setIsAddModalOpen,
   ] = useState(false)
+
+  const [
+    selectedModalityId,
+    setSelectedModalityId,
+  ] = useState<string | null>(
+    null,
+  )
 
   const canViewModalities =
     activeGym?.role ===
@@ -340,6 +351,10 @@ export function ModalitiesPage() {
     setIsAddModalOpen(
       false,
     )
+
+    setSelectedModalityId(
+      null,
+    )
   }, [
     activeGym?.id,
   ])
@@ -400,14 +415,6 @@ export function ModalitiesPage() {
       'all',
     )
 
-    /*
-     * Se já estivermos na página 1,
-     * recarregamos imediatamente.
-     *
-     * Se estivermos em outra página,
-     * a mudança de page disparará
-     * loadModalities via useEffect.
-     */
     if (page === 1) {
       await Promise.all([
         loadModalities(),
@@ -418,6 +425,13 @@ export function ModalitiesPage() {
     }
 
     await loadSummary()
+  }
+
+  async function handleModalityUpdated() {
+    await Promise.all([
+      loadModalities(),
+      loadSummary(),
+    ])
   }
 
   const hasFilters =
@@ -790,6 +804,21 @@ export function ModalitiesPage() {
                           </span>
                         ) : null}
                       </div>
+
+                      <div className="modality-card-actions">
+                        <button
+                          type="button"
+                          className="modalities-button modalities-button-secondary"
+                          data-testid={`modality-view-button-${modality.id}`}
+                          onClick={() => {
+                            setSelectedModalityId(
+                              modality.id,
+                            )
+                          }}
+                        >
+                          Ver detalhes
+                        </button>
+                      </div>
                     </div>
                   </article>
                 ),
@@ -864,6 +893,30 @@ export function ModalitiesPage() {
           }}
           onCreated={
             handleModalityCreated
+          }
+        />
+      ) : null}
+
+      {selectedModalityId &&
+      activeGym &&
+      canViewModalities ? (
+        <ManageModalityModal
+          gymId={
+            activeGym.id
+          }
+          modalityId={
+            selectedModalityId
+          }
+          canEdit={
+            canManageModalities
+          }
+          onClose={() => {
+            setSelectedModalityId(
+              null,
+            )
+          }}
+          onUpdated={
+            handleModalityUpdated
           }
         />
       ) : null}

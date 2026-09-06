@@ -867,3 +867,139 @@
     width: 100%;
   }
 }
+
+/* =========================================================
+   MODALITY DETAILS
+   ========================================================= */
+
+.modality-card-actions {
+  display: flex;
+  flex: 0 0 auto;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.modality-card-actions
+  .modalities-button {
+  width: 100%;
+}
+
+.modality-detail-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.modality-detail-summary
+  > div:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.modality-detail-summary strong {
+  color: #fafafa;
+  font-size: 1rem;
+}
+
+.modality-detail-color {
+  display: flex;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #3f3f46;
+  border-radius: 12px;
+  background: #27272a;
+  color: #fafafa;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.modality-detail-metadata {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #09090b;
+}
+
+.modality-detail-metadata
+  > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modality-detail-metadata span {
+  color: #71717a;
+  font-size: 0.75rem;
+}
+
+.modality-detail-metadata strong {
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.modality-modal-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 24px;
+  color: #a1a1aa;
+  text-align: center;
+}
+
+.modality-modal-state-error {
+  color: #fca5a5;
+}
+
+@media (min-width: 768px) {
+  .modality-card-actions {
+    width: auto;
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .modality-card-actions
+    .modalities-button {
+    width: auto;
+  }
+
+  .modality-detail-metadata {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+}
+
+@media (max-width: 767px) {
+  .modality-card-actions {
+    flex-basis: 100%;
+  }
+
+  .modality-card-actions
+    .modalities-button {
+    width: 100%;
+  }
+
+  .modality-detail-metadata {
+    grid-template-columns: 1fr;
+  }
+}
