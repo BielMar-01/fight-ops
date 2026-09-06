@@ -12,6 +12,7 @@ import {
 import {
   getModalityById,
   updateModality,
+  updateModalityStatus,
 } from '../../services/modality.service'
 
 import type {
@@ -105,6 +106,16 @@ export function ManageModalityModal({
   ] = useState(false)
 
   const [
+    isChangingStatus,
+    setIsChangingStatus,
+  ] = useState(false)
+
+  const [
+    isStatusConfirmationOpen,
+    setIsStatusConfirmationOpen,
+  ] = useState(false)
+
+  const [
     error,
     setError,
   ] = useState<string | null>(
@@ -192,11 +203,29 @@ export function ManageModalityModal({
       event: KeyboardEvent,
     ) {
       if (
-        event.key === 'Escape' &&
-        !isSubmitting
+        event.key !== 'Escape'
       ) {
-        onClose()
+        return
       }
+
+      if (
+        isSubmitting ||
+        isChangingStatus
+      ) {
+        return
+      }
+
+      if (
+        isStatusConfirmationOpen
+      ) {
+        setIsStatusConfirmationOpen(
+          false,
+        )
+
+        return
+      }
+
+      onClose()
     }
 
     window.addEventListener(
@@ -212,6 +241,8 @@ export function ManageModalityModal({
     }
   }, [
     isSubmitting,
+    isChangingStatus,
+    isStatusConfirmationOpen,
     onClose,
   ])
 
@@ -244,6 +275,97 @@ export function ManageModalityModal({
     setError(null)
 
     setIsEditing(false)
+  }
+
+  function handleOpenStatusConfirmation() {
+    if (
+      !canEdit ||
+      !modality ||
+      isEditing
+    ) {
+      return
+    }
+
+    setError(null)
+
+    setIsStatusConfirmationOpen(
+      true,
+    )
+  }
+
+  function handleCloseStatusConfirmation() {
+    if (isChangingStatus) {
+      return
+    }
+
+    setIsStatusConfirmationOpen(
+      false,
+    )
+  }
+
+  async function handleStatusChange() {
+    if (
+      !canEdit ||
+      !modality
+    ) {
+      return
+    }
+
+    const nextActiveStatus =
+      !modality.active
+
+    setError(null)
+
+    setIsChangingStatus(
+      true,
+    )
+
+    try {
+      const response =
+        await updateModalityStatus(
+          gymId,
+          modalityId,
+          {
+            active:
+              nextActiveStatus,
+          },
+        )
+
+      setModality(
+        response.modality,
+      )
+
+      populateForm(
+        response.modality,
+      )
+
+      setIsStatusConfirmationOpen(
+        false,
+      )
+
+      await onUpdated()
+    } catch (caughtError) {
+      if (
+        caughtError instanceof
+        ApiError
+      ) {
+        setError(
+          caughtError.message,
+        )
+
+        return
+      }
+
+      setError(
+        nextActiveStatus
+          ? 'Não foi possível reativar a modalidade.'
+          : 'Não foi possível inativar a modalidade.',
+      )
+    } finally {
+      setIsChangingStatus(
+        false,
+      )
+    }
   }
 
   async function handleSubmit(
@@ -413,6 +535,10 @@ export function ManageModalityModal({
         originalColor
     )
 
+  const isBusy =
+    isSubmitting ||
+    isChangingStatus
+
   return (
     <div
       className="modality-modal-backdrop"
@@ -424,7 +550,8 @@ export function ManageModalityModal({
         if (
           event.target ===
             event.currentTarget &&
-          !isSubmitting
+          !isBusy &&
+          !isStatusConfirmationOpen
         ) {
           onClose()
         }
@@ -460,7 +587,7 @@ export function ManageModalityModal({
             className="modality-modal-close"
             aria-label="Fechar"
             disabled={
-              isSubmitting
+              isBusy
             }
             data-testid="modality-manage-close-button"
             onClick={
@@ -570,7 +697,7 @@ export function ManageModalityModal({
                   maxLength={100}
                   disabled={
                     !isEditing ||
-                    isSubmitting
+                    isBusy
                   }
                   data-testid="modality-manage-name-input"
                   onChange={(
@@ -597,7 +724,7 @@ export function ManageModalityModal({
                   rows={4}
                   disabled={
                     !isEditing ||
-                    isSubmitting
+                    isBusy
                   }
                   data-testid="modality-manage-description-input"
                   onChange={(
@@ -638,7 +765,7 @@ export function ManageModalityModal({
                       }
                       disabled={
                         !isEditing ||
-                        isSubmitting
+                        isBusy
                       }
                       aria-label="Selecionar cor da modalidade"
                       data-testid="modality-manage-color-picker"
@@ -659,7 +786,7 @@ export function ManageModalityModal({
                       maxLength={7}
                       disabled={
                         !isEditing ||
-                        isSubmitting
+                        isBusy
                       }
                       placeholder="#EF4444"
                       data-testid="modality-manage-color-input"
@@ -757,6 +884,67 @@ export function ManageModalityModal({
               </div>
             ) : null}
 
+            {isStatusConfirmationOpen ? (
+              <div
+                className="modality-status-confirmation"
+                data-testid="modality-status-confirmation"
+              >
+                <div className="modality-status-confirmation-content">
+                  <strong>
+                    {modality.active
+                      ? 'Inativar modalidade?'
+                      : 'Reativar modalidade?'}
+                  </strong>
+
+                  <p>
+                    {modality.active
+                      ? `A modalidade "${modality.name}" ficará inativa, mas seus dados e histórico serão preservados.`
+                      : `A modalidade "${modality.name}" voltará a ficar disponível como modalidade ativa.`}
+                  </p>
+                </div>
+
+                <div className="modality-status-confirmation-actions">
+                  <button
+                    type="button"
+                    className="modalities-button modalities-button-secondary"
+                    disabled={
+                      isChangingStatus
+                    }
+                    data-testid="modality-status-cancel-button"
+                    onClick={
+                      handleCloseStatusConfirmation
+                    }
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      modality.active
+                        ? 'modalities-button modality-status-action-danger'
+                        : 'modalities-button modality-status-action-success'
+                    }
+                    disabled={
+                      isChangingStatus
+                    }
+                    data-testid="modality-status-confirm-button"
+                    onClick={() => {
+                      void handleStatusChange()
+                    }}
+                  >
+                    {isChangingStatus
+                      ? modality.active
+                        ? 'Inativando...'
+                        : 'Reativando...'
+                      : modality.active
+                        ? 'Confirmar inativação'
+                        : 'Confirmar reativação'}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             <footer className="modality-modal-actions">
               {isEditing ? (
                 <>
@@ -764,7 +952,7 @@ export function ManageModalityModal({
                     type="button"
                     className="modalities-button modalities-button-secondary"
                     disabled={
-                      isSubmitting
+                      isBusy
                     }
                     data-testid="modality-manage-cancel-edit-button"
                     onClick={
@@ -778,7 +966,7 @@ export function ManageModalityModal({
                     type="submit"
                     className="modalities-button modalities-button-primary"
                     disabled={
-                      isSubmitting ||
+                      isBusy ||
                       !hasChanges
                     }
                     data-testid="modality-manage-save-button"
@@ -793,6 +981,9 @@ export function ManageModalityModal({
                   <button
                     type="button"
                     className="modalities-button modalities-button-secondary"
+                    disabled={
+                      isBusy
+                    }
                     data-testid="modality-manage-close-footer-button"
                     onClick={
                       onClose
@@ -801,17 +992,47 @@ export function ManageModalityModal({
                     Fechar
                   </button>
 
-                  {canEdit ? (
-                    <button
-                      type="button"
-                      className="modalities-button modalities-button-primary"
-                      data-testid="modality-manage-edit-button"
-                      onClick={
-                        handleStartEditing
-                      }
-                    >
-                      Editar modalidade
-                    </button>
+                  {canEdit &&
+                  !isStatusConfirmationOpen ? (
+                    <>
+                      <button
+                        type="button"
+                        className={
+                          modality.active
+                            ? 'modalities-button modality-status-action-danger'
+                            : 'modalities-button modality-status-action-success'
+                        }
+                        disabled={
+                          isBusy
+                        }
+                        data-testid={
+                          modality.active
+                            ? 'modality-manage-inactivate-button'
+                            : 'modality-manage-reactivate-button'
+                        }
+                        onClick={
+                          handleOpenStatusConfirmation
+                        }
+                      >
+                        {modality.active
+                          ? 'Inativar modalidade'
+                          : 'Reativar modalidade'}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="modalities-button modalities-button-primary"
+                        disabled={
+                          isBusy
+                        }
+                        data-testid="modality-manage-edit-button"
+                        onClick={
+                          handleStartEditing
+                        }
+                      >
+                        Editar modalidade
+                      </button>
+                    </>
                   ) : null}
                 </>
               )}

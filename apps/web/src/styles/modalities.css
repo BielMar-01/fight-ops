@@ -1003,3 +1003,74 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   MODALITY STATUS CHANGE
+   ========================================================= */
+
+.modality-status-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #3f3f46;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.modality-status-confirmation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modality-status-confirmation-content strong {
+  color: #fafafa;
+  font-size: 0.95rem;
+}
+
+.modality-status-confirmation-content p {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.modality-status-confirmation-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+}
+
+.modality-status-action-danger {
+  border: 1px solid #7f1d1d;
+  background: #450a0a;
+  color: #fecaca;
+}
+
+.modality-status-action-danger:hover:not(:disabled) {
+  background: #7f1d1d;
+}
+
+.modality-status-action-success {
+  border: 1px solid #14532d;
+  background: #052e16;
+  color: #bbf7d0;
+}
+
+.modality-status-action-success:hover:not(:disabled) {
+  background: #14532d;
+}
+
+.modality-status-action-danger:disabled,
+.modality-status-action-success:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .modality-status-confirmation-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
