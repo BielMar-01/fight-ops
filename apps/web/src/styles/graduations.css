@@ -1482,3 +1482,182 @@
     width: 100%;
   }
 }
+
+/* =========================================================
+   GRADUATIONS FINAL RESPONSIVE HARDENING
+   ========================================================= */
+
+.graduation-card,
+.graduation-modal,
+.graduations-modality-panel,
+.graduations-filters,
+.graduations-summary-card {
+  box-sizing: border-box;
+}
+
+.graduation-card-actions {
+  min-width: 0;
+}
+
+.graduation-card-actions .graduations-button {
+  white-space: nowrap;
+}
+
+.graduation-modal {
+  scrollbar-gutter: stable;
+}
+
+.graduation-modal-form {
+  overflow-x: hidden;
+}
+
+.graduation-detail-summary,
+.graduation-detail-description,
+.graduation-detail-metadata,
+.graduation-status-confirmation {
+  min-width: 0;
+}
+
+.graduation-detail-summary > *,
+.graduation-detail-description > *,
+.graduation-detail-metadata > *,
+.graduation-status-confirmation > * {
+  min-width: 0;
+}
+
+/* =========================================================
+   TABLET REFINEMENT
+   ========================================================= */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  .graduation-card-main {
+    grid-template-columns:
+      auto
+      auto
+      minmax(0, 1fr);
+  }
+
+  .graduation-card-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .graduation-card-actions .graduations-button {
+    width: auto;
+  }
+
+  .graduation-detail-metadata {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .graduation-manage-actions {
+    justify-content: flex-end;
+  }
+
+  .graduation-manage-actions .graduations-button {
+    width: auto;
+  }
+}
+
+/* =========================================================
+   MOBILE REFINEMENT
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .graduation-modal-backdrop {
+    align-items: flex-end;
+  }
+
+  .graduation-modal {
+    max-height: calc(100dvh - 12px);
+    overflow-y: auto;
+  }
+
+  .graduation-modal-header {
+    position: sticky;
+    top: 0;
+  }
+
+  .graduation-modal-actions {
+    position: static;
+  }
+
+  .graduation-status-confirmation {
+    padding: 14px;
+  }
+
+  .graduation-status-confirmation-actions {
+    width: 100%;
+  }
+
+  .graduation-status-confirmation-actions .graduations-button {
+    width: 100%;
+  }
+
+  .graduation-detail-summary {
+    align-items: flex-start;
+  }
+
+  .graduation-detail-metadata {
+    grid-template-columns: 1fr;
+  }
+
+  .graduation-card-actions {
+    margin-top: 8px;
+  }
+
+  .graduation-card-actions .graduations-button {
+    width: 100%;
+    white-space: normal;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .graduation-card {
+    padding: 12px;
+  }
+
+  .graduation-card-main {
+    gap: 8px;
+  }
+
+  .graduation-order {
+    min-width: 38px;
+    min-height: 42px;
+  }
+
+  .graduation-color {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .graduation-name-row h2 {
+    font-size: 0.95rem;
+  }
+
+  .graduation-description {
+    font-size: 0.8rem;
+  }
+
+  .graduation-modal-header {
+    padding: 14px;
+  }
+
+  .graduation-modal-form {
+    padding: 14px;
+  }
+
+  .graduation-modal-actions {
+    margin: 0 -14px -14px;
+    padding: 12px 14px 14px;
+  }
+
+  .graduation-status-confirmation {
+    padding: 12px;
+  }
+}
