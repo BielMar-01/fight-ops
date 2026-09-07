@@ -3,6 +3,10 @@ import type {
 } from 'fastify'
 
 import {
+  createAuditLog,
+} from '../audit/audit.service.js'
+
+import {
   authenticate,
 } from '../auth/authenticate.js'
 
@@ -158,6 +162,42 @@ export async function graduationRoutes(
           body,
         )
 
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'CREATE',
+
+        entity:
+          'GRADUATION',
+
+        entityId:
+          graduation.id,
+
+        newValues:
+          graduation,
+
+        metadata: {
+          source:
+            'graduations',
+
+          modalityId:
+            params.modalityId,
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
+
       return reply
         .status(
           201,
@@ -200,6 +240,13 @@ export async function graduationRoutes(
           request.body,
         )
 
+      const previousGraduation =
+        await getGraduationById(
+          params.gymId,
+          params.modalityId,
+          params.graduationId,
+        )
+
       const graduation =
         await updateGraduation(
           params.gymId,
@@ -207,6 +254,45 @@ export async function graduationRoutes(
           params.graduationId,
           body,
         )
+
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'UPDATE',
+
+        entity:
+          'GRADUATION',
+
+        entityId:
+          graduation.id,
+
+        oldValues:
+          previousGraduation,
+
+        newValues:
+          graduation,
+
+        metadata: {
+          source:
+            'graduations',
+
+          modalityId:
+            params.modalityId,
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
 
       return reply.send({
         graduation,
@@ -246,6 +332,13 @@ export async function graduationRoutes(
           request.body,
         )
 
+      const previousGraduation =
+        await getGraduationById(
+          params.gymId,
+          params.modalityId,
+          params.graduationId,
+        )
+
       const graduation =
         await updateGraduationStatus(
           params.gymId,
@@ -253,6 +346,49 @@ export async function graduationRoutes(
           params.graduationId,
           body,
         )
+
+      await createAuditLog({
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'STATUS_CHANGE',
+
+        entity:
+          'GRADUATION',
+
+        entityId:
+          graduation.id,
+
+        oldValues: {
+          active:
+            previousGraduation.active,
+        },
+
+        newValues: {
+          active:
+            graduation.active,
+        },
+
+        metadata: {
+          source:
+            'graduations',
+
+          modalityId:
+            params.modalityId,
+        },
+
+        ipAddress:
+          request.ip,
+
+        userAgent:
+          request.headers[
+            'user-agent'
+          ],
+      })
 
       return reply.send({
         graduation,

@@ -16,6 +16,7 @@ export type AuditEntity =
   | 'STUDENT'
   | 'PROFESSOR'
   | 'MODALITY'
+  | 'GRADUATION'
   | 'AUTH'
   | 'SYSTEM'
 
@@ -24,6 +25,7 @@ export type AuditMetadata =
 
 export interface CreateAuditLogInput {
   gymId?: string | null
+
   userId?: string | null
 
   action:
@@ -37,6 +39,7 @@ export interface CreateAuditLogInput {
   entityId?: string | null
 
   oldValues?: unknown
+
   newValues?: unknown
 
   metadata?:
@@ -44,17 +47,22 @@ export interface CreateAuditLogInput {
     | null
 
   ipAddress?: string | null
+
   userAgent?: string | null
 }
 
 export interface ListAuditLogsInput {
   page: number
+
   limit: number
 
   action?: string
+
   entity?: string
+
   userId?: string
 
   startDate?: string
+
   endDate?: string
 }
