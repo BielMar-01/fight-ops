@@ -10,21 +10,13 @@ interface FaqMetadata {
 }
 
 export function FaqPage() {
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = usePublicPage('faq')
+  const { data, isLoading, isError, refetch } = usePublicPage('faq')
 
   if (isLoading) {
     return <PublicPageLoading />
   }
 
-  if (
-    isError ||
-    !data?.page
-  ) {
+  if (isError || !data?.page) {
     return (
       <PublicPageError
         onRetry={() => {
@@ -36,23 +28,11 @@ export function FaqPage() {
 
   const page = data.page
 
-  const hero =
-    page.sections.find(
-      (section) =>
-        section.key === 'hero',
-    )
+  const hero = page.sections.find((section) => section.key === 'hero')
 
-  const questions =
-    page.sections.find(
-      (section) =>
-        section.key ===
-        'questions',
-    )
+  const questions = page.sections.find((section) => section.key === 'questions')
 
-  const metadata =
-    questions?.metadata as
-      | FaqMetadata
-      | null
+  const metadata = questions?.metadata as FaqMetadata | null
 
   return (
     <main>
@@ -61,43 +41,24 @@ export function FaqPage() {
       {hero ? (
         <section className="page-hero">
           <div className="site-container">
-            {hero.eyebrow ? (
-              <span className="eyebrow">
-                {hero.eyebrow}
-              </span>
-            ) : null}
+            {hero.eyebrow ? <span className="eyebrow">{hero.eyebrow}</span> : null}
 
-            {hero.title ? (
-              <h1>{hero.title}</h1>
-            ) : null}
+            {hero.title ? <h1>{hero.title}</h1> : null}
 
-            {hero.content ? (
-              <p>
-                {hero.content}
-              </p>
-            ) : null}
+            {hero.content ? <p>{hero.content}</p> : null}
           </div>
         </section>
       ) : null}
 
       <section className="section">
         <div className="site-container faq-list">
-          {metadata?.items?.map(
-            (item) => (
-              <details
-                className="faq-item"
-                key={item.question}
-              >
-                <summary>
-                  {item.question}
-                </summary>
+          {metadata?.items?.map((item) => (
+            <details className="faq-item" key={item.question}>
+              <summary>{item.question}</summary>
 
-                <p>
-                  {item.answer}
-                </p>
-              </details>
-            ),
-          )}
+              <p>{item.answer}</p>
+            </details>
+          ))}
         </div>
       </section>
     </main>

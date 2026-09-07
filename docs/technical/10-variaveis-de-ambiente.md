@@ -3,6 +3,7 @@
 Este arquivo documenta nomes, nunca valores.
 
 ## API
+
 - NODE_ENV
 - LOG_LEVEL
 - PORT
@@ -23,6 +24,7 @@ Este arquivo documenta nomes, nunca valores.
 - SMTP_FROM
 
 ## Web
+
 - VITE_API_URL
 
 `VITE_*` é público no bundle e nunca deve conter segredo.

@@ -1,22 +1,12 @@
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
-import {
-  createAuditLog,
-} from '../audit/audit.service.js'
+import { createAuditLog } from '../audit/audit.service.js'
 
-import {
-  hashPassword,
-} from '../auth/password.js'
+import { hashPassword } from '../auth/password.js'
 
-import type {
-  GymRole,
-} from './gyms.types.js'
+import type { GymRole } from './gyms.types.js'
 
 interface ResetGymMemberPasswordInput {
   gymId: string
@@ -38,10 +28,7 @@ function validateAdministrativePasswordReset(
   targetUserId: string,
   targetRole: GymRole,
 ) {
-  if (
-    actorUserId ===
-    targetUserId
-  ) {
+  if (actorUserId === targetUserId) {
     throw new AppError(
       'MEMBER_SELF_PASSWORD_RESET_NOT_ALLOWED',
       409,
@@ -49,10 +36,7 @@ function validateAdministrativePasswordReset(
     )
   }
 
-  if (
-    targetRole ===
-    'OWNER'
-  ) {
+  if (targetRole === 'OWNER') {
     throw new AppError(
       'OWNER_PASSWORD_RESET_NOT_ALLOWED',
       403,
@@ -60,12 +44,7 @@ function validateAdministrativePasswordReset(
     )
   }
 
-  if (
-    actorRole ===
-      'ADMIN' &&
-    targetRole ===
-      'ADMIN'
-  ) {
+  if (actorRole === 'ADMIN' && targetRole === 'ADMIN') {
     throw new AppError(
       'ADMIN_MANAGEMENT_NOT_ALLOWED',
       403,
@@ -73,12 +52,7 @@ function validateAdministrativePasswordReset(
     )
   }
 
-  if (
-    actorRole !==
-      'OWNER' &&
-    actorRole !==
-      'ADMIN'
-  ) {
+  if (actorRole !== 'OWNER' && actorRole !== 'ADMIN') {
     throw new AppError(
       'GYM_ROLE_NOT_ALLOWED',
       403,
@@ -91,44 +65,35 @@ export async function resetGymMemberPassword(
   input: ResetGymMemberPasswordInput,
   auditContext: GymMemberPasswordAuditContext,
 ) {
-  const membership =
-    await prisma.gymMembership.findFirst({
-      where: {
-        id:
-          input.memberId,
+  const membership = await prisma.gymMembership.findFirst({
+    where: {
+      id: input.memberId,
 
-        gymId:
-          input.gymId,
-      },
+      gymId: input.gymId,
+    },
 
-      select: {
-        id: true,
-        userId: true,
-        role: true,
-        active: true,
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      active: true,
 
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            active: true,
-          },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          active: true,
         },
       },
-    })
+    },
+  })
 
   if (!membership) {
-    throw new AppError(
-      'GYM_MEMBER_NOT_FOUND',
-      404,
-      'Membro não encontrado.',
-    )
+    throw new AppError('GYM_MEMBER_NOT_FOUND', 404, 'Membro não encontrado.')
   }
 
-  if (
-    !membership.active
-  ) {
+  if (!membership.active) {
     throw new AppError(
       'GYM_MEMBER_INACTIVE',
       409,
@@ -136,9 +101,7 @@ export async function resetGymMemberPassword(
     )
   }
 
-  if (
-    !membership.user.active
-  ) {
+  if (!membership.user.active) {
     throw new AppError(
       'USER_INACTIVE',
       409,
@@ -153,120 +116,87 @@ export async function resetGymMemberPassword(
     membership.role,
   )
 
-  const passwordHash =
-    await hashPassword(
-      input.password,
-    )
+  const passwordHash = await hashPassword(input.password)
 
-  const now =
-    new Date()
+  const now = new Date()
 
-  await prisma.$transaction(
-    async (
-      transaction,
-    ) => {
-      await transaction.user.update({
-        where: {
-          id:
-            membership.userId,
-        },
+  await prisma.$transaction(async (transaction) => {
+    await transaction.user.update({
+      where: {
+        id: membership.userId,
+      },
 
-        data: {
-          passwordHash,
-        },
-      })
+      data: {
+        passwordHash,
+      },
+    })
 
-      await transaction.userSession.updateMany({
-        where: {
-          userId:
-            membership.userId,
+    await transaction.userSession.updateMany({
+      where: {
+        userId: membership.userId,
 
-          revokedAt:
-            null,
-        },
+        revokedAt: null,
+      },
 
-        data: {
-          revokedAt:
-            now,
-        },
-      })
+      data: {
+        revokedAt: now,
+      },
+    })
 
-      await transaction.passwordReset.updateMany({
-        where: {
-          userId:
-            membership.userId,
+    await transaction.passwordReset.updateMany({
+      where: {
+        userId: membership.userId,
 
-          usedAt:
-            null,
-        },
+        usedAt: null,
+      },
 
-        data: {
-          usedAt:
-            now,
-        },
-      })
-    },
-  )
+      data: {
+        usedAt: now,
+      },
+    })
+  })
 
   await createAuditLog({
-    gymId:
-      input.gymId,
+    gymId: input.gymId,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'PASSWORD_RESET_REQUESTED_BY_ADMIN',
+    action: 'PASSWORD_RESET_REQUESTED_BY_ADMIN',
 
-    entity:
-      'USER',
+    entity: 'USER',
 
-    entityId:
-      membership.userId,
+    entityId: membership.userId,
 
     metadata: {
-      source:
-        'gym-member-password-reset',
+      source: 'gym-member-password-reset',
 
-      membershipId:
-        membership.id,
+      membershipId: membership.id,
 
-      targetUserId:
-        membership.userId,
+      targetUserId: membership.userId,
 
-      targetUserName:
-        membership.user.name,
+      targetUserName: membership.user.name,
 
-      targetUserEmail:
-        membership.user.email,
+      targetUserEmail: membership.user.email,
 
-      targetRole:
-        membership.role,
+      targetRole: membership.role,
 
-      actorRole:
-        input.actorRole,
+      actorRole: input.actorRole,
 
-      sessionsRevoked:
-        true,
+      sessionsRevoked: true,
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return {
     user: {
-      id:
-        membership.user.id,
+      id: membership.user.id,
 
-      name:
-        membership.user.name,
+      name: membership.user.name,
 
-      email:
-        membership.user.email,
+      email: membership.user.email,
     },
   }
 }

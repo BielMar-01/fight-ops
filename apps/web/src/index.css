@@ -1,8 +1,5 @@
 :root {
-  font-family:
-    var(--font-body, Inter),
-    system-ui,
-    sans-serif;
+  font-family: var(--font-body, Inter), system-ui, sans-serif;
 
   color: var(--color-text, #f6f6f6);
   background: var(--color-background, #080808);
@@ -45,21 +42,14 @@ body {
   background:
     radial-gradient(
       circle at 50% 0%,
-      color-mix(
-        in srgb,
-        var(--color-primary) 8%,
-        transparent
-      ),
+      color-mix(in srgb, var(--color-primary) 8%, transparent),
       transparent 35%
     ),
     var(--color-background);
 
   color: var(--color-text);
 
-  font-family:
-    var(--font-body),
-    system-ui,
-    sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
 body,
@@ -67,10 +57,7 @@ button,
 input,
 textarea,
 select {
-  font-family:
-    var(--font-body),
-    system-ui,
-    sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
 h1,
@@ -79,10 +66,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family:
-    var(--font-heading),
-    system-ui,
-    sans-serif;
+  font-family: var(--font-heading), system-ui, sans-serif;
 }
 
 a {
@@ -281,11 +265,7 @@ img {
 }
 
 .button-secondary:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--color-primary) 50%,
-    var(--border-color)
-  );
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--border-color));
 }
 
 .button-ghost {
@@ -435,11 +415,7 @@ img {
 .page-hero h1 {
   margin: 16px 0 20px;
 
-  font-size: clamp(
-    2.6rem,
-    13vw,
-    4.5rem
-  );
+  font-size: clamp(2.6rem, 13vw, 4.5rem);
 
   line-height: 0.98;
 
@@ -572,11 +548,7 @@ img {
 }
 
 .dashboard-nav-item.active {
-  background: color-mix(
-    in srgb,
-    var(--color-primary) 20%,
-    transparent
-  );
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 .dashboard-main {
@@ -642,11 +614,7 @@ img {
 .cta-card h2 {
   margin: 10px 0 16px;
 
-  font-size: clamp(
-    2rem,
-    10vw,
-    3.3rem
-  );
+  font-size: clamp(2rem, 10vw, 3.3rem);
 
   line-height: 1;
 
@@ -684,11 +652,7 @@ img {
 
   border-radius: 9px;
 
-  background: color-mix(
-    in srgb,
-    var(--color-primary) 15%,
-    transparent
-  );
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
 
   color: var(--color-primary);
 
@@ -761,12 +725,7 @@ img {
 
   padding: 28px;
 
-  border: 1px solid
-    color-mix(
-      in srgb,
-      var(--color-primary) 30%,
-      transparent
-    );
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
 
   border-radius: 18px;
 
@@ -1041,10 +1000,7 @@ summary:focus-visible {
 
 @media (min-width: 640px) {
   .site-container {
-    width: min(
-      100% - 48px,
-      1180px
-    );
+    width: min(100% - 48px, 1180px);
   }
 
   .header-actions .button-ghost {
@@ -1072,24 +1028,15 @@ summary:focus-visible {
   }
 
   .feature-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .pricing-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .footer-grid {
-    grid-template-columns:
-      2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr;
   }
 }
 
@@ -1107,11 +1054,7 @@ summary:focus-visible {
   }
 
   .dashboard-stats {
-    grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .dashboard-card {
@@ -1122,8 +1065,7 @@ summary:focus-visible {
   }
 
   .cta-card {
-    grid-template-columns:
-      1fr auto;
+    grid-template-columns: 1fr auto;
 
     align-items: center;
   }
@@ -1166,9 +1108,7 @@ summary:focus-visible {
   }
 
   .hero {
-    min-height: calc(
-      100vh - 76px
-    );
+    min-height: calc(100vh - 76px);
 
     display: flex;
     align-items: center;
@@ -1185,11 +1125,7 @@ summary:focus-visible {
   }
 
   .feature-grid {
-    grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .highlight-grid {
@@ -1201,11 +1137,7 @@ summary:focus-visible {
   }
 
   .pricing-grid {
-    grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1269,11 +1201,7 @@ summary:focus-visible {
   background:
     radial-gradient(
       circle at 20% 20%,
-      color-mix(
-        in srgb,
-        var(--color-primary) 18%,
-        transparent
-      ),
+      color-mix(in srgb, var(--color-primary) 18%, transparent),
       transparent 40%
     ),
     var(--color-background);
@@ -1282,11 +1210,7 @@ summary:focus-visible {
 .auth-brand-panel h1 {
   margin: 16px 0;
 
-  font-size: clamp(
-    2.5rem,
-    13vw,
-    4.8rem
-  );
+  font-size: clamp(2.5rem, 13vw, 4.8rem);
 
   line-height: 0.98;
 
@@ -1317,10 +1241,7 @@ summary:focus-visible {
 }
 
 .auth-form-container {
-  width: min(
-    100%,
-    420px
-  );
+  width: min(100%, 420px);
 }
 
 .auth-heading {
@@ -1405,21 +1326,11 @@ summary:focus-visible {
 .form-error {
   padding: 12px 14px;
 
-  border: 1px solid
-    color-mix(
-      in srgb,
-      var(--color-primary) 45%,
-      transparent
-    );
+  border: 1px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
 
   border-radius: 10px;
 
-  background:
-    color-mix(
-      in srgb,
-      var(--color-primary) 10%,
-      transparent
-    );
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 
   color: var(--color-text);
 
@@ -1488,11 +1399,7 @@ summary:focus-visible {
 
   margin: 0;
 
-  font-size: clamp(
-    2rem,
-    8vw,
-    4rem
-  );
+  font-size: clamp(2rem, 8vw, 4rem);
 }
 
 .dashboard-placeholder-page p {
@@ -1533,10 +1440,7 @@ summary:focus-visible {
    ========================================================= */
 
 .session-debug-card {
-  width: min(
-    100%,
-    520px
-  );
+  width: min(100%, 520px);
 
   display: grid;
 
@@ -1593,23 +1497,11 @@ summary:focus-visible {
 
   padding: 12px 14px;
 
-  border: 1px solid
-    rgba(
-      34,
-      197,
-      94,
-      0.35
-    );
+  border: 1px solid rgba(34, 197, 94, 0.35);
 
   border-radius: 10px;
 
-  background:
-    rgba(
-      34,
-      197,
-      94,
-      0.08
-    );
+  background: rgba(34, 197, 94, 0.08);
 
   color: var(--color-text);
 

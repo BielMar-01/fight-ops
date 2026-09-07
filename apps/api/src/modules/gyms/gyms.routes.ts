@@ -1,23 +1,12 @@
-import type {
-  FastifyInstance,
-  FastifyRequest,
-} from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
-import {
-  authenticate,
-} from '../auth/authenticate.js'
+import { authenticate } from '../auth/authenticate.js'
 
-import {
-  requireGymRole,
-} from './gym-access.js'
+import { requireGymRole } from './gym-access.js'
 
-import {
-  resetGymMemberPassword,
-} from './gym-member-password.service.js'
+import { resetGymMemberPassword } from './gym-member-password.service.js'
 
 import {
   addGymMemberBodySchema,
@@ -39,102 +28,56 @@ import {
   updateGymMemberStatus,
 } from './gyms.service.js'
 
-function getAuditContext(
-  request: FastifyRequest,
-) {
+function getAuditContext(request: FastifyRequest) {
   if (!request.user) {
-    throw new AppError(
-      'UNAUTHENTICATED',
-      401,
-      'Usuário não autenticado.',
-    )
+    throw new AppError('UNAUTHENTICATED', 401, 'Usuário não autenticado.')
   }
 
   return {
-    userId:
-      request.user.id,
+    userId: request.user.id,
 
-    ipAddress:
-      request.ip,
+    ipAddress: request.ip,
 
-    userAgent:
-      request.headers[
-        'user-agent'
-      ] ??
-      null,
+    userAgent: request.headers['user-agent'] ?? null,
   }
 }
 
-export async function gymRoutes(
-  app: FastifyInstance,
-) {
+export async function gymRoutes(app: FastifyInstance) {
   app.post(
     '/gyms',
     {
-      preHandler:
-        authenticate,
+      preHandler: authenticate,
     },
-    async (
-      request,
-      reply,
-    ) => {
+    async (request, reply) => {
       if (!request.user) {
-        throw new AppError(
-          'UNAUTHENTICATED',
-          401,
-          'Usuário não autenticado.',
-        )
+        throw new AppError('UNAUTHENTICATED', 401, 'Usuário não autenticado.')
       }
 
-      const body =
-        createGymBodySchema.parse(
-          request.body,
-        )
+      const body = createGymBodySchema.parse(request.body)
 
-      const gym =
-        await createGym(
-          request.user.id,
-          body,
-          getAuditContext(
-            request,
-          ),
-        )
+      const gym = await createGym(request.user.id, body, getAuditContext(request))
 
-      return reply
-        .status(201)
-        .send({
-          gym: {
-            ...gym,
+      return reply.status(201).send({
+        gym: {
+          ...gym,
 
-            role:
-              'OWNER',
-          },
-        })
+          role: 'OWNER',
+        },
+      })
     },
   )
 
   app.get(
     '/gyms',
     {
-      preHandler:
-        authenticate,
+      preHandler: authenticate,
     },
-    async (
-      request,
-      reply,
-    ) => {
+    async (request, reply) => {
       if (!request.user) {
-        throw new AppError(
-          'UNAUTHENTICATED',
-          401,
-          'Usuário não autenticado.',
-        )
+        throw new AppError('UNAUTHENTICATED', 401, 'Usuário não autenticado.')
       }
 
-      const gyms =
-        await listUserGyms(
-          request.user.id,
-        )
+      const gyms = await listUserGyms(request.user.id)
 
       return reply.send({
         gyms,
@@ -145,31 +88,16 @@ export async function gymRoutes(
   app.get(
     '/gyms/:gymId',
     {
-      preHandler:
-        authenticate,
+      preHandler: authenticate,
     },
-    async (
-      request,
-      reply,
-    ) => {
+    async (request, reply) => {
       if (!request.user) {
-        throw new AppError(
-          'UNAUTHENTICATED',
-          401,
-          'Usuário não autenticado.',
-        )
+        throw new AppError('UNAUTHENTICATED', 401, 'Usuário não autenticado.')
       }
 
-      const params =
-        gymParamsSchema.parse(
-          request.params,
-        )
+      const params = gymParamsSchema.parse(request.params)
 
-      const gym =
-        await getUserGymById(
-          request.user.id,
-          params.gymId,
-        )
+      const gym = await getUserGymById(request.user.id, params.gymId)
 
       return reply.send({
         gym,
@@ -180,30 +108,12 @@ export async function gymRoutes(
   app.get(
     '/gyms/:gymId/members',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-          'PROFESSOR',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST', 'PROFESSOR')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        gymParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = gymParamsSchema.parse(request.params)
 
-      const members =
-        await listGymMembers(
-          params.gymId,
-        )
+      const members = await listGymMembers(params.gymId)
 
       return reply.send({
         members,
@@ -214,106 +124,52 @@ export async function gymRoutes(
   app.post(
     '/gyms/:gymId/members',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        gymParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = gymParamsSchema.parse(request.params)
 
-      const body =
-        addGymMemberBodySchema.parse(
-          request.body,
-        )
+      const body = addGymMemberBodySchema.parse(request.body)
 
-      if (
-        !request.user ||
-        !request.gymMembership
-      ) {
-        throw new AppError(
-          'GYM_MEMBERSHIP_REQUIRED',
-          403,
-          'Vínculo com a academia não encontrado.',
-        )
+      if (!request.user || !request.gymMembership) {
+        throw new AppError('GYM_MEMBERSHIP_REQUIRED', 403, 'Vínculo com a academia não encontrado.')
       }
 
-      const member =
-        await addGymMember(
-          params.gymId,
-          request.gymMembership.role,
-          body,
-          getAuditContext(
-            request,
-          ),
-        )
+      const member = await addGymMember(
+        params.gymId,
+        request.gymMembership.role,
+        body,
+        getAuditContext(request),
+      )
 
-      return reply
-        .status(201)
-        .send({
-          member,
-        })
+      return reply.status(201).send({
+        member,
+      })
     },
   )
 
   app.patch(
     '/gyms/:gymId/members/:memberId/role',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      if (
-        !request.user ||
-        !request.gymMembership
-      ) {
-        throw new AppError(
-          'GYM_MEMBERSHIP_REQUIRED',
-          403,
-          'Vínculo com a academia não encontrado.',
-        )
+    async (request, reply) => {
+      if (!request.user || !request.gymMembership) {
+        throw new AppError('GYM_MEMBERSHIP_REQUIRED', 403, 'Vínculo com a academia não encontrado.')
       }
 
-      const params =
-        gymMemberParamsSchema.parse(
-          request.params,
-        )
+      const params = gymMemberParamsSchema.parse(request.params)
 
-      const body =
-        updateGymMemberRoleBodySchema.parse(
-          request.body,
-        )
+      const body = updateGymMemberRoleBodySchema.parse(request.body)
 
-      const member =
-        await updateGymMemberRole(
-          params.gymId,
-          params.memberId,
-          request.user.id,
-          request.gymMembership.role,
-          body,
-          getAuditContext(
-            request,
-          ),
-        )
+      const member = await updateGymMemberRole(
+        params.gymId,
+        params.memberId,
+        request.user.id,
+        request.gymMembership.role,
+        body,
+        getAuditContext(request),
+      )
 
       return reply.send({
         member,
@@ -324,51 +180,25 @@ export async function gymRoutes(
   app.patch(
     '/gyms/:gymId/members/:memberId/status',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      if (
-        !request.user ||
-        !request.gymMembership
-      ) {
-        throw new AppError(
-          'GYM_MEMBERSHIP_REQUIRED',
-          403,
-          'Vínculo com a academia não encontrado.',
-        )
+    async (request, reply) => {
+      if (!request.user || !request.gymMembership) {
+        throw new AppError('GYM_MEMBERSHIP_REQUIRED', 403, 'Vínculo com a academia não encontrado.')
       }
 
-      const params =
-        gymMemberParamsSchema.parse(
-          request.params,
-        )
+      const params = gymMemberParamsSchema.parse(request.params)
 
-      const body =
-        updateGymMemberStatusBodySchema.parse(
-          request.body,
-        )
+      const body = updateGymMemberStatusBodySchema.parse(request.body)
 
-      const member =
-        await updateGymMemberStatus(
-          params.gymId,
-          params.memberId,
-          request.user.id,
-          request.gymMembership.role,
-          body,
-          getAuditContext(
-            request,
-          ),
-        )
+      const member = await updateGymMemberStatus(
+        params.gymId,
+        params.memberId,
+        request.user.id,
+        request.gymMembership.role,
+        body,
+        getAuditContext(request),
+      )
 
       return reply.send({
         member,
@@ -379,66 +209,35 @@ export async function gymRoutes(
   app.patch(
     '/gyms/:gymId/members/:memberId/password',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      if (
-        !request.user ||
-        !request.gymMembership
-      ) {
-        throw new AppError(
-          'GYM_MEMBERSHIP_REQUIRED',
-          403,
-          'Vínculo com a academia não encontrado.',
-        )
+    async (request, reply) => {
+      if (!request.user || !request.gymMembership) {
+        throw new AppError('GYM_MEMBERSHIP_REQUIRED', 403, 'Vínculo com a academia não encontrado.')
       }
 
-      const params =
-        gymMemberParamsSchema.parse(
-          request.params,
-        )
+      const params = gymMemberParamsSchema.parse(request.params)
 
-      const body =
-        resetGymMemberPasswordBodySchema.parse(
-          request.body,
-        )
+      const body = resetGymMemberPasswordBodySchema.parse(request.body)
 
       await resetGymMemberPassword(
         {
-          gymId:
-            params.gymId,
+          gymId: params.gymId,
 
-          memberId:
-            params.memberId,
+          memberId: params.memberId,
 
-          actorUserId:
-            request.user.id,
+          actorUserId: request.user.id,
 
-          actorRole:
-            request.gymMembership.role,
+          actorRole: request.gymMembership.role,
 
-          password:
-            body.password,
+          password: body.password,
         },
 
-        getAuditContext(
-          request,
-        ),
+        getAuditContext(request),
       )
 
       return reply.send({
-        message:
-          'Senha redefinida com sucesso.',
+        message: 'Senha redefinida com sucesso.',
       })
     },
   )

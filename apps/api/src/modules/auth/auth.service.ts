@@ -52,32 +52,17 @@ export async function authenticateUser(input: LoginInput) {
   })
 
   if (!user) {
-    throw new AppError(
-      'INVALID_CREDENTIALS',
-      401,
-      'E-mail ou senha inválidos.',
-    )
+    throw new AppError('INVALID_CREDENTIALS', 401, 'E-mail ou senha inválidos.')
   }
 
-  const passwordMatches = await verifyPassword(
-    user.passwordHash,
-    input.password,
-  )
+  const passwordMatches = await verifyPassword(user.passwordHash, input.password)
 
   if (!passwordMatches) {
-    throw new AppError(
-      'INVALID_CREDENTIALS',
-      401,
-      'E-mail ou senha inválidos.',
-    )
+    throw new AppError('INVALID_CREDENTIALS', 401, 'E-mail ou senha inválidos.')
   }
 
   if (!user.active) {
-    throw new AppError(
-      'USER_INACTIVE',
-      403,
-      'Este usuário está inativo.',
-    )
+    throw new AppError('USER_INACTIVE', 403, 'Este usuário está inativo.')
   }
 
   return {
@@ -108,19 +93,11 @@ export async function getAuthenticatedUser(userId: string) {
   })
 
   if (!user) {
-    throw new AppError(
-      'USER_NOT_FOUND',
-      404,
-      'Usuário não encontrado.',
-    )
+    throw new AppError('USER_NOT_FOUND', 404, 'Usuário não encontrado.')
   }
 
   if (!user.active) {
-    throw new AppError(
-      'USER_INACTIVE',
-      403,
-      'Este usuário está inativo.',
-    )
+    throw new AppError('USER_INACTIVE', 403, 'Este usuário está inativo.')
   }
 
   return user

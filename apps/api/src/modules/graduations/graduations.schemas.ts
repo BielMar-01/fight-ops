@@ -15,19 +15,13 @@ const graduationDescriptionSchema = z
 const graduationColorSchema = z
   .string()
   .trim()
-  .regex(
-    /^#[0-9A-Fa-f]{6}$/,
-    'A cor deve estar no formato hexadecimal #RRGGBB.',
-  )
+  .regex(/^#[0-9A-Fa-f]{6}$/, 'A cor deve estar no formato hexadecimal #RRGGBB.')
   .optional()
 
 const graduationTextColorSchema = z
   .string()
   .trim()
-  .regex(
-    /^#[0-9A-Fa-f]{6}$/,
-    'A cor do texto deve estar no formato hexadecimal #RRGGBB.',
-  )
+  .regex(/^#[0-9A-Fa-f]{6}$/, 'A cor do texto deve estar no formato hexadecimal #RRGGBB.')
   .optional()
 
 const graduationOrderSchema = z.coerce
@@ -36,93 +30,56 @@ const graduationOrderSchema = z.coerce
   .min(1, 'A ordem deve ser maior ou igual a 1.')
 
 export const listGraduationsQuerySchema = z.object({
-  page: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .default(1),
+  page: z.coerce.number().int().min(1).default(1),
 
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(100)
-    .optional(),
+  search: z.string().trim().min(1).max(100).optional(),
 
   active: z
-    .enum([
-      'true',
-      'false',
-    ])
-    .transform(
-      (value) =>
-        value ===
-        'true',
-    )
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
     .optional(),
 })
 
 export const createGraduationBodySchema = z.object({
-  name:
-    graduationNameSchema,
+  name: graduationNameSchema,
 
-  description:
-    graduationDescriptionSchema,
+  description: graduationDescriptionSchema,
 
-  color:
-    graduationColorSchema,
+  color: graduationColorSchema,
 
-  textColor:
-    graduationTextColorSchema,
+  textColor: graduationTextColorSchema,
 
-  order:
-    graduationOrderSchema,
+  order: graduationOrderSchema,
 })
 
 export const updateGraduationBodySchema = z.object({
-  name:
-    graduationNameSchema,
+  name: graduationNameSchema,
 
-  description:
-    graduationDescriptionSchema,
+  description: graduationDescriptionSchema,
 
-  color:
-    graduationColorSchema,
+  color: graduationColorSchema,
 
-  textColor:
-    graduationTextColorSchema,
+  textColor: graduationTextColorSchema,
 
-  order:
-    graduationOrderSchema,
+  order: graduationOrderSchema,
 })
 
 export const updateGraduationStatusBodySchema = z.object({
-  active:
-    z.boolean(),
+  active: z.boolean(),
 })
 
 export const graduationParamsSchema = z.object({
-  gymId:
-    z.string().uuid(),
+  gymId: z.string().uuid(),
 
-  modalityId:
-    z.string().uuid(),
+  modalityId: z.string().uuid(),
 
-  graduationId:
-    z.string().uuid(),
+  graduationId: z.string().uuid(),
 })
 
 export const modalityGraduationsParamsSchema = z.object({
-  gymId:
-    z.string().uuid(),
+  gymId: z.string().uuid(),
 
-  modalityId:
-    z.string().uuid(),
+  modalityId: z.string().uuid(),
 })

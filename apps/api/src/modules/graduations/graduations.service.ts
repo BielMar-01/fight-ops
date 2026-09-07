@@ -1,14 +1,8 @@
-import type {
-  Prisma,
-} from '../../generated/prisma/client.js'
+import type { Prisma } from '../../generated/prisma/client.js'
 
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
 import type {
   CreateGraduationBody,
@@ -17,15 +11,10 @@ import type {
   UpdateGraduationStatusBody,
 } from './graduations.types.js'
 
-function normalizeOptionalText(
-  value?: string,
-) {
-  const normalized =
-    value?.trim()
+function normalizeOptionalText(value?: string) {
+  const normalized = value?.trim()
 
-  return normalized
-    ? normalized
-    : null
+  return normalized ? normalized : null
 }
 
 const graduationSelect = {
@@ -42,30 +31,21 @@ const graduationSelect = {
   updatedAt: true,
 } satisfies Prisma.GraduationSelect
 
-async function ensureModalityBelongsToGym(
-  gymId: string,
-  modalityId: string,
-) {
-  const modality =
-    await prisma.modality.findFirst({
-      where: {
-        id:
-          modalityId,
+async function ensureModalityBelongsToGym(gymId: string, modalityId: string) {
+  const modality = await prisma.modality.findFirst({
+    where: {
+      id: modalityId,
 
-        gymId,
-      },
+      gymId,
+    },
 
-      select: {
-        id: true,
-      },
-    })
+    select: {
+      id: true,
+    },
+  })
 
   if (!modality) {
-    throw new AppError(
-      'MODALITY_NOT_FOUND',
-      404,
-      'Modalidade não encontrada.',
-    )
+    throw new AppError('MODALITY_NOT_FOUND', 404, 'Modalidade não encontrada.')
   }
 
   return modality
@@ -77,35 +57,31 @@ async function ensureGraduationNameAvailable(
   name: string,
   ignoredGraduationId?: string,
 ) {
-  const existingGraduation =
-    await prisma.graduation.findFirst({
-      where: {
-        gymId,
+  const existingGraduation = await prisma.graduation.findFirst({
+    where: {
+      gymId,
 
-        modalityId,
+      modalityId,
 
-        name: {
-          equals:
-            name.trim(),
+      name: {
+        equals: name.trim(),
 
-          mode:
-            'insensitive',
-        },
-
-        ...(ignoredGraduationId
-          ? {
-              id: {
-                not:
-                  ignoredGraduationId,
-              },
-            }
-          : {}),
+        mode: 'insensitive',
       },
 
-      select: {
-        id: true,
-      },
-    })
+      ...(ignoredGraduationId
+        ? {
+            id: {
+              not: ignoredGraduationId,
+            },
+          }
+        : {}),
+    },
+
+    select: {
+      id: true,
+    },
+  })
 
   if (existingGraduation) {
     throw new AppError(
@@ -122,29 +98,27 @@ async function ensureGraduationOrderAvailable(
   order: number,
   ignoredGraduationId?: string,
 ) {
-  const existingGraduation =
-    await prisma.graduation.findFirst({
-      where: {
-        gymId,
+  const existingGraduation = await prisma.graduation.findFirst({
+    where: {
+      gymId,
 
-        modalityId,
+      modalityId,
 
-        order,
+      order,
 
-        ...(ignoredGraduationId
-          ? {
-              id: {
-                not:
-                  ignoredGraduationId,
-              },
-            }
-          : {}),
-      },
+      ...(ignoredGraduationId
+        ? {
+            id: {
+              not: ignoredGraduationId,
+            },
+          }
+        : {}),
+    },
 
-      select: {
-        id: true,
-      },
-    })
+    select: {
+      id: true,
+    },
+  })
 
   if (existingGraduation) {
     throw new AppError(
@@ -160,79 +134,57 @@ export async function listGraduations(
   modalityId: string,
   query: ListGraduationsQuery,
 ) {
-  await ensureModalityBelongsToGym(
+  await ensureModalityBelongsToGym(gymId, modalityId)
+
+  const { page, limit, search, active } = query
+
+  const where: Prisma.GraduationWhereInput = {
     gymId,
+
     modalityId,
-  )
 
-  const {
-    page,
-    limit,
-    search,
-    active,
-  } = query
+    ...(active !== undefined
+      ? {
+          active,
+        }
+      : {}),
 
-  const where: Prisma.GraduationWhereInput =
-    {
-      gymId,
+    ...(search
+      ? {
+          name: {
+            contains: search,
 
-      modalityId,
-
-      ...(active !==
-      undefined
-        ? {
-            active,
-          }
-        : {}),
-
-      ...(search
-        ? {
-            name: {
-              contains:
-                search,
-
-              mode:
-                'insensitive',
-            },
-          }
-        : {}),
-    }
-
-  const [
-    graduations,
-    total,
-  ] =
-    await prisma.$transaction([
-      prisma.graduation.findMany({
-        where,
-
-        orderBy: [
-          {
-            order:
-              'asc',
+            mode: 'insensitive',
           },
+        }
+      : {}),
+  }
 
-          {
-            name:
-              'asc',
-          },
-        ],
+  const [graduations, total] = await prisma.$transaction([
+    prisma.graduation.findMany({
+      where,
 
-        skip:
-          (page - 1) *
-          limit,
+      orderBy: [
+        {
+          order: 'asc',
+        },
 
-        take:
-          limit,
+        {
+          name: 'asc',
+        },
+      ],
 
-        select:
-          graduationSelect,
-      }),
+      skip: (page - 1) * limit,
 
-      prisma.graduation.count({
-        where,
-      }),
-    ])
+      take: limit,
+
+      select: graduationSelect,
+    }),
+
+    prisma.graduation.count({
+      where,
+    }),
+  ])
 
   return {
     graduations,
@@ -242,40 +194,26 @@ export async function listGraduations(
       limit,
       total,
 
-      totalPages:
-        Math.ceil(
-          total / limit,
-        ),
+      totalPages: Math.ceil(total / limit),
     },
   }
 }
 
-export async function getGraduationById(
-  gymId: string,
-  modalityId: string,
-  graduationId: string,
-) {
-  const graduation =
-    await prisma.graduation.findFirst({
-      where: {
-        id:
-          graduationId,
+export async function getGraduationById(gymId: string, modalityId: string, graduationId: string) {
+  const graduation = await prisma.graduation.findFirst({
+    where: {
+      id: graduationId,
 
-        gymId,
+      gymId,
 
-        modalityId,
-      },
+      modalityId,
+    },
 
-      select:
-        graduationSelect,
-    })
+    select: graduationSelect,
+  })
 
   if (!graduation) {
-    throw new AppError(
-      'GRADUATION_NOT_FOUND',
-      404,
-      'Graduação não encontrada.',
-    )
+    throw new AppError('GRADUATION_NOT_FOUND', 404, 'Graduação não encontrada.')
   }
 
   return graduation
@@ -286,57 +224,33 @@ export async function createGraduation(
   modalityId: string,
   input: CreateGraduationBody,
 ) {
-  await ensureModalityBelongsToGym(
-    gymId,
-    modalityId,
-  )
+  await ensureModalityBelongsToGym(gymId, modalityId)
 
-  const name =
-    input.name.trim()
+  const name = input.name.trim()
 
-  await ensureGraduationNameAvailable(
-    gymId,
-    modalityId,
-    name,
-  )
+  await ensureGraduationNameAvailable(gymId, modalityId, name)
 
-  await ensureGraduationOrderAvailable(
-    gymId,
-    modalityId,
-    input.order,
-  )
+  await ensureGraduationOrderAvailable(gymId, modalityId, input.order)
 
-  const graduation =
-    await prisma.graduation.create({
-      data: {
-        gymId,
+  const graduation = await prisma.graduation.create({
+    data: {
+      gymId,
 
-        modalityId,
+      modalityId,
 
-        name,
+      name,
 
-        description:
-          normalizeOptionalText(
-            input.description,
-          ),
+      description: normalizeOptionalText(input.description),
 
-        color:
-          normalizeOptionalText(
-            input.color,
-          ),
+      color: normalizeOptionalText(input.color),
 
-        textColor:
-          normalizeOptionalText(
-            input.textColor,
-          ),
+      textColor: normalizeOptionalText(input.textColor),
 
-        order:
-          input.order,
-      },
+      order: input.order,
+    },
 
-      select:
-        graduationSelect,
-    })
+    select: graduationSelect,
+  })
 
   return graduation
 }
@@ -347,61 +261,33 @@ export async function updateGraduation(
   graduationId: string,
   input: UpdateGraduationBody,
 ) {
-  await getGraduationById(
-    gymId,
-    modalityId,
-    graduationId,
-  )
+  await getGraduationById(gymId, modalityId, graduationId)
 
-  const name =
-    input.name.trim()
+  const name = input.name.trim()
 
-  await ensureGraduationNameAvailable(
-    gymId,
-    modalityId,
-    name,
-    graduationId,
-  )
+  await ensureGraduationNameAvailable(gymId, modalityId, name, graduationId)
 
-  await ensureGraduationOrderAvailable(
-    gymId,
-    modalityId,
-    input.order,
-    graduationId,
-  )
+  await ensureGraduationOrderAvailable(gymId, modalityId, input.order, graduationId)
 
-  const graduation =
-    await prisma.graduation.update({
-      where: {
-        id:
-          graduationId,
-      },
+  const graduation = await prisma.graduation.update({
+    where: {
+      id: graduationId,
+    },
 
-      data: {
-        name,
+    data: {
+      name,
 
-        description:
-          normalizeOptionalText(
-            input.description,
-          ),
+      description: normalizeOptionalText(input.description),
 
-        color:
-          normalizeOptionalText(
-            input.color,
-          ),
+      color: normalizeOptionalText(input.color),
 
-        textColor:
-          normalizeOptionalText(
-            input.textColor,
-          ),
+      textColor: normalizeOptionalText(input.textColor),
 
-        order:
-          input.order,
-      },
+      order: input.order,
+    },
 
-      select:
-        graduationSelect,
-    })
+    select: graduationSelect,
+  })
 
   return graduation
 }
@@ -412,27 +298,19 @@ export async function updateGraduationStatus(
   graduationId: string,
   input: UpdateGraduationStatusBody,
 ) {
-  await getGraduationById(
-    gymId,
-    modalityId,
-    graduationId,
-  )
+  await getGraduationById(gymId, modalityId, graduationId)
 
-  const graduation =
-    await prisma.graduation.update({
-      where: {
-        id:
-          graduationId,
-      },
+  const graduation = await prisma.graduation.update({
+    where: {
+      id: graduationId,
+    },
 
-      data: {
-        active:
-          input.active,
-      },
+    data: {
+      active: input.active,
+    },
 
-      select:
-        graduationSelect,
-    })
+    select: graduationSelect,
+  })
 
   return graduation
 }

@@ -1,10 +1,12 @@
 # Endpoints da API
 
 ## Base
+
 - GET `/`
 - GET `/health`
 
 ## Auth
+
 - POST `/auth/register`
 - POST `/auth/login`
 - POST `/auth/refresh`
@@ -13,17 +15,20 @@
 - endpoints de recuperação de senha conforme Swagger
 
 ## Academias
+
 - POST `/gyms`
 - GET `/gyms`
 - GET `/gyms/:gymId`
 
 ## Membros
+
 - GET `/gyms/:gymId/members`
 - POST `/gyms/:gymId/members`
 - PATCH `/gyms/:gymId/members/:memberId/role`
 - PATCH `/gyms/:gymId/members/:memberId/status`
 
 ### Adicionar membro
+
 ```json
 {
   "email": "usuario@exemplo.com",
@@ -32,6 +37,7 @@
 ```
 
 ### Alterar papel
+
 ```json
 {
   "role": "RECEPTIONIST"
@@ -39,6 +45,7 @@
 ```
 
 ### Alterar status
+
 ```json
 {
   "active": false
@@ -46,7 +53,9 @@
 ```
 
 ## Próxima API — Alunos
+
 Planejada:
+
 - GET `/gyms/:gymId/students`
 - GET `/gyms/:gymId/students/:studentId`
 - POST `/gyms/:gymId/students`

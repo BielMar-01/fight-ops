@@ -1,21 +1,25 @@
 # Frontend
 
 ## Rotas públicas
+
 - `/`
 - `/features`
 - `/pricing`
 - `/faq`
 
 ## Visitante
+
 - `/login`
 - `/register`
 - recuperação de senha
 
 ## Protegidas
+
 - `/dashboard`
 - `/members`
 
 ## Estrutura
+
 ```text
 ProtectedRoute
 → GymProvider

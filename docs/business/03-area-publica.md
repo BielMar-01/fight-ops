@@ -1,9 +1,11 @@
 # Área Pública
 
 ## Status
+
 🟢 Base implementada
 
 Páginas:
+
 - `/`
 - `/features`
 - `/pricing`
@@ -12,6 +14,7 @@ Páginas:
 A área pública foi preparada para conteúdo dinâmico vindo da API/banco.
 
 Configurações previstas/atuais:
+
 - nome do site;
 - logo/favicon;
 - cores;

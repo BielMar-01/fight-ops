@@ -4,12 +4,7 @@ import { env } from '../../config/env.js'
 import { AppError } from '../../http/app-error.js'
 
 function getTransporter() {
-  if (
-    !env.SMTP_HOST ||
-    !env.SMTP_USER ||
-    !env.SMTP_PASSWORD ||
-    !env.SMTP_FROM
-  ) {
+  if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASSWORD || !env.SMTP_FROM) {
     throw new AppError(
       'EMAIL_SERVICE_NOT_CONFIGURED',
       503,

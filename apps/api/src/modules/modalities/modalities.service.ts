@@ -1,14 +1,8 @@
-import type {
-  Prisma,
-} from '../../generated/prisma/client.js'
+import type { Prisma } from '../../generated/prisma/client.js'
 
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
 import type {
   CreateModalityBody,
@@ -17,15 +11,10 @@ import type {
   UpdateModalityStatusBody,
 } from './modalities.types.js'
 
-function normalizeOptionalText(
-  value?: string,
-) {
-  const normalized =
-    value?.trim()
+function normalizeOptionalText(value?: string) {
+  const normalized = value?.trim()
 
-  return normalized
-    ? normalized
-    : null
+  return normalized ? normalized : null
 }
 
 const modalitySelect = {
@@ -44,33 +33,29 @@ async function ensureModalityNameAvailable(
   name: string,
   ignoredModalityId?: string,
 ) {
-  const existingModality =
-    await prisma.modality.findFirst({
-      where: {
-        gymId,
+  const existingModality = await prisma.modality.findFirst({
+    where: {
+      gymId,
 
-        name: {
-          equals:
-            name.trim(),
+      name: {
+        equals: name.trim(),
 
-          mode:
-            'insensitive',
-        },
-
-        ...(ignoredModalityId
-          ? {
-              id: {
-                not:
-                  ignoredModalityId,
-              },
-            }
-          : {}),
+        mode: 'insensitive',
       },
 
-      select: {
-        id: true,
-      },
-    })
+      ...(ignoredModalityId
+        ? {
+            id: {
+              not: ignoredModalityId,
+            },
+          }
+        : {}),
+    },
+
+    select: {
+      id: true,
+    },
+  })
 
   if (existingModality) {
     throw new AppError(
@@ -81,76 +66,54 @@ async function ensureModalityNameAvailable(
   }
 }
 
-export async function listModalities(
-  gymId: string,
-  query: ListModalitiesQuery,
-) {
-  const {
-    page,
-    limit,
-    search,
-    active,
-  } = query
+export async function listModalities(gymId: string, query: ListModalitiesQuery) {
+  const { page, limit, search, active } = query
 
-  const where: Prisma.ModalityWhereInput =
-    {
-      gymId,
+  const where: Prisma.ModalityWhereInput = {
+    gymId,
 
-      ...(active !==
-      undefined
-        ? {
-            active,
-          }
-        : {}),
+    ...(active !== undefined
+      ? {
+          active,
+        }
+      : {}),
 
-      ...(search
-        ? {
-            name: {
-              contains:
-                search,
+    ...(search
+      ? {
+          name: {
+            contains: search,
 
-              mode:
-                'insensitive',
-            },
-          }
-        : {}),
-    }
-
-  const [
-    modalities,
-    total,
-  ] =
-    await prisma.$transaction([
-      prisma.modality.findMany({
-        where,
-
-        orderBy: [
-          {
-            active:
-              'desc',
+            mode: 'insensitive',
           },
+        }
+      : {}),
+  }
 
-          {
-            name:
-              'asc',
-          },
-        ],
+  const [modalities, total] = await prisma.$transaction([
+    prisma.modality.findMany({
+      where,
 
-        skip:
-          (page - 1) *
-          limit,
+      orderBy: [
+        {
+          active: 'desc',
+        },
 
-        take:
-          limit,
+        {
+          name: 'asc',
+        },
+      ],
 
-        select:
-          modalitySelect,
-      }),
+      skip: (page - 1) * limit,
 
-      prisma.modality.count({
-        where,
-      }),
-    ])
+      take: limit,
+
+      select: modalitySelect,
+    }),
+
+    prisma.modality.count({
+      where,
+    }),
+  ])
 
   return {
     modalities,
@@ -160,122 +123,73 @@ export async function listModalities(
       limit,
       total,
 
-      totalPages:
-        Math.ceil(
-          total / limit,
-        ),
+      totalPages: Math.ceil(total / limit),
     },
   }
 }
 
-export async function getModalityById(
-  gymId: string,
-  modalityId: string,
-) {
-  const modality =
-    await prisma.modality.findFirst({
-      where: {
-        id:
-          modalityId,
+export async function getModalityById(gymId: string, modalityId: string) {
+  const modality = await prisma.modality.findFirst({
+    where: {
+      id: modalityId,
 
-        gymId,
-      },
+      gymId,
+    },
 
-      select:
-        modalitySelect,
-    })
+    select: modalitySelect,
+  })
 
   if (!modality) {
-    throw new AppError(
-      'MODALITY_NOT_FOUND',
-      404,
-      'Modalidade não encontrada.',
-    )
+    throw new AppError('MODALITY_NOT_FOUND', 404, 'Modalidade não encontrada.')
   }
 
   return modality
 }
 
-export async function createModality(
-  gymId: string,
-  input: CreateModalityBody,
-) {
-  const name =
-    input.name.trim()
+export async function createModality(gymId: string, input: CreateModalityBody) {
+  const name = input.name.trim()
 
-  await ensureModalityNameAvailable(
-    gymId,
-    name,
-  )
+  await ensureModalityNameAvailable(gymId, name)
 
-  const modality =
-    await prisma.modality.create({
-      data: {
-        gymId,
+  const modality = await prisma.modality.create({
+    data: {
+      gymId,
 
-        name,
+      name,
 
-        description:
-          normalizeOptionalText(
-            input.description,
-          ),
+      description: normalizeOptionalText(input.description),
 
-        color:
-          normalizeOptionalText(
-            input.color,
-          ),
-      },
+      color: normalizeOptionalText(input.color),
+    },
 
-      select:
-        modalitySelect,
-    })
+    select: modalitySelect,
+  })
 
   return modality
 }
 
-export async function updateModality(
-  gymId: string,
-  modalityId: string,
-  input: UpdateModalityBody,
-) {
-  await getModalityById(
-    gymId,
-    modalityId,
-  )
+export async function updateModality(gymId: string, modalityId: string, input: UpdateModalityBody) {
+  await getModalityById(gymId, modalityId)
 
-  const name =
-    input.name.trim()
+  const name = input.name.trim()
 
-  await ensureModalityNameAvailable(
-    gymId,
-    name,
-    modalityId,
-  )
+  await ensureModalityNameAvailable(gymId, name, modalityId)
 
-  const modality =
-    await prisma.modality.update({
-      where: {
-        id:
-          modalityId,
-      },
+  const modality = await prisma.modality.update({
+    where: {
+      id: modalityId,
+    },
 
-      data: {
-        name,
+    data: {
+      name,
 
-        description:
-          normalizeOptionalText(
-            input.description,
-          ),
+      description: normalizeOptionalText(input.description),
 
-        color:
-          normalizeOptionalText(
-            input.color,
-          ),
-      },
+      color: normalizeOptionalText(input.color),
+    },
 
-      select:
-        modalitySelect,
-    })
+    select: modalitySelect,
+  })
 
   return modality
 }
@@ -285,26 +199,19 @@ export async function updateModalityStatus(
   modalityId: string,
   input: UpdateModalityStatusBody,
 ) {
-  await getModalityById(
-    gymId,
-    modalityId,
-  )
+  await getModalityById(gymId, modalityId)
 
-  const modality =
-    await prisma.modality.update({
-      where: {
-        id:
-          modalityId,
-      },
+  const modality = await prisma.modality.update({
+    where: {
+      id: modalityId,
+    },
 
-      data: {
-        active:
-          input.active,
-      },
+    data: {
+      active: input.active,
+    },
 
-      select:
-        modalitySelect,
-    })
+    select: modalitySelect,
+  })
 
   return modality
 }

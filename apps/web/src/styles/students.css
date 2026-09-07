@@ -344,9 +344,7 @@
   border: 1px solid #27272a;
   border-radius: 18px 18px 0 0;
   background: #111113;
-  box-shadow:
-    0 -20px 60px
-    rgba(0, 0, 0, 0.45);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.45);
 }
 
 .student-modal-header {
@@ -446,11 +444,9 @@
 
 .student-form-error {
   padding: 12px 14px;
-  border: 1px solid
-    rgba(239, 68, 68, 0.35);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: 9px;
-  background:
-    rgba(239, 68, 68, 0.08);
+  background: rgba(239, 68, 68, 0.08);
   color: #fca5a5;
   font-size: 0.875rem;
 }
@@ -485,8 +481,7 @@
   }
 
   .student-form-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .student-form-field-full {
@@ -598,8 +593,7 @@
   }
 
   .student-detail-metadata {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -874,15 +868,11 @@
     display: flex;
     flex-direction: column;
 
-    max-height:
-      calc(
-        100dvh - 24px
-      );
+    max-height: calc(100dvh - 24px);
 
     overflow-y: auto;
 
-    overscroll-behavior:
-      contain;
+    overscroll-behavior: contain;
   }
 
   .student-modal-header {
@@ -913,19 +903,11 @@
 
     flex-shrink: 0;
 
-    margin:
-      0
-      -20px
-      -20px;
+    margin: 0 -20px -20px;
 
-    padding:
-      14px
-      20px
-      20px;
+    padding: 14px 20px 20px;
 
-    border-top:
-      1px solid
-      #27272a;
+    border-top: 1px solid #27272a;
 
     background: #111113;
   }
@@ -933,8 +915,7 @@
   .student-status-confirmation {
     width: 100%;
 
-    box-sizing:
-      border-box;
+    box-sizing: border-box;
 
     flex-shrink: 0;
   }
@@ -943,8 +924,7 @@
     width: 100%;
   }
 
-  .student-status-confirmation-actions
-    .students-button {
+  .student-status-confirmation-actions .students-button {
     width: 100%;
   }
 }

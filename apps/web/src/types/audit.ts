@@ -9,13 +9,7 @@ export type AuditAction =
   | 'PASSWORD_RESET_COMPLETED'
   | 'PASSWORD_RESET_REQUESTED_BY_ADMIN'
 
-export type AuditEntity =
-  | 'USER'
-  | 'GYM'
-  | 'GYM_MEMBERSHIP'
-  | 'STUDENT'
-  | 'AUTH'
-  | 'SYSTEM'
+export type AuditEntity = 'USER' | 'GYM' | 'GYM_MEMBERSHIP' | 'STUDENT' | 'AUTH' | 'SYSTEM'
 
 export interface AuditUser {
   id: string
@@ -30,8 +24,7 @@ export type AuditJsonValue =
   | null
   | AuditJsonValue[]
   | {
-      [key: string]:
-        AuditJsonValue
+      [key: string]: AuditJsonValue
     }
 
 export interface AuditLog {
@@ -40,36 +33,24 @@ export interface AuditLog {
   gymId: string | null
   userId: string | null
 
-  action:
-    | AuditAction
-    | string
+  action: AuditAction | string
 
-  entity:
-    | AuditEntity
-    | string
+  entity: AuditEntity | string
 
   entityId: string | null
 
-  oldValues:
-    | AuditJsonValue
-    | null
+  oldValues: AuditJsonValue | null
 
-  newValues:
-    | AuditJsonValue
-    | null
+  newValues: AuditJsonValue | null
 
-  metadata:
-    | AuditJsonValue
-    | null
+  metadata: AuditJsonValue | null
 
   ipAddress: string | null
   userAgent: string | null
 
   createdAt: string
 
-  user:
-    | AuditUser
-    | null
+  user: AuditUser | null
 }
 
 export interface AuditPagination {

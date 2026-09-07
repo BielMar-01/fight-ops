@@ -4,6 +4,7 @@
 `GymMembership.role` controla privilégios no tenant.
 
 O guard de academia:
+
 1. exige autenticação;
 2. lê `gymId`;
 3. encontra membership;

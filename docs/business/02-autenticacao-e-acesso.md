@@ -1,9 +1,11 @@
 # Autenticação e Acesso
 
 ## Status
+
 🟢 Implementado
 
 ## Fluxos
+
 - cadastro;
 - login;
 - refresh;
@@ -14,6 +16,7 @@
 - rotas de visitante.
 
 ## Recuperação de senha
+
 ```text
 Informar e-mail
 → receber código
@@ -22,6 +25,7 @@ Informar e-mail
 ```
 
 Regras:
+
 - não revelar se o e-mail existe;
 - código com expiração;
 - limite de tentativas;

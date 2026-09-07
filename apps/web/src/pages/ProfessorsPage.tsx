@@ -1,30 +1,14 @@
-import {
-  type FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
 
-import {
-  AddProfessorModal,
-} from '../components/professors/AddProfessorModal'
+import { AddProfessorModal } from '../components/professors/AddProfessorModal'
 
-import {
-  ManageProfessorModal,
-} from '../components/professors/ManageProfessorModal'
+import { ManageProfessorModal } from '../components/professors/ManageProfessorModal'
 
-import {
-  useGym,
-} from '../contexts/GymContext'
+import { useGym } from '../contexts/GymContext'
 
-import {
-  getProfessors,
-} from '../services/professor.service'
+import { getProfessors } from '../services/professor.service'
 
-import type {
-  Pagination,
-  Professor,
-} from '../types/professor'
+import type { Pagination, Professor } from '../types/professor'
 
 import '../styles/professors.css'
 
@@ -37,10 +21,7 @@ const initialPagination: Pagination = {
   totalPages: 0,
 }
 
-type StatusFilter =
-  | 'all'
-  | 'active'
-  | 'inactive'
+type StatusFilter = 'all' | 'active' | 'inactive'
 
 interface ProfessorSummary {
   total: number
@@ -54,9 +35,7 @@ const initialSummary: ProfessorSummary = {
   inactive: 0,
 }
 
-function getActiveFilter(
-  status: StatusFilter,
-) {
+function getActiveFilter(status: StatusFilter) {
   if (status === 'active') {
     return true
   }
@@ -69,273 +48,139 @@ function getActiveFilter(
 }
 
 export function ProfessorsPage() {
-  const {
-    activeGym,
-  } = useGym()
+  const { activeGym } = useGym()
 
-  const [
-    professors,
-    setProfessors,
-  ] = useState<Professor[]>(
-    [],
-  )
+  const [professors, setProfessors] = useState<Professor[]>([])
 
-  const [
-    pagination,
-    setPagination,
-  ] =
-    useState<Pagination>(
-      initialPagination,
-    )
+  const [pagination, setPagination] = useState<Pagination>(initialPagination)
 
-  const [
-    summary,
-    setSummary,
-  ] =
-    useState<ProfessorSummary>(
-      initialSummary,
-    )
+  const [summary, setSummary] = useState<ProfessorSummary>(initialSummary)
 
-  const [
-    page,
-    setPage,
-  ] = useState(1)
+  const [page, setPage] = useState(1)
 
-  const [
-    searchInput,
-    setSearchInput,
-  ] = useState('')
+  const [searchInput, setSearchInput] = useState('')
 
-  const [
-    appliedSearch,
-    setAppliedSearch,
-  ] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] =
-    useState<StatusFilter>(
-      'all',
-    )
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true)
+  const [loading, setLoading] = useState(true)
 
-  const [
-    error,
-    setError,
-  ] = useState<string | null>(
-    null,
-  )
+  const [error, setError] = useState<string | null>(null)
 
-  const [
-    isAddModalOpen,
-    setIsAddModalOpen,
-  ] = useState(false)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
-  const [
-    selectedProfessorId,
-    setSelectedProfessorId,
-  ] = useState<string | null>(
-    null,
-  )
+  const [selectedProfessorId, setSelectedProfessorId] = useState<string | null>(null)
 
   const canViewProfessors =
-    activeGym?.role ===
-      'OWNER' ||
-    activeGym?.role ===
-      'ADMIN' ||
-    activeGym?.role ===
-      'RECEPTIONIST' ||
-    activeGym?.role ===
-      'PROFESSOR'
+    activeGym?.role === 'OWNER' ||
+    activeGym?.role === 'ADMIN' ||
+    activeGym?.role === 'RECEPTIONIST' ||
+    activeGym?.role === 'PROFESSOR'
 
-  const canManageProfessors =
-    activeGym?.role ===
-      'OWNER' ||
-    activeGym?.role ===
-      'ADMIN'
+  const canManageProfessors = activeGym?.role === 'OWNER' || activeGym?.role === 'ADMIN'
 
-  const loadSummary =
-    useCallback(
-      async () => {
-        if (
-          !activeGym ||
-          activeGym.role ===
-            'STUDENT'
-        ) {
-          setSummary(
-            initialSummary,
-          )
+  const loadSummary = useCallback(async () => {
+    if (!activeGym || activeGym.role === 'STUDENT') {
+      setSummary(initialSummary)
 
-          return
-        }
+      return
+    }
 
-        try {
-          const [
-            activeResponse,
-            inactiveResponse,
-          ] =
-            await Promise.all([
-              getProfessors(
-                activeGym.id,
-                {
-                  page: 1,
-                  limit: 1,
-                  active:
-                    true,
-                },
-              ),
+    try {
+      const [activeResponse, inactiveResponse] = await Promise.all([
+        getProfessors(activeGym.id, {
+          page: 1,
+          limit: 1,
+          active: true,
+        }),
 
-              getProfessors(
-                activeGym.id,
-                {
-                  page: 1,
-                  limit: 1,
-                  active:
-                    false,
-                },
-              ),
-            ])
+        getProfessors(activeGym.id, {
+          page: 1,
+          limit: 1,
+          active: false,
+        }),
+      ])
 
-          const activeTotal =
-            activeResponse
-              .pagination
-              .total
+      const activeTotal = activeResponse.pagination.total
 
-          const inactiveTotal =
-            inactiveResponse
-              .pagination
-              .total
+      const inactiveTotal = inactiveResponse.pagination.total
 
-          setSummary({
-            total:
-              activeTotal +
-              inactiveTotal,
+      setSummary({
+        total: activeTotal + inactiveTotal,
 
-            active:
-              activeTotal,
+        active: activeTotal,
 
-            inactive:
-              inactiveTotal,
-          })
-        } catch {
-          setSummary(
-            initialSummary,
-          )
-        }
-      },
-      [
-        activeGym,
-      ],
-    )
+        inactive: inactiveTotal,
+      })
+    } catch {
+      setSummary(initialSummary)
+    }
+  }, [activeGym])
 
-  const loadProfessors =
-    useCallback(
-      async () => {
-        if (!activeGym) {
-          setProfessors([])
+  const loadProfessors = useCallback(async () => {
+    if (!activeGym) {
+      setProfessors([])
 
-          setPagination(
-            initialPagination,
-          )
+      setPagination(initialPagination)
 
-          setLoading(false)
+      setLoading(false)
 
-          return
-        }
+      return
+    }
 
-        if (
-          activeGym.role ===
-          'STUDENT'
-        ) {
-          setProfessors([])
+    if (activeGym.role === 'STUDENT') {
+      setProfessors([])
 
-          setPagination(
-            initialPagination,
-          )
+      setPagination(initialPagination)
 
-          setSummary(
-            initialSummary,
-          )
+      setSummary(initialSummary)
 
-          setError(null)
+      setError(null)
 
-          setLoading(false)
+      setLoading(false)
 
-          return
-        }
+      return
+    }
 
-        const active =
-          getActiveFilter(
-            statusFilter,
-          )
+    const active = getActiveFilter(statusFilter)
 
-        try {
-          setLoading(true)
+    try {
+      setLoading(true)
 
-          setError(null)
+      setError(null)
 
-          const response =
-            await getProfessors(
-              activeGym.id,
-              {
-                page,
-
-                limit:
-                  PAGE_LIMIT,
-
-                search:
-                  appliedSearch ||
-                  undefined,
-
-                active,
-              },
-            )
-
-          setProfessors(
-            response.professors,
-          )
-
-          setPagination(
-            response.pagination,
-          )
-        } catch {
-          setProfessors([])
-
-          setPagination(
-            initialPagination,
-          )
-
-          setError(
-            'Não foi possível carregar os professores.',
-          )
-        } finally {
-          setLoading(false)
-        }
-      },
-      [
-        activeGym,
+      const response = await getProfessors(activeGym.id, {
         page,
-        appliedSearch,
-        statusFilter,
-      ],
-    )
+
+        limit: PAGE_LIMIT,
+
+        search: appliedSearch || undefined,
+
+        active,
+      })
+
+      setProfessors(response.professors)
+
+      setPagination(response.pagination)
+    } catch {
+      setProfessors([])
+
+      setPagination(initialPagination)
+
+      setError('Não foi possível carregar os professores.')
+    } finally {
+      setLoading(false)
+    }
+  }, [activeGym, page, appliedSearch, statusFilter])
 
   useEffect(() => {
     void loadProfessors()
-  }, [
-    loadProfessors,
-  ])
+  }, [loadProfessors])
 
   useEffect(() => {
     void loadSummary()
-  }, [
-    loadSummary,
-  ])
+  }, [loadSummary])
 
   useEffect(() => {
     setPage(1)
@@ -344,32 +189,19 @@ export function ProfessorsPage() {
 
     setAppliedSearch('')
 
-    setStatusFilter(
-      'all',
-    )
+    setStatusFilter('all')
 
-    setIsAddModalOpen(
-      false,
-    )
+    setIsAddModalOpen(false)
 
-    setSelectedProfessorId(
-      null,
-    )
-  }, [
-    activeGym?.id,
-  ])
+    setSelectedProfessorId(null)
+  }, [activeGym?.id])
 
-  function handleSearch(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     setPage(1)
 
-    setAppliedSearch(
-      searchInput.trim(),
-    )
+    setAppliedSearch(searchInput.trim())
   }
 
   function handleClearFilters() {
@@ -377,31 +209,17 @@ export function ProfessorsPage() {
 
     setAppliedSearch('')
 
-    setStatusFilter(
-      'all',
-    )
+    setStatusFilter('all')
 
     setPage(1)
   }
 
   function handlePreviousPage() {
-    setPage(
-      (currentPage) =>
-        Math.max(
-          1,
-          currentPage - 1,
-        ),
-    )
+    setPage((currentPage) => Math.max(1, currentPage - 1))
   }
 
   function handleNextPage() {
-    setPage(
-      (currentPage) =>
-        Math.min(
-          pagination.totalPages,
-          currentPage + 1,
-        ),
-    )
+    setPage((currentPage) => Math.min(pagination.totalPages, currentPage + 1))
   }
 
   async function handleProfessorCreated() {
@@ -411,15 +229,10 @@ export function ProfessorsPage() {
 
     setAppliedSearch('')
 
-    setStatusFilter(
-      'all',
-    )
+    setStatusFilter('all')
 
     if (page === 1) {
-      await Promise.all([
-        loadProfessors(),
-        loadSummary(),
-      ])
+      await Promise.all([loadProfessors(), loadSummary()])
 
       return
     }
@@ -428,53 +241,26 @@ export function ProfessorsPage() {
   }
 
   async function handleProfessorUpdated() {
-    await Promise.all([
-      loadProfessors(),
-      loadSummary(),
-    ])
+    await Promise.all([loadProfessors(), loadSummary()])
   }
 
-  const hasFilters =
-    appliedSearch.length > 0 ||
-    statusFilter !== 'all'
+  const hasFilters = appliedSearch.length > 0 || statusFilter !== 'all'
 
-  const hasPreviousPage =
-    pagination.page > 1
+  const hasPreviousPage = pagination.page > 1
 
-  const hasNextPage =
-    pagination.page <
-    pagination.totalPages
+  const hasNextPage = pagination.page < pagination.totalPages
 
-  if (
-    activeGym &&
-    !canViewProfessors
-  ) {
+  if (activeGym && !canViewProfessors) {
     return (
-      <section
-        className="professors-page"
-        data-testid="professors-page"
-      >
-        <div
-          className="professors-access-denied"
-          data-testid="professors-access-denied"
-        >
-          <div className="professors-access-denied-icon">
-            !
-          </div>
+      <section className="professors-page" data-testid="professors-page">
+        <div className="professors-access-denied" data-testid="professors-access-denied">
+          <div className="professors-access-denied-icon">!</div>
 
-          <span className="professors-eyebrow">
-            Acesso restrito
-          </span>
+          <span className="professors-eyebrow">Acesso restrito</span>
 
-          <h1>
-            Área não disponível
-          </h1>
+          <h1>Área não disponível</h1>
 
-          <p>
-            Seu perfil nesta academia
-            não possui acesso à gestão
-            de professores.
-          </p>
+          <p>Seu perfil nesta academia não possui acesso à gestão de professores.</p>
         </div>
       </section>
     )
@@ -482,25 +268,14 @@ export function ProfessorsPage() {
 
   return (
     <>
-      <section
-        className="professors-page"
-        data-testid="professors-page"
-      >
+      <section className="professors-page" data-testid="professors-page">
         <header className="professors-header">
           <div>
-            <span className="professors-eyebrow">
-              Gestão acadêmica
-            </span>
+            <span className="professors-eyebrow">Gestão acadêmica</span>
 
-            <h1>
-              Professores
-            </h1>
+            <h1>Professores</h1>
 
-            <p>
-              Consulte e gerencie os
-              professores cadastrados
-              na academia selecionada.
-            </p>
+            <p>Consulte e gerencie os professores cadastrados na academia selecionada.</p>
           </div>
 
           {canManageProfessors ? (
@@ -510,9 +285,7 @@ export function ProfessorsPage() {
                 className="professors-button professors-button-primary"
                 data-testid="professors-add-button"
                 onClick={() => {
-                  setIsAddModalOpen(
-                    true,
-                  )
+                  setIsAddModalOpen(true)
                 }}
               >
                 Novo professor
@@ -521,94 +294,45 @@ export function ProfessorsPage() {
           ) : null}
         </header>
 
-        <div
-          className="professors-summary"
-          data-testid="professors-summary"
-        >
-          <div
-            className="professors-summary-card"
-            data-testid="professors-summary-total"
-          >
-            <span>
-              Total
-            </span>
+        <div className="professors-summary" data-testid="professors-summary">
+          <div className="professors-summary-card" data-testid="professors-summary-total">
+            <span>Total</span>
 
-            <strong>
-              {summary.total}
-            </strong>
+            <strong>{summary.total}</strong>
 
-            <small>
-              Professores cadastrados
-            </small>
+            <small>Professores cadastrados</small>
           </div>
 
-          <div
-            className="professors-summary-card"
-            data-testid="professors-summary-active"
-          >
-            <span>
-              Ativos
-            </span>
+          <div className="professors-summary-card" data-testid="professors-summary-active">
+            <span>Ativos</span>
 
-            <strong>
-              {summary.active}
-            </strong>
+            <strong>{summary.active}</strong>
 
-            <small>
-              Professores ativos
-            </small>
+            <small>Professores ativos</small>
           </div>
 
-          <div
-            className="professors-summary-card"
-            data-testid="professors-summary-inactive"
-          >
-            <span>
-              Inativos
-            </span>
+          <div className="professors-summary-card" data-testid="professors-summary-inactive">
+            <span>Inativos</span>
 
-            <strong>
-              {summary.inactive}
-            </strong>
+            <strong>{summary.inactive}</strong>
 
-            <small>
-              Professores inativos
-            </small>
+            <small>Professores inativos</small>
           </div>
         </div>
 
-        <div
-          className="professors-filters"
-          data-testid="professors-filters"
-        >
-          <form
-            className="professors-search-form"
-            onSubmit={
-              handleSearch
-            }
-          >
+        <div className="professors-filters" data-testid="professors-filters">
+          <form className="professors-search-form" onSubmit={handleSearch}>
             <div className="professors-field">
-              <label
-                htmlFor="professors-search"
-              >
-                Buscar professor
-              </label>
+              <label htmlFor="professors-search">Buscar professor</label>
 
               <input
                 id="professors-search"
                 type="search"
-                value={
-                  searchInput
-                }
+                value={searchInput}
                 placeholder="Nome, e-mail ou telefone"
                 data-testid="professors-search-input"
-                onChange={(
-                  event,
-                ) => {
-                  setSearchInput(
-                    event.target
-                      .value,
-                  )
+                onChange={(event) => {
+                  setSearchInput(event.target.value)
                 }}
               />
             </div>
@@ -624,40 +348,23 @@ export function ProfessorsPage() {
 
           <div className="professors-filter-actions">
             <div className="professors-field">
-              <label
-                htmlFor="professors-status"
-              >
-                Status
-              </label>
+              <label htmlFor="professors-status">Status</label>
 
               <select
                 id="professors-status"
-                value={
-                  statusFilter
-                }
+                value={statusFilter}
                 data-testid="professors-status-filter"
-                onChange={(
-                  event,
-                ) => {
-                  setStatusFilter(
-                    event.target
-                      .value as StatusFilter,
-                  )
+                onChange={(event) => {
+                  setStatusFilter(event.target.value as StatusFilter)
 
                   setPage(1)
                 }}
               >
-                <option value="all">
-                  Todos
-                </option>
+                <option value="all">Todos</option>
 
-                <option value="active">
-                  Ativos
-                </option>
+                <option value="active">Ativos</option>
 
-                <option value="inactive">
-                  Inativos
-                </option>
+                <option value="inactive">Inativos</option>
               </select>
             </div>
 
@@ -666,9 +373,7 @@ export function ProfessorsPage() {
                 type="button"
                 className="professors-button professors-button-secondary"
                 data-testid="professors-clear-filters-button"
-                onClick={
-                  handleClearFilters
-                }
+                onClick={handleClearFilters}
               >
                 Limpar filtros
               </button>
@@ -677,31 +382,16 @@ export function ProfessorsPage() {
         </div>
 
         {loading ? (
-          <div
-            className="professors-state"
-            data-testid="professors-loading"
-          >
-            <div
-              className="professors-loading-spinner"
-              aria-hidden="true"
-            />
+          <div className="professors-state" data-testid="professors-loading">
+            <div className="professors-loading-spinner" aria-hidden="true" />
 
-            <span>
-              Carregando professores...
-            </span>
+            <span>Carregando professores...</span>
           </div>
         ) : error ? (
-          <div
-            className="professors-state professors-state-error"
-            data-testid="professors-error"
-          >
-            <strong>
-              Não foi possível carregar os professores
-            </strong>
+          <div className="professors-state professors-state-error" data-testid="professors-error">
+            <strong>Não foi possível carregar os professores</strong>
 
-            <span>
-              {error}
-            </span>
+            <span>{error}</span>
 
             <button
               type="button"
@@ -715,15 +405,9 @@ export function ProfessorsPage() {
               Tentar novamente
             </button>
           </div>
-        ) : professors.length ===
-          0 ? (
-          <div
-            className="professors-empty"
-            data-testid="professors-empty"
-          >
-            <h2>
-              Nenhum professor encontrado
-            </h2>
+        ) : professors.length === 0 ? (
+          <div className="professors-empty" data-testid="professors-empty">
+            <h2>Nenhum professor encontrado</h2>
 
             <p>
               {hasFilters
@@ -733,142 +417,85 @@ export function ProfessorsPage() {
           </div>
         ) : (
           <>
-            <div
-              className="professors-list"
-              data-testid="professors-list"
-            >
-              {professors.map(
-                (
-                  professor,
-                ) => (
-                  <article
-                    key={
-                      professor.id
-                    }
-                    className="professor-card"
-                    data-testid={`professor-card-${professor.id}`}
-                  >
-                    <div className="professor-card-main">
-                      <div className="professor-avatar">
-                        {professor.name
-                          .charAt(0)
-                          .toUpperCase()}
-                      </div>
+            <div className="professors-list" data-testid="professors-list">
+              {professors.map((professor) => (
+                <article
+                  key={professor.id}
+                  className="professor-card"
+                  data-testid={`professor-card-${professor.id}`}
+                >
+                  <div className="professor-card-main">
+                    <div className="professor-avatar">{professor.name.charAt(0).toUpperCase()}</div>
 
-                      <div className="professor-info">
-                        <div className="professor-name-row">
-                          <h2>
-                            {
-                              professor.name
-                            }
-                          </h2>
+                    <div className="professor-info">
+                      <div className="professor-name-row">
+                        <h2>{professor.name}</h2>
 
-                          <span
-                            className={
-                              professor.active
-                                ? 'professor-status professor-status-active'
-                                : 'professor-status professor-status-inactive'
-                            }
-                            data-testid={`professor-status-${professor.id}`}
-                          >
-                            {professor.active
-                              ? 'Ativo'
-                              : 'Inativo'}
-                          </span>
-                        </div>
-
-                        <div className="professor-contact">
-                          <span>
-                            {professor.email ??
-                              'E-mail não informado'}
-                          </span>
-
-                          <span>
-                            {professor.phone ??
-                              'Telefone não informado'}
-                          </span>
-                        </div>
-
-                        {professor.hireDate ? (
-                          <span className="professor-hire-date">
-                            Contratação:{' '}
-                            {new Intl.DateTimeFormat(
-                              'pt-BR',
-                            ).format(
-                              new Date(
-                                professor.hireDate,
-                              ),
-                            )}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="professor-card-actions">
-                        <button
-                          type="button"
-                          className="professors-button professors-button-secondary"
-                          data-testid={`professor-view-button-${professor.id}`}
-                          onClick={() => {
-                            setSelectedProfessorId(
-                              professor.id,
-                            )
-                          }}
+                        <span
+                          className={
+                            professor.active
+                              ? 'professor-status professor-status-active'
+                              : 'professor-status professor-status-inactive'
+                          }
+                          data-testid={`professor-status-${professor.id}`}
                         >
-                          Ver detalhes
-                        </button>
+                          {professor.active ? 'Ativo' : 'Inativo'}
+                        </span>
                       </div>
+
+                      <div className="professor-contact">
+                        <span>{professor.email ?? 'E-mail não informado'}</span>
+
+                        <span>{professor.phone ?? 'Telefone não informado'}</span>
+                      </div>
+
+                      {professor.hireDate ? (
+                        <span className="professor-hire-date">
+                          Contratação:{' '}
+                          {new Intl.DateTimeFormat('pt-BR').format(new Date(professor.hireDate))}
+                        </span>
+                      ) : null}
                     </div>
-                  </article>
-                ),
-              )}
+
+                    <div className="professor-card-actions">
+                      <button
+                        type="button"
+                        className="professors-button professors-button-secondary"
+                        data-testid={`professor-view-button-${professor.id}`}
+                        onClick={() => {
+                          setSelectedProfessorId(professor.id)
+                        }}
+                      >
+                        Ver detalhes
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
 
-            <div
-              className="professors-pagination"
-              data-testid="professors-pagination"
-            >
+            <div className="professors-pagination" data-testid="professors-pagination">
               <button
                 type="button"
                 className="professors-button professors-button-secondary"
-                disabled={
-                  !hasPreviousPage
-                }
+                disabled={!hasPreviousPage}
                 data-testid="professors-pagination-previous"
-                onClick={
-                  handlePreviousPage
-                }
+                onClick={handlePreviousPage}
               >
                 Anterior
               </button>
 
-              <span
-                className="professors-pagination-info"
-                data-testid="professors-pagination-info"
-              >
-                Página{' '}
-                <strong>
-                  {
-                    pagination.page
-                  }
-                </strong>{' '}
-                de{' '}
-                <strong>
-                  {
-                    pagination.totalPages
-                  }
-                </strong>
+              <span className="professors-pagination-info" data-testid="professors-pagination-info">
+                Página <strong>{pagination.page}</strong> de{' '}
+                <strong>{pagination.totalPages}</strong>
               </span>
 
               <button
                 type="button"
                 className="professors-button professors-button-secondary"
-                disabled={
-                  !hasNextPage
-                }
+                disabled={!hasNextPage}
                 data-testid="professors-pagination-next"
-                onClick={
-                  handleNextPage
-                }
+                onClick={handleNextPage}
               >
                 Próxima
               </button>
@@ -877,45 +504,25 @@ export function ProfessorsPage() {
         )}
       </section>
 
-      {isAddModalOpen &&
-      activeGym &&
-      canManageProfessors ? (
+      {isAddModalOpen && activeGym && canManageProfessors ? (
         <AddProfessorModal
-          gymId={
-            activeGym.id
-          }
+          gymId={activeGym.id}
           onClose={() => {
-            setIsAddModalOpen(
-              false,
-            )
+            setIsAddModalOpen(false)
           }}
-          onCreated={
-            handleProfessorCreated
-          }
+          onCreated={handleProfessorCreated}
         />
       ) : null}
 
-      {selectedProfessorId &&
-      activeGym &&
-      canViewProfessors ? (
+      {selectedProfessorId && activeGym && canViewProfessors ? (
         <ManageProfessorModal
-          gymId={
-            activeGym.id
-          }
-          professorId={
-            selectedProfessorId
-          }
-          canEdit={
-            canManageProfessors
-          }
+          gymId={activeGym.id}
+          professorId={selectedProfessorId}
+          canEdit={canManageProfessors}
           onClose={() => {
-            setSelectedProfessorId(
-              null,
-            )
+            setSelectedProfessorId(null)
           }}
-          onUpdated={
-            handleProfessorUpdated
-          }
+          onUpdated={handleProfessorUpdated}
         />
       ) : null}
     </>

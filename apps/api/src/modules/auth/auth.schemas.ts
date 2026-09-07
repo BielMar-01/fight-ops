@@ -11,7 +11,12 @@ const passwordSchema = z
 export const registerSchema = z.object({
   name: z.string().trim().min(3).max(150),
 
-  email: z.string().trim().email().max(255).transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .max(255)
+    .transform((value) => value.toLowerCase()),
 
   password: passwordSchema,
 
@@ -19,17 +24,29 @@ export const registerSchema = z.object({
 })
 
 export const loginSchema = z.object({
-  email: z.string().trim().email().transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .transform((value) => value.toLowerCase()),
 
   password: z.string().min(1),
 })
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().trim().email().transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .transform((value) => value.toLowerCase()),
 })
 
 export const verifyPasswordResetSchema = z.object({
-  email: z.string().trim().email().transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .transform((value) => value.toLowerCase()),
 
   code: z.string().regex(/^\d{6}$/, 'O código deve possuir 6 dígitos.'),
 })

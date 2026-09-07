@@ -1,18 +1,10 @@
-import type {
-  FastifyInstance,
-} from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
-import {
-  createAuditLog,
-} from '../audit/audit.service.js'
+import { createAuditLog } from '../audit/audit.service.js'
 
-import {
-  authenticate,
-} from '../auth/authenticate.js'
+import { authenticate } from '../auth/authenticate.js'
 
-import {
-  requireGymRole,
-} from '../gyms/gym-access.js'
+import { requireGymRole } from '../gyms/gym-access.js'
 
 import {
   createProfessorBodySchema,
@@ -31,9 +23,7 @@ import {
   updateProfessorStatus,
 } from './professors.service.js'
 
-export async function professorRoutes(
-  app: FastifyInstance,
-) {
+export async function professorRoutes(app: FastifyInstance) {
   /*
    * =========================================================
    * LIST
@@ -43,40 +33,16 @@ export async function professorRoutes(
   app.get(
     '/gyms/:gymId/professors',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-          'PROFESSOR',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST', 'PROFESSOR')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        professorListParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = professorListParamsSchema.parse(request.params)
 
-      const query =
-        listProfessorsQuerySchema.parse(
-          request.query,
-        )
+      const query = listProfessorsQuerySchema.parse(request.query)
 
-      const result =
-        await listProfessors(
-          params.gymId,
-          query,
-        )
+      const result = await listProfessors(params.gymId, query)
 
-      return reply.send(
-        result,
-      )
+      return reply.send(result)
     },
   )
 
@@ -89,31 +55,12 @@ export async function professorRoutes(
   app.get(
     '/gyms/:gymId/professors/:professorId',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-          'PROFESSOR',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST', 'PROFESSOR')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        professorParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = professorParamsSchema.parse(request.params)
 
-      const professor =
-        await getProfessorById(
-          params.gymId,
-          params.professorId,
-        )
+      const professor = await getProfessorById(params.gymId, params.professorId)
 
       return reply.send({
         professor,
@@ -130,75 +77,40 @@ export async function professorRoutes(
   app.post(
     '/gyms/:gymId/professors',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        professorListParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = professorListParamsSchema.parse(request.params)
 
-      const body =
-        createProfessorBodySchema.parse(
-          request.body,
-        )
+      const body = createProfessorBodySchema.parse(request.body)
 
-      const professor =
-        await createProfessor(
-          params.gymId,
-          body,
-        )
+      const professor = await createProfessor(params.gymId, body)
 
       await createAuditLog({
-        gymId:
-          params.gymId,
+        gymId: params.gymId,
 
-        userId:
-          request.user!.id,
+        userId: request.user!.id,
 
-        action:
-          'CREATE',
+        action: 'CREATE',
 
-        entity:
-          'PROFESSOR',
+        entity: 'PROFESSOR',
 
-        entityId:
-          professor.id,
+        entityId: professor.id,
 
-        newValues:
-          professor,
+        newValues: professor,
 
         metadata: {
-          source:
-            'professors',
+          source: 'professors',
         },
 
-        ipAddress:
-          request.ip,
+        ipAddress: request.ip,
 
-        userAgent:
-          request.headers[
-            'user-agent'
-          ],
+        userAgent: request.headers['user-agent'],
       })
 
-      return reply
-        .status(
-          201,
-        )
-        .send({
-          professor,
-        })
+      return reply.status(201).send({
+        professor,
+      })
     },
   )
 
@@ -211,76 +123,39 @@ export async function professorRoutes(
   app.put(
     '/gyms/:gymId/professors/:professorId',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        professorParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = professorParamsSchema.parse(request.params)
 
-      const body =
-        updateProfessorBodySchema.parse(
-          request.body,
-        )
+      const body = updateProfessorBodySchema.parse(request.body)
 
-      const previousProfessor =
-        await getProfessorById(
-          params.gymId,
-          params.professorId,
-        )
+      const previousProfessor = await getProfessorById(params.gymId, params.professorId)
 
-      const professor =
-        await updateProfessor(
-          params.gymId,
-          params.professorId,
-          body,
-        )
+      const professor = await updateProfessor(params.gymId, params.professorId, body)
 
       await createAuditLog({
-        gymId:
-          params.gymId,
+        gymId: params.gymId,
 
-        userId:
-          request.user!.id,
+        userId: request.user!.id,
 
-        action:
-          'UPDATE',
+        action: 'UPDATE',
 
-        entity:
-          'PROFESSOR',
+        entity: 'PROFESSOR',
 
-        entityId:
-          professor.id,
+        entityId: professor.id,
 
-        oldValues:
-          previousProfessor,
+        oldValues: previousProfessor,
 
-        newValues:
-          professor,
+        newValues: professor,
 
         metadata: {
-          source:
-            'professors',
+          source: 'professors',
         },
 
-        ipAddress:
-          request.ip,
+        ipAddress: request.ip,
 
-        userAgent:
-          request.headers[
-            'user-agent'
-          ],
+        userAgent: request.headers['user-agent'],
       })
 
       return reply.send({
@@ -298,80 +173,43 @@ export async function professorRoutes(
   app.patch(
     '/gyms/:gymId/professors/:professorId/status',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        professorParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = professorParamsSchema.parse(request.params)
 
-      const body =
-        updateProfessorStatusBodySchema.parse(
-          request.body,
-        )
+      const body = updateProfessorStatusBodySchema.parse(request.body)
 
-      const previousProfessor =
-        await getProfessorById(
-          params.gymId,
-          params.professorId,
-        )
+      const previousProfessor = await getProfessorById(params.gymId, params.professorId)
 
-      const professor =
-        await updateProfessorStatus(
-          params.gymId,
-          params.professorId,
-          body,
-        )
+      const professor = await updateProfessorStatus(params.gymId, params.professorId, body)
 
       await createAuditLog({
-        gymId:
-          params.gymId,
+        gymId: params.gymId,
 
-        userId:
-          request.user!.id,
+        userId: request.user!.id,
 
-        action:
-          'STATUS_CHANGE',
+        action: 'STATUS_CHANGE',
 
-        entity:
-          'PROFESSOR',
+        entity: 'PROFESSOR',
 
-        entityId:
-          professor.id,
+        entityId: professor.id,
 
         oldValues: {
-          active:
-            previousProfessor.active,
+          active: previousProfessor.active,
         },
 
         newValues: {
-          active:
-            professor.active,
+          active: professor.active,
         },
 
         metadata: {
-          source:
-            'professors',
+          source: 'professors',
         },
 
-        ipAddress:
-          request.ip,
+        ipAddress: request.ip,
 
-        userAgent:
-          request.headers[
-            'user-agent'
-          ],
+        userAgent: request.headers['user-agent'],
       })
 
       return reply.send({

@@ -1,25 +1,12 @@
-import {
-  useEffect,
-  useState,
-} from 'react'
+import { useEffect, useState } from 'react'
 
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import {
-  PasswordInput,
-} from '../components/auth/PasswordInput'
+import { PasswordInput } from '../components/auth/PasswordInput'
 
-import {
-  useResetPassword,
-} from '../hooks/useAuth'
+import { useResetPassword } from '../hooks/useAuth'
 
-import {
-  ApiError,
-} from '../services/api'
+import { ApiError } from '../services/api'
 
 interface ResetPasswordState {
   email?: string
@@ -27,85 +14,45 @@ interface ResetPasswordState {
 }
 
 export function ResetPasswordPage() {
-  const navigate =
-    useNavigate()
+  const navigate = useNavigate()
 
-  const location =
-    useLocation()
+  const location = useLocation()
 
-  const resetMutation =
-    useResetPassword()
+  const resetMutation = useResetPassword()
 
-  const state =
-    location.state as
-      | ResetPasswordState
-      | null
+  const state = location.state as ResetPasswordState | null
 
-  const email =
-    state?.email ?? ''
+  const email = state?.email ?? ''
 
-  const resetToken =
-    state?.resetToken ?? ''
+  const resetToken = state?.resetToken ?? ''
 
-  const [
-    password,
-    setPassword,
-  ] =
-    useState('')
+  const [password, setPassword] = useState('')
 
-  const [
-    confirmPassword,
-    setConfirmPassword,
-  ] =
-    useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const [
-    formError,
-    setFormError,
-  ] =
-    useState<
-      string | null
-    >(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!resetToken) {
-      navigate(
-        '/forgot-password',
-        {
-          replace: true,
-        },
-      )
+      navigate('/forgot-password', {
+        replace: true,
+      })
     }
-  }, [
-    navigate,
-    resetToken,
-  ])
+  }, [navigate, resetToken])
 
-  async function handleSubmit(
-    event:
-      React.FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     setFormError(null)
 
-    if (
-      password.length < 8
-    ) {
-      setFormError(
-        'A nova senha deve possuir pelo menos 8 caracteres.',
-      )
+    if (password.length < 8) {
+      setFormError('A nova senha deve possuir pelo menos 8 caracteres.')
 
       return
     }
 
-    if (
-      password !==
-      confirmPassword
-    ) {
-      setFormError(
-        'As senhas informadas não são iguais.',
-      )
+    if (password !== confirmPassword) {
+      setFormError('As senhas informadas não são iguais.')
 
       return
     }
@@ -113,35 +60,24 @@ export function ResetPasswordPage() {
     try {
       await resetMutation.mutateAsync({
         resetToken,
-        newPassword:
-          password,
+        newPassword: password,
       })
 
-      navigate(
-        '/login',
-        {
-          replace: true,
+      navigate('/login', {
+        replace: true,
 
-          state: {
-            passwordReset:
-              true,
-          },
+        state: {
+          passwordReset: true,
         },
-      )
+      })
     } catch (error) {
-      if (
-        error instanceof ApiError
-      ) {
-        setFormError(
-          error.message,
-        )
+      if (error instanceof ApiError) {
+        setFormError(error.message)
 
         return
       }
 
-      setFormError(
-        'Não foi possível redefinir sua senha.',
-      )
+      setFormError('Não foi possível redefinir sua senha.')
     }
   }
 
@@ -150,72 +86,38 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <main
-      className="auth-page"
-      data-testid="reset-password-page"
-    >
+    <main className="auth-page" data-testid="reset-password-page">
       <div className="auth-shell">
         <section className="auth-brand-panel">
-          <Link
-            to="/"
-            className="brand"
-            data-testid="reset-password-logo-link"
-          >
-            <span className="brand-mark">
-              FO
-            </span>
+          <Link to="/" className="brand" data-testid="reset-password-logo-link">
+            <span className="brand-mark">FO</span>
 
-            <span className="brand-text">
-              FightOps
-            </span>
+            <span className="brand-text">FightOps</span>
           </Link>
 
           <div>
-            <span className="eyebrow">
-              Nova senha
-            </span>
+            <span className="eyebrow">Nova senha</span>
 
             <h1>
               Recupere seu acesso.
-              <span>
-                {' '}
-                Com segurança.
-              </span>
+              <span> Com segurança.</span>
             </h1>
 
-            <p>
-              Defina uma nova senha
-              para sua conta FightOps.
-            </p>
+            <p>Defina uma nova senha para sua conta FightOps.</p>
           </div>
         </section>
 
         <section className="auth-form-panel">
           <div className="auth-form-container">
             <div className="auth-heading">
-              <h2
-                data-testid="reset-password-title"
-              >
-                Criar nova senha
-              </h2>
+              <h2 data-testid="reset-password-title">Criar nova senha</h2>
 
-              {email ? (
-                <p>
-                  Conta: {email}
-                </p>
-              ) : null}
+              {email ? <p>Conta: {email}</p> : null}
             </div>
 
-            <form
-              onSubmit={
-                handleSubmit
-              }
-              data-testid="reset-password-form"
-            >
+            <form onSubmit={handleSubmit} data-testid="reset-password-form">
               <div className="form-field">
-                <label htmlFor="password">
-                  Nova senha
-                </label>
+                <label htmlFor="password">Nova senha</label>
 
                 <PasswordInput
                   id="password"
@@ -226,9 +128,7 @@ export function ResetPasswordPage() {
                   maxLength={128}
                   required
                   value={password}
-                  disabled={
-                    resetMutation.isPending
-                  }
+                  disabled={resetMutation.isPending}
                   inputTestId="reset-password-input"
                   toggleTestId="reset-password-toggle"
                   onChange={setPassword}
@@ -236,9 +136,7 @@ export function ResetPasswordPage() {
               </div>
 
               <div className="form-field">
-                <label htmlFor="confirmPassword">
-                  Confirmar nova senha
-                </label>
+                <label htmlFor="confirmPassword">Confirmar nova senha</label>
 
                 <PasswordInput
                   id="confirmPassword"
@@ -248,26 +146,16 @@ export function ResetPasswordPage() {
                   minLength={8}
                   maxLength={128}
                   required
-                  value={
-                    confirmPassword
-                  }
-                  disabled={
-                    resetMutation.isPending
-                  }
+                  value={confirmPassword}
+                  disabled={resetMutation.isPending}
                   inputTestId="reset-password-confirm-input"
                   toggleTestId="reset-password-confirm-toggle"
-                  onChange={
-                    setConfirmPassword
-                  }
+                  onChange={setConfirmPassword}
                 />
               </div>
 
               {formError ? (
-                <div
-                  className="form-error"
-                  role="alert"
-                  data-testid="reset-password-error"
-                >
+                <div className="form-error" role="alert" data-testid="reset-password-error">
                   {formError}
                 </div>
               ) : null}
@@ -275,14 +163,10 @@ export function ResetPasswordPage() {
               <button
                 type="submit"
                 className="button button-primary auth-submit"
-                disabled={
-                  resetMutation.isPending
-                }
+                disabled={resetMutation.isPending}
                 data-testid="reset-password-submit-button"
               >
-                {resetMutation.isPending
-                  ? 'Alterando senha...'
-                  : 'Alterar senha'}
+                {resetMutation.isPending ? 'Alterando senha...' : 'Alterar senha'}
               </button>
             </form>
           </div>

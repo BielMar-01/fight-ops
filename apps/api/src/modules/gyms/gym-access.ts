@@ -1,19 +1,10 @@
-import type {
-  FastifyReply,
-  FastifyRequest,
-} from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
-import type {
-  GymRole,
-} from './gyms.types.js'
+import type { GymRole } from './gyms.types.js'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -31,78 +22,49 @@ interface GymParams {
   gymId?: string
 }
 
-export function requireGymRole(
-  ...allowedRoles: GymRole[]
-) {
-  return async function gymRoleGuard(
-    request: FastifyRequest,
-    _reply: FastifyReply,
-  ) {
+export function requireGymRole(...allowedRoles: GymRole[]) {
+  return async function gymRoleGuard(request: FastifyRequest, _reply: FastifyReply) {
     if (!request.user) {
-      throw new AppError(
-        'UNAUTHENTICATED',
-        401,
-        'Usuário não autenticado.',
-      )
+      throw new AppError('UNAUTHENTICATED', 401, 'Usuário não autenticado.')
     }
 
-    const params =
-      request.params as GymParams
+    const params = request.params as GymParams
 
-    const gymId =
-      params.gymId
+    const gymId = params.gymId
 
     if (!gymId) {
-      throw new AppError(
-        'GYM_ID_REQUIRED',
-        400,
-        'Identificador da academia não informado.',
-      )
+      throw new AppError('GYM_ID_REQUIRED', 400, 'Identificador da academia não informado.')
     }
 
-    const membership =
-      await prisma.gymMembership.findUnique({
-        where: {
-          userId_gymId: {
-            userId:
-              request.user.id,
+    const membership = await prisma.gymMembership.findUnique({
+      where: {
+        userId_gymId: {
+          userId: request.user.id,
 
-            gymId,
+          gymId,
+        },
+      },
+
+      select: {
+        id: true,
+        gymId: true,
+        userId: true,
+        role: true,
+        active: true,
+
+        gym: {
+          select: {
+            active: true,
           },
         },
+      },
+    })
 
-        select: {
-          id: true,
-          gymId: true,
-          userId: true,
-          role: true,
-          active: true,
-
-          gym: {
-            select: {
-              active: true,
-            },
-          },
-        },
-      })
-
-    if (
-      !membership ||
-      !membership.active ||
-      !membership.gym.active
-    ) {
-      throw new AppError(
-        'GYM_NOT_FOUND',
-        404,
-        'Academia não encontrada.',
-      )
+    if (!membership || !membership.active || !membership.gym.active) {
+      throw new AppError('GYM_NOT_FOUND', 404, 'Academia não encontrada.')
     }
 
-    if (
-      !allowedRoles.includes(
-        membership.role,
-      )
-    ) {
+    if (!allowedRoles.includes(membership.role)) {
       throw new AppError(
         'GYM_ACCESS_DENIED',
         403,
@@ -111,20 +73,15 @@ export function requireGymRole(
     }
 
     request.gymMembership = {
-      id:
-        membership.id,
+      id: membership.id,
 
-      gymId:
-        membership.gymId,
+      gymId: membership.gymId,
 
-      userId:
-        membership.userId,
+      userId: membership.userId,
 
-      role:
-        membership.role,
+      role: membership.role,
 
-      active:
-        membership.active,
+      active: membership.active,
     }
   }
 }

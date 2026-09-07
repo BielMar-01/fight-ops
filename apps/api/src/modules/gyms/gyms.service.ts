@@ -1,14 +1,8 @@
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
-import {
-  createAuditLog,
-} from '../audit/audit.service.js'
+import { createAuditLog } from '../audit/audit.service.js'
 
 import type {
   AddGymMemberInput,
@@ -24,37 +18,20 @@ interface GymAuditContext {
   userAgent?: string | null
 }
 
-function normalizeSlugValue(
-  value: string,
-) {
+function normalizeSlugValue(value: string) {
   return value
     .normalize('NFD')
-    .replace(
-      /[\u0300-\u036f]/g,
-      '',
-    )
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim()
-    .replace(
-      /[^a-z0-9]+/g,
-      '-',
-    )
-    .replace(
-      /^-+|-+$/g,
-      '',
-    )
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
-async function generateUniqueSlug(
-  name: string,
-) {
-  const baseSlug =
-    normalizeSlugValue(
-      name,
-    ) || 'academia'
+async function generateUniqueSlug(name: string) {
+  const baseSlug = normalizeSlugValue(name) || 'academia'
 
-  let slug =
-    baseSlug
+  let slug = baseSlug
 
   let counter = 2
 
@@ -69,8 +46,7 @@ async function generateUniqueSlug(
       },
     })
   ) {
-    slug =
-      `${baseSlug}-${counter}`
+    slug = `${baseSlug}-${counter}`
 
     counter += 1
   }
@@ -83,22 +59,18 @@ export async function createGym(
   input: CreateGymInput,
   auditContext: GymAuditContext,
 ) {
-  const user =
-    await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
 
-      select: {
-        id: true,
-        active: true,
-      },
-    })
+    select: {
+      id: true,
+      active: true,
+    },
+  })
 
-  if (
-    !user ||
-    !user.active
-  ) {
+  if (!user || !user.active) {
     throw new AppError(
       'USER_NOT_AVAILABLE',
       403,
@@ -106,223 +78,164 @@ export async function createGym(
     )
   }
 
-  const slug =
-    await generateUniqueSlug(
-      input.name,
-    )
+  const slug = await generateUniqueSlug(input.name)
 
-  const gym =
-    await prisma.$transaction(
-      async (transaction) => {
-        const createdGym =
-          await transaction.gym.create({
-            data: {
-              name:
-                input.name.trim(),
+  const gym = await prisma.$transaction(async (transaction) => {
+    const createdGym = await transaction.gym.create({
+      data: {
+        name: input.name.trim(),
 
-              slug,
+        slug,
 
-              description:
-                input.description?.trim() ||
-                null,
+        description: input.description?.trim() || null,
 
-              phone:
-                input.phone?.trim() ||
-                null,
+        phone: input.phone?.trim() || null,
 
-              email:
-                input.email
-                  ?.trim()
-                  .toLowerCase() ||
-                null,
-            },
-          })
-
-        await transaction.gymMembership.create({
-          data: {
-            userId,
-
-            gymId:
-              createdGym.id,
-
-            role:
-              'OWNER',
-
-            active:
-              true,
-          },
-        })
-
-        return createdGym
+        email: input.email?.trim().toLowerCase() || null,
       },
-    )
+    })
+
+    await transaction.gymMembership.create({
+      data: {
+        userId,
+
+        gymId: createdGym.id,
+
+        role: 'OWNER',
+
+        active: true,
+      },
+    })
+
+    return createdGym
+  })
 
   await createAuditLog({
-    gymId:
-      gym.id,
+    gymId: gym.id,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'CREATE',
+    action: 'CREATE',
 
-    entity:
-      'GYM',
+    entity: 'GYM',
 
-    entityId:
-      gym.id,
+    entityId: gym.id,
 
     newValues: {
-      id:
-        gym.id,
+      id: gym.id,
 
-      name:
-        gym.name,
+      name: gym.name,
 
-      slug:
-        gym.slug,
+      slug: gym.slug,
 
-      description:
-        gym.description,
+      description: gym.description,
 
-      phone:
-        gym.phone,
+      phone: gym.phone,
 
-      email:
-        gym.email,
+      email: gym.email,
 
-      active:
-        gym.active,
+      active: gym.active,
     },
 
     metadata: {
-      source:
-        'gyms',
+      source: 'gyms',
 
-      creatorRole:
-        'OWNER',
+      creatorRole: 'OWNER',
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return gym
 }
 
-export async function listUserGyms(
-  userId: string,
-) {
-  const memberships =
-    await prisma.gymMembership.findMany({
-      where: {
-        userId,
+export async function listUserGyms(userId: string) {
+  const memberships = await prisma.gymMembership.findMany({
+    where: {
+      userId,
 
-        active:
-          true,
+      active: true,
 
-        gym: {
-          active:
-            true,
+      gym: {
+        active: true,
+      },
+    },
+
+    orderBy: {
+      joinedAt: 'asc',
+    },
+
+    select: {
+      role: true,
+
+      gym: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          phone: true,
+          email: true,
+          logoUrl: true,
+          active: true,
+          createdAt: true,
+          updatedAt: true,
         },
       },
+    },
+  })
 
-      orderBy: {
-        joinedAt:
-          'asc',
-      },
+  return memberships.map((membership) => ({
+    ...membership.gym,
 
-      select: {
-        role: true,
-
-        gym: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            description: true,
-            phone: true,
-            email: true,
-            logoUrl: true,
-            active: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-      },
-    })
-
-  return memberships.map(
-    (membership) => ({
-      ...membership.gym,
-
-      role:
-        membership.role,
-    }),
-  )
+    role: membership.role,
+  }))
 }
 
-export async function getUserGymById(
-  userId: string,
-  gymId: string,
-) {
-  const membership =
-    await prisma.gymMembership.findUnique({
-      where: {
-        userId_gymId: {
-          userId,
-          gymId,
+export async function getUserGymById(userId: string, gymId: string) {
+  const membership = await prisma.gymMembership.findUnique({
+    where: {
+      userId_gymId: {
+        userId,
+        gymId,
+      },
+    },
+
+    select: {
+      role: true,
+      active: true,
+
+      gym: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          phone: true,
+          email: true,
+          logoUrl: true,
+          active: true,
+          createdAt: true,
+          updatedAt: true,
         },
       },
+    },
+  })
 
-      select: {
-        role: true,
-        active: true,
-
-        gym: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            description: true,
-            phone: true,
-            email: true,
-            logoUrl: true,
-            active: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-      },
-    })
-
-  if (
-    !membership ||
-    !membership.active ||
-    !membership.gym.active
-  ) {
-    throw new AppError(
-      'GYM_NOT_FOUND',
-      404,
-      'Academia não encontrada.',
-    )
+  if (!membership || !membership.active || !membership.gym.active) {
+    throw new AppError('GYM_NOT_FOUND', 404, 'Academia não encontrada.')
   }
 
   return {
     ...membership.gym,
 
-    role:
-      membership.role,
+    role: membership.role,
   }
 }
 
-export async function listGymMembers(
-  gymId: string,
-) {
+export async function listGymMembers(gymId: string) {
   return prisma.gymMembership.findMany({
     where: {
       gymId,
@@ -330,12 +243,10 @@ export async function listGymMembers(
 
     orderBy: [
       {
-        active:
-          'desc',
+        active: 'desc',
       },
       {
-        joinedAt:
-          'asc',
+        joinedAt: 'asc',
       },
     ],
 
@@ -367,10 +278,7 @@ export async function addGymMember(
   input: AddGymMemberInput,
   auditContext: GymAuditContext,
 ) {
-  if (
-    actorRole !== 'OWNER' &&
-    input.role === 'ADMIN'
-  ) {
+  if (actorRole !== 'OWNER' && input.role === 'ADMIN') {
     throw new AppError(
       'GYM_ROLE_NOT_ALLOWED',
       403,
@@ -378,142 +286,107 @@ export async function addGymMember(
     )
   }
 
-  const email =
-    input.email
-      .trim()
-      .toLowerCase()
+  const email = input.email.trim().toLowerCase()
 
-  const user =
-    await prisma.user.findUnique({
-      where: {
-        email,
-      },
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
 
-      select: {
-        id: true,
-        active: true,
-      },
-    })
+    select: {
+      id: true,
+      active: true,
+    },
+  })
 
   if (!user) {
-    throw new AppError(
-      'USER_NOT_FOUND',
-      404,
-      'Usuário não encontrado.',
-    )
+    throw new AppError('USER_NOT_FOUND', 404, 'Usuário não encontrado.')
   }
 
   if (!user.active) {
-    throw new AppError(
-      'USER_INACTIVE',
-      409,
-      'O usuário informado está inativo.',
-    )
+    throw new AppError('USER_INACTIVE', 409, 'O usuário informado está inativo.')
   }
 
-  const existingMembership =
-    await prisma.gymMembership.findUnique({
-      where: {
-        userId_gymId: {
-          userId:
-            user.id,
-
-          gymId,
-        },
-      },
-    })
-
-  if (existingMembership) {
-    throw new AppError(
-      'GYM_MEMBER_ALREADY_EXISTS',
-      409,
-      'O usuário já faz parte desta academia.',
-    )
-  }
-
-  const member =
-    await prisma.gymMembership.create({
-      data: {
-        userId:
-          user.id,
+  const existingMembership = await prisma.gymMembership.findUnique({
+    where: {
+      userId_gymId: {
+        userId: user.id,
 
         gymId,
-
-        role:
-          input.role,
-
-        active:
-          true,
       },
+    },
+  })
 
-      select: {
-        id: true,
-        role: true,
-        active: true,
-        joinedAt: true,
-        createdAt: true,
-        updatedAt: true,
+  if (existingMembership) {
+    throw new AppError('GYM_MEMBER_ALREADY_EXISTS', 409, 'O usuário já faz parte desta academia.')
+  }
 
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            avatarUrl: true,
-            active: true,
-          },
+  const member = await prisma.gymMembership.create({
+    data: {
+      userId: user.id,
+
+      gymId,
+
+      role: input.role,
+
+      active: true,
+    },
+
+    select: {
+      id: true,
+      role: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          active: true,
         },
       },
-    })
+    },
+  })
 
   await createAuditLog({
     gymId,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'CREATE',
+    action: 'CREATE',
 
-    entity:
-      'GYM_MEMBERSHIP',
+    entity: 'GYM_MEMBERSHIP',
 
-    entityId:
-      member.id,
+    entityId: member.id,
 
     newValues: {
-      membershipId:
-        member.id,
+      membershipId: member.id,
 
-      memberUserId:
-        member.user.id,
+      memberUserId: member.user.id,
 
-      memberName:
-        member.user.name,
+      memberName: member.user.name,
 
-      memberEmail:
-        member.user.email,
+      memberEmail: member.user.email,
 
-      role:
-        member.role,
+      role: member.role,
 
-      active:
-        member.active,
+      active: member.active,
     },
 
     metadata: {
-      source:
-        'gym-members',
+      source: 'gym-members',
 
       actorRole,
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return member
@@ -527,37 +400,26 @@ export async function updateGymMemberRole(
   input: UpdateGymMemberRoleInput,
   auditContext: GymAuditContext,
 ) {
-  const membership =
-    await prisma.gymMembership.findFirst({
-      where: {
-        id:
-          memberId,
+  const membership = await prisma.gymMembership.findFirst({
+    where: {
+      id: memberId,
 
-        gymId,
-      },
+      gymId,
+    },
 
-      select: {
-        id: true,
-        userId: true,
-        role: true,
-        active: true,
-      },
-    })
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      active: true,
+    },
+  })
 
   if (!membership) {
-    throw new AppError(
-      'GYM_MEMBER_NOT_FOUND',
-      404,
-      'Membro não encontrado.',
-    )
+    throw new AppError('GYM_MEMBER_NOT_FOUND', 404, 'Membro não encontrado.')
   }
 
-  if (
-    membership.userId ===
-      actorUserId &&
-    membership.role ===
-      'OWNER'
-  ) {
+  if (membership.userId === actorUserId && membership.role === 'OWNER') {
     throw new AppError(
       'OWNER_SELF_CHANGE_NOT_ALLOWED',
       409,
@@ -565,12 +427,7 @@ export async function updateGymMemberRole(
     )
   }
 
-  if (
-    membership.role ===
-      'OWNER' &&
-    actorRole !==
-      'OWNER'
-  ) {
+  if (membership.role === 'OWNER' && actorRole !== 'OWNER') {
     throw new AppError(
       'OWNER_MANAGEMENT_NOT_ALLOWED',
       403,
@@ -578,12 +435,7 @@ export async function updateGymMemberRole(
     )
   }
 
-  if (
-    input.role ===
-      'OWNER' &&
-    actorRole !==
-      'OWNER'
-  ) {
+  if (input.role === 'OWNER' && actorRole !== 'OWNER') {
     throw new AppError(
       'OWNER_ASSIGNMENT_NOT_ALLOWED',
       403,
@@ -591,16 +443,7 @@ export async function updateGymMemberRole(
     )
   }
 
-  if (
-    actorRole ===
-      'ADMIN' &&
-    (
-      membership.role ===
-        'ADMIN' ||
-      input.role ===
-        'ADMIN'
-    )
-  ) {
+  if (actorRole === 'ADMIN' && (membership.role === 'ADMIN' || input.role === 'ADMIN')) {
     throw new AppError(
       'ADMIN_ROLE_MANAGEMENT_NOT_ALLOWED',
       403,
@@ -608,88 +451,72 @@ export async function updateGymMemberRole(
     )
   }
 
-  const previousRole =
-    membership.role
+  const previousRole = membership.role
 
-  const member =
-    await prisma.gymMembership.update({
-      where: {
-        id:
-          membership.id,
-      },
+  const member = await prisma.gymMembership.update({
+    where: {
+      id: membership.id,
+    },
 
-      data: {
-        role:
-          input.role,
-      },
+    data: {
+      role: input.role,
+    },
 
-      select: {
-        id: true,
-        role: true,
-        active: true,
-        joinedAt: true,
-        createdAt: true,
-        updatedAt: true,
+    select: {
+      id: true,
+      role: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
 
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            avatarUrl: true,
-            active: true,
-          },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          active: true,
         },
       },
-    })
+    },
+  })
 
   await createAuditLog({
     gymId,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'UPDATE',
+    action: 'UPDATE',
 
-    entity:
-      'GYM_MEMBERSHIP',
+    entity: 'GYM_MEMBERSHIP',
 
-    entityId:
-      member.id,
+    entityId: member.id,
 
     oldValues: {
-      role:
-        previousRole,
+      role: previousRole,
     },
 
     newValues: {
-      role:
-        member.role,
+      role: member.role,
     },
 
     metadata: {
-      source:
-        'gym-members',
+      source: 'gym-members',
 
-      memberUserId:
-        member.user.id,
+      memberUserId: member.user.id,
 
-      memberName:
-        member.user.name,
+      memberName: member.user.name,
 
-      memberEmail:
-        member.user.email,
+      memberEmail: member.user.email,
 
       actorRole,
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return member
@@ -703,35 +530,26 @@ export async function updateGymMemberStatus(
   input: UpdateGymMemberStatusInput,
   auditContext: GymAuditContext,
 ) {
-  const membership =
-    await prisma.gymMembership.findFirst({
-      where: {
-        id:
-          memberId,
+  const membership = await prisma.gymMembership.findFirst({
+    where: {
+      id: memberId,
 
-        gymId,
-      },
+      gymId,
+    },
 
-      select: {
-        id: true,
-        userId: true,
-        role: true,
-        active: true,
-      },
-    })
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      active: true,
+    },
+  })
 
   if (!membership) {
-    throw new AppError(
-      'GYM_MEMBER_NOT_FOUND',
-      404,
-      'Membro não encontrado.',
-    )
+    throw new AppError('GYM_MEMBER_NOT_FOUND', 404, 'Membro não encontrado.')
   }
 
-  if (
-    membership.userId ===
-      actorUserId
-  ) {
+  if (membership.userId === actorUserId) {
     throw new AppError(
       'MEMBER_SELF_STATUS_NOT_ALLOWED',
       409,
@@ -739,10 +557,7 @@ export async function updateGymMemberStatus(
     )
   }
 
-  if (
-    membership.role ===
-      'OWNER'
-  ) {
+  if (membership.role === 'OWNER') {
     throw new AppError(
       'OWNER_STATUS_CHANGE_NOT_ALLOWED',
       403,
@@ -750,12 +565,7 @@ export async function updateGymMemberStatus(
     )
   }
 
-  if (
-    actorRole ===
-      'ADMIN' &&
-    membership.role ===
-      'ADMIN'
-  ) {
+  if (actorRole === 'ADMIN' && membership.role === 'ADMIN') {
     throw new AppError(
       'ADMIN_MANAGEMENT_NOT_ALLOWED',
       403,
@@ -763,106 +573,82 @@ export async function updateGymMemberStatus(
     )
   }
 
-  if (
-    membership.active ===
-      input.active
-  ) {
+  if (membership.active === input.active) {
     throw new AppError(
-      input.active
-        ? 'GYM_MEMBER_ALREADY_ACTIVE'
-        : 'GYM_MEMBER_ALREADY_INACTIVE',
+      input.active ? 'GYM_MEMBER_ALREADY_ACTIVE' : 'GYM_MEMBER_ALREADY_INACTIVE',
       409,
-      input.active
-        ? 'O membro já está ativo.'
-        : 'O membro já está inativo.',
+      input.active ? 'O membro já está ativo.' : 'O membro já está inativo.',
     )
   }
 
-  const previousActive =
-    membership.active
+  const previousActive = membership.active
 
-  const member =
-    await prisma.gymMembership.update({
-      where: {
-        id:
-          membership.id,
-      },
+  const member = await prisma.gymMembership.update({
+    where: {
+      id: membership.id,
+    },
 
-      data: {
-        active:
-          input.active,
-      },
+    data: {
+      active: input.active,
+    },
 
-      select: {
-        id: true,
-        role: true,
-        active: true,
-        joinedAt: true,
-        createdAt: true,
-        updatedAt: true,
+    select: {
+      id: true,
+      role: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
 
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            avatarUrl: true,
-            active: true,
-          },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          active: true,
         },
       },
-    })
+    },
+  })
 
   await createAuditLog({
     gymId,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'STATUS_CHANGE',
+    action: 'STATUS_CHANGE',
 
-    entity:
-      'GYM_MEMBERSHIP',
+    entity: 'GYM_MEMBERSHIP',
 
-    entityId:
-      member.id,
+    entityId: member.id,
 
     oldValues: {
-      active:
-        previousActive,
+      active: previousActive,
     },
 
     newValues: {
-      active:
-        member.active,
+      active: member.active,
     },
 
     metadata: {
-      source:
-        'gym-members',
+      source: 'gym-members',
 
-      memberUserId:
-        member.user.id,
+      memberUserId: member.user.id,
 
-      memberName:
-        member.user.name,
+      memberName: member.user.name,
 
-      memberEmail:
-        member.user.email,
+      memberEmail: member.user.email,
 
-      memberRole:
-        member.role,
+      memberRole: member.role,
 
       actorRole,
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return member

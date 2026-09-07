@@ -1,6 +1,7 @@
 # ADR-004 — Student separado de User
 
 ## Status
+
 Aceito para próxima fase
 
 Academias precisam cadastrar alunos sem obrigar criação de login.

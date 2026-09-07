@@ -1,9 +1,4 @@
-export type GymRole =
-  | 'OWNER'
-  | 'ADMIN'
-  | 'RECEPTIONIST'
-  | 'PROFESSOR'
-  | 'STUDENT'
+export type GymRole = 'OWNER' | 'ADMIN' | 'RECEPTIONIST' | 'PROFESSOR' | 'STUDENT'
 
 export interface Gym {
   id: string

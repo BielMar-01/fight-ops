@@ -14,10 +14,7 @@
 }
 
 .app-state-card {
-  width: min(
-    100%,
-    480px
-  );
+  width: min(100%, 480px);
 
   display: flex;
   flex-direction: column;
@@ -27,13 +24,11 @@
 
   padding: 32px 24px;
 
-  border: 1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 18px;
 
-  background:
-    var(--color-surface);
+  background: var(--color-surface);
 
   text-align: center;
 }
@@ -41,19 +36,13 @@
 .app-state-card h1 {
   margin: 0;
 
-  font-size:
-    clamp(
-      1.5rem,
-      6vw,
-      2rem
-    );
+  font-size: clamp(1.5rem, 6vw, 2rem);
 }
 
 .app-state-card p {
   margin: 0;
 
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   line-height: 1.6;
 }
@@ -64,24 +53,18 @@
 
   display: block;
 
-  border: 3px solid
-    var(--border-color);
+  border: 3px solid var(--border-color);
 
-  border-top-color:
-    var(--color-primary);
+  border-top-color: var(--color-primary);
 
   border-radius: 50%;
 
-  animation:
-    gym-loading-spin
-    0.8s linear
-    infinite;
+  animation: gym-loading-spin 0.8s linear infinite;
 }
 
 @keyframes gym-loading-spin {
   to {
-    transform:
-      rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
@@ -100,21 +83,14 @@
   background:
     radial-gradient(
       circle at 15% 15%,
-      color-mix(
-        in srgb,
-        var(--color-primary) 12%,
-        transparent
-      ),
+      color-mix(in srgb, var(--color-primary) 12%, transparent),
       transparent 38%
     ),
     var(--color-background);
 }
 
 .gym-onboarding-container {
-  width: min(
-    100%,
-    1100px
-  );
+  width: min(100%, 1100px);
 
   display: grid;
 
@@ -139,15 +115,9 @@
 
   border-radius: 100px;
 
-  background:
-    color-mix(
-      in srgb,
-      var(--color-primary) 12%,
-      transparent
-    );
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
 
-  color:
-    var(--color-primary);
+  color: var(--color-primary);
 
   font-size: 0.68rem;
 
@@ -155,26 +125,17 @@
 
   letter-spacing: 0.08em;
 
-  text-transform:
-    uppercase;
+  text-transform: uppercase;
 }
 
 .gym-onboarding-intro h1 {
-  margin:
-    18px 0
-    12px;
+  margin: 18px 0 12px;
 
-  font-size:
-    clamp(
-      2.2rem,
-      10vw,
-      4rem
-    );
+  font-size: clamp(2.2rem, 10vw, 4rem);
 
   line-height: 1;
 
-  letter-spacing:
-    -0.05em;
+  letter-spacing: -0.05em;
 }
 
 .gym-onboarding-intro > p {
@@ -182,8 +143,7 @@
 
   margin: 0;
 
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   line-height: 1.7;
 }
@@ -204,17 +164,11 @@
 
   padding: 15px 16px;
 
-  border: 1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 12px;
 
-  background:
-    color-mix(
-      in srgb,
-      var(--color-surface) 75%,
-      transparent
-    );
+  background: color-mix(in srgb, var(--color-surface) 75%, transparent);
 }
 
 .gym-onboarding-benefits strong {
@@ -222,8 +176,7 @@
 }
 
 .gym-onboarding-benefits span {
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.76rem;
 
@@ -237,13 +190,11 @@
 .gym-onboarding-card {
   padding: 24px;
 
-  border: 1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 18px;
 
-  background:
-    var(--color-surface);
+  background: var(--color-surface);
 }
 
 .gym-onboarding-card-header {
@@ -251,24 +202,19 @@
 }
 
 .gym-onboarding-card-header > span {
-  color:
-    var(--color-primary);
+  color: var(--color-primary);
 
   font-size: 0.68rem;
 
   font-weight: 800;
 
-  letter-spacing:
-    0.08em;
+  letter-spacing: 0.08em;
 
-  text-transform:
-    uppercase;
+  text-transform: uppercase;
 }
 
 .gym-onboarding-card-header h2 {
-  margin:
-    7px 0
-    8px;
+  margin: 7px 0 8px;
 
   font-size: 1.4rem;
 }
@@ -276,8 +222,7 @@
 .gym-onboarding-card-header p {
   margin: 0;
 
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.82rem;
 
@@ -295,8 +240,7 @@
 
   gap: 8px;
 
-  color:
-    var(--color-text);
+  color: var(--color-text);
 
   font-size: 0.78rem;
 
@@ -304,8 +248,7 @@
 }
 
 .gym-onboarding-form label > span {
-  color:
-    var(--color-primary);
+  color: var(--color-primary);
 }
 
 .gym-onboarding-form input,
@@ -314,26 +257,21 @@
 
   padding: 13px 14px;
 
-  border: 1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 10px;
 
   outline: none;
 
-  background:
-    var(--color-background);
+  background: var(--color-background);
 
-  color:
-    var(--color-text);
+  color: var(--color-text);
 
   font: inherit;
 
   font-weight: 400;
 
-  transition:
-    border-color
-    0.2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .gym-onboarding-form input {
@@ -348,8 +286,7 @@
 
 .gym-onboarding-form input:focus,
 .gym-onboarding-form textarea:focus {
-  border-color:
-    var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .gym-onboarding-form input:disabled,
@@ -368,24 +305,13 @@
 .gym-onboarding-error {
   padding: 12px 14px;
 
-  border: 1px solid
-    color-mix(
-      in srgb,
-      var(--color-primary) 40%,
-      transparent
-    );
+  border: 1px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
 
   border-radius: 10px;
 
-  background:
-    color-mix(
-      in srgb,
-      var(--color-primary) 8%,
-      transparent
-    );
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 
-  color:
-    var(--color-text);
+  color: var(--color-text);
 
   font-size: 0.8rem;
 
@@ -412,11 +338,7 @@
   }
 
   .gym-onboarding-form-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

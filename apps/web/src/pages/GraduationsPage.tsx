@@ -1,30 +1,14 @@
-import {
-  type FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
 
-import {
-  useGym,
-} from '../contexts/GymContext'
+import { useGym } from '../contexts/GymContext'
 
-import {
-  listGraduations,
-} from '../services/graduation.service'
+import { listGraduations } from '../services/graduation.service'
 
-import {
-  getModalities,
-} from '../services/modality.service'
+import { getModalities } from '../services/modality.service'
 
-import type {
-  Graduation,
-  Pagination,
-} from '../types/graduation'
+import type { Graduation, Pagination } from '../types/graduation'
 
-import type {
-  Modality,
-} from '../types/modality'
+import type { Modality } from '../types/modality'
 
 import '../styles/graduations.css'
 
@@ -37,10 +21,7 @@ const initialPagination: Pagination = {
   totalPages: 0,
 }
 
-type StatusFilter =
-  | 'all'
-  | 'active'
-  | 'inactive'
+type StatusFilter = 'all' | 'active' | 'inactive'
 
 interface GraduationSummary {
   total: number
@@ -54,9 +35,7 @@ const initialSummary: GraduationSummary = {
   inactive: 0,
 }
 
-function getActiveFilter(
-  status: StatusFilter,
-) {
+function getActiveFilter(status: StatusFilter) {
   if (status === 'active') {
     return true
   }
@@ -68,439 +47,220 @@ function getActiveFilter(
   return undefined
 }
 
-function getGraduationInitial(
-  name: string,
-) {
-  return name
-    .charAt(0)
-    .toUpperCase()
+function getGraduationInitial(name: string) {
+  return name.charAt(0).toUpperCase()
 }
 
 export function GraduationsPage() {
-  const {
-    activeGym,
-  } = useGym()
+  const { activeGym } = useGym()
 
-  const [
-    modalities,
-    setModalities,
-  ] = useState<Modality[]>(
-    [],
-  )
+  const [modalities, setModalities] = useState<Modality[]>([])
 
-  const [
-    selectedModalityId,
-    setSelectedModalityId,
-  ] = useState('')
+  const [selectedModalityId, setSelectedModalityId] = useState('')
 
-  const [
-    graduations,
-    setGraduations,
-  ] = useState<Graduation[]>(
-    [],
-  )
+  const [graduations, setGraduations] = useState<Graduation[]>([])
 
-  const [
-    pagination,
-    setPagination,
-  ] =
-    useState<Pagination>(
-      initialPagination,
-    )
+  const [pagination, setPagination] = useState<Pagination>(initialPagination)
 
-  const [
-    summary,
-    setSummary,
-  ] =
-    useState<GraduationSummary>(
-      initialSummary,
-    )
+  const [summary, setSummary] = useState<GraduationSummary>(initialSummary)
 
-  const [
-    page,
-    setPage,
-  ] = useState(1)
+  const [page, setPage] = useState(1)
 
-  const [
-    searchInput,
-    setSearchInput,
-  ] = useState('')
+  const [searchInput, setSearchInput] = useState('')
 
-  const [
-    appliedSearch,
-    setAppliedSearch,
-  ] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] =
-    useState<StatusFilter>(
-      'all',
-    )
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
 
-  const [
-    modalitiesLoading,
-    setModalitiesLoading,
-  ] = useState(true)
+  const [modalitiesLoading, setModalitiesLoading] = useState(true)
 
-  const [
-    modalitiesError,
-    setModalitiesError,
-  ] = useState<string | null>(
-    null,
-  )
+  const [modalitiesError, setModalitiesError] = useState<string | null>(null)
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const [
-    error,
-    setError,
-  ] = useState<string | null>(
-    null,
-  )
+  const [error, setError] = useState<string | null>(null)
 
   const canViewGraduations =
-    activeGym?.role ===
-      'OWNER' ||
-    activeGym?.role ===
-      'ADMIN' ||
-    activeGym?.role ===
-      'RECEPTIONIST' ||
-    activeGym?.role ===
-      'PROFESSOR'
+    activeGym?.role === 'OWNER' ||
+    activeGym?.role === 'ADMIN' ||
+    activeGym?.role === 'RECEPTIONIST' ||
+    activeGym?.role === 'PROFESSOR'
 
-  const selectedModality =
-    modalities.find(
-      (modality) =>
-        modality.id ===
-        selectedModalityId,
-    ) ?? null
+  const selectedModality = modalities.find((modality) => modality.id === selectedModalityId) ?? null
 
-  const loadModalities =
-    useCallback(
-      async () => {
-        if (!activeGym) {
-          setModalities([])
+  const loadModalities = useCallback(async () => {
+    if (!activeGym) {
+      setModalities([])
 
-          setSelectedModalityId(
-            '',
-          )
+      setSelectedModalityId('')
 
-          setModalitiesLoading(
-            false,
-          )
+      setModalitiesLoading(false)
 
-          return
+      return
+    }
+
+    if (activeGym.role === 'STUDENT') {
+      setModalities([])
+
+      setSelectedModalityId('')
+
+      setModalitiesError(null)
+
+      setModalitiesLoading(false)
+
+      return
+    }
+
+    try {
+      setModalitiesLoading(true)
+
+      setModalitiesError(null)
+
+      const response = await getModalities(activeGym.id, {
+        page: 1,
+        limit: 100,
+      })
+
+      setModalities(response.modalities)
+
+      setSelectedModalityId((currentModalityId) => {
+        const currentExists = response.modalities.some(
+          (modality) => modality.id === currentModalityId,
+        )
+
+        if (currentModalityId && currentExists) {
+          return currentModalityId
         }
 
-        if (
-          activeGym.role ===
-          'STUDENT'
-        ) {
-          setModalities([])
+        const firstActive = response.modalities.find((modality) => modality.active)
 
-          setSelectedModalityId(
-            '',
-          )
+        return firstActive?.id ?? response.modalities[0]?.id ?? ''
+      })
+    } catch {
+      setModalities([])
 
-          setModalitiesError(
-            null,
-          )
+      setSelectedModalityId('')
 
-          setModalitiesLoading(
-            false,
-          )
+      setModalitiesError('Não foi possível carregar as modalidades.')
+    } finally {
+      setModalitiesLoading(false)
+    }
+  }, [activeGym])
 
-          return
-        }
+  const loadSummary = useCallback(async () => {
+    if (!activeGym || !selectedModalityId || !canViewGraduations) {
+      setSummary(initialSummary)
 
-        try {
-          setModalitiesLoading(
-            true,
-          )
+      return
+    }
 
-          setModalitiesError(
-            null,
-          )
+    try {
+      const [activeResponse, inactiveResponse] = await Promise.all([
+        listGraduations(activeGym.id, selectedModalityId, {
+          page: 1,
+          limit: 1,
+          active: true,
+        }),
 
-          const response =
-            await getModalities(
-              activeGym.id,
-              {
-                page: 1,
-                limit: 100,
-              },
-            )
+        listGraduations(activeGym.id, selectedModalityId, {
+          page: 1,
+          limit: 1,
+          active: false,
+        }),
+      ])
 
-          setModalities(
-            response.modalities,
-          )
+      const activeTotal = activeResponse.pagination.total
 
-          setSelectedModalityId(
-            (
-              currentModalityId,
-            ) => {
-              const currentExists =
-                response.modalities.some(
-                  (modality) =>
-                    modality.id ===
-                    currentModalityId,
-                )
+      const inactiveTotal = inactiveResponse.pagination.total
 
-              if (
-                currentModalityId &&
-                currentExists
-              ) {
-                return currentModalityId
-              }
+      setSummary({
+        total: activeTotal + inactiveTotal,
 
-              const firstActive =
-                response.modalities.find(
-                  (modality) =>
-                    modality.active,
-                )
+        active: activeTotal,
 
-              return (
-                firstActive?.id ??
-                response
-                  .modalities[0]
-                  ?.id ??
-                ''
-              )
-            },
-          )
-        } catch {
-          setModalities([])
+        inactive: inactiveTotal,
+      })
+    } catch {
+      setSummary(initialSummary)
+    }
+  }, [activeGym, selectedModalityId, canViewGraduations])
 
-          setSelectedModalityId(
-            '',
-          )
+  const loadGraduations = useCallback(async () => {
+    if (!activeGym || !selectedModalityId) {
+      setGraduations([])
 
-          setModalitiesError(
-            'Não foi possível carregar as modalidades.',
-          )
-        } finally {
-          setModalitiesLoading(
-            false,
-          )
-        }
-      },
-      [
-        activeGym,
-      ],
-    )
+      setPagination(initialPagination)
 
-  const loadSummary =
-    useCallback(
-      async () => {
-        if (
-          !activeGym ||
-          !selectedModalityId ||
-          !canViewGraduations
-        ) {
-          setSummary(
-            initialSummary,
-          )
+      setLoading(false)
 
-          return
-        }
+      return
+    }
 
-        try {
-          const [
-            activeResponse,
-            inactiveResponse,
-          ] =
-            await Promise.all([
-              listGraduations(
-                activeGym.id,
-                selectedModalityId,
-                {
-                  page: 1,
-                  limit: 1,
-                  active:
-                    true,
-                },
-              ),
+    if (!canViewGraduations) {
+      setGraduations([])
 
-              listGraduations(
-                activeGym.id,
-                selectedModalityId,
-                {
-                  page: 1,
-                  limit: 1,
-                  active:
-                    false,
-                },
-              ),
-            ])
+      setPagination(initialPagination)
 
-          const activeTotal =
-            activeResponse
-              .pagination
-              .total
+      setSummary(initialSummary)
 
-          const inactiveTotal =
-            inactiveResponse
-              .pagination
-              .total
+      setError(null)
 
-          setSummary({
-            total:
-              activeTotal +
-              inactiveTotal,
+      setLoading(false)
 
-            active:
-              activeTotal,
+      return
+    }
 
-            inactive:
-              inactiveTotal,
-          })
-        } catch {
-          setSummary(
-            initialSummary,
-          )
-        }
-      },
-      [
-        activeGym,
-        selectedModalityId,
-        canViewGraduations,
-      ],
-    )
+    const active = getActiveFilter(statusFilter)
 
-  const loadGraduations =
-    useCallback(
-      async () => {
-        if (
-          !activeGym ||
-          !selectedModalityId
-        ) {
-          setGraduations([])
+    try {
+      setLoading(true)
 
-          setPagination(
-            initialPagination,
-          )
+      setError(null)
 
-          setLoading(false)
-
-          return
-        }
-
-        if (
-          !canViewGraduations
-        ) {
-          setGraduations([])
-
-          setPagination(
-            initialPagination,
-          )
-
-          setSummary(
-            initialSummary,
-          )
-
-          setError(null)
-
-          setLoading(false)
-
-          return
-        }
-
-        const active =
-          getActiveFilter(
-            statusFilter,
-          )
-
-        try {
-          setLoading(true)
-
-          setError(null)
-
-          const response =
-            await listGraduations(
-              activeGym.id,
-              selectedModalityId,
-              {
-                page,
-
-                limit:
-                  PAGE_LIMIT,
-
-                search:
-                  appliedSearch ||
-                  undefined,
-
-                active,
-              },
-            )
-
-          setGraduations(
-            response.graduations,
-          )
-
-          setPagination(
-            response.pagination,
-          )
-        } catch {
-          setGraduations([])
-
-          setPagination(
-            initialPagination,
-          )
-
-          setError(
-            'Não foi possível carregar as graduações.',
-          )
-        } finally {
-          setLoading(false)
-        }
-      },
-      [
-        activeGym,
-        selectedModalityId,
+      const response = await listGraduations(activeGym.id, selectedModalityId, {
         page,
-        appliedSearch,
-        statusFilter,
-        canViewGraduations,
-      ],
-    )
+
+        limit: PAGE_LIMIT,
+
+        search: appliedSearch || undefined,
+
+        active,
+      })
+
+      setGraduations(response.graduations)
+
+      setPagination(response.pagination)
+    } catch {
+      setGraduations([])
+
+      setPagination(initialPagination)
+
+      setError('Não foi possível carregar as graduações.')
+    } finally {
+      setLoading(false)
+    }
+  }, [activeGym, selectedModalityId, page, appliedSearch, statusFilter, canViewGraduations])
 
   useEffect(() => {
     void loadModalities()
-  }, [
-    loadModalities,
-  ])
+  }, [loadModalities])
 
   useEffect(() => {
     void loadGraduations()
-  }, [
-    loadGraduations,
-  ])
+  }, [loadGraduations])
 
   useEffect(() => {
     void loadSummary()
-  }, [
-    loadSummary,
-  ])
+  }, [loadSummary])
 
   useEffect(() => {
-    setSelectedModalityId(
-      '',
-    )
+    setSelectedModalityId('')
 
     setGraduations([])
 
-    setPagination(
-      initialPagination,
-    )
+    setPagination(initialPagination)
 
-    setSummary(
-      initialSummary,
-    )
+    setSummary(initialSummary)
 
     setPage(1)
 
@@ -508,26 +268,17 @@ export function GraduationsPage() {
 
     setAppliedSearch('')
 
-    setStatusFilter(
-      'all',
-    )
+    setStatusFilter('all')
 
     setError(null)
-  }, [
-    activeGym?.id,
-  ])
+  }, [activeGym?.id])
 
-  function handleSearch(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     setPage(1)
 
-    setAppliedSearch(
-      searchInput.trim(),
-    )
+    setAppliedSearch(searchInput.trim())
   }
 
   function handleClearFilters() {
@@ -535,37 +286,25 @@ export function GraduationsPage() {
 
     setAppliedSearch('')
 
-    setStatusFilter(
-      'all',
-    )
+    setStatusFilter('all')
 
     setPage(1)
   }
 
-  function handleModalityChange(
-    modalityId: string,
-  ) {
-    setSelectedModalityId(
-      modalityId,
-    )
+  function handleModalityChange(modalityId: string) {
+    setSelectedModalityId(modalityId)
 
     setGraduations([])
 
-    setPagination(
-      initialPagination,
-    )
+    setPagination(initialPagination)
 
-    setSummary(
-      initialSummary,
-    )
+    setSummary(initialSummary)
 
     setSearchInput('')
 
     setAppliedSearch('')
 
-    setStatusFilter(
-      'all',
-    )
+    setStatusFilter('all')
 
     setPage(1)
 
@@ -573,121 +312,61 @@ export function GraduationsPage() {
   }
 
   function handlePreviousPage() {
-    setPage(
-      (currentPage) =>
-        Math.max(
-          1,
-          currentPage - 1,
-        ),
-    )
+    setPage((currentPage) => Math.max(1, currentPage - 1))
   }
 
   function handleNextPage() {
-    setPage(
-      (currentPage) =>
-        Math.min(
-          pagination.totalPages,
-          currentPage + 1,
-        ),
-    )
+    setPage((currentPage) => Math.min(pagination.totalPages, currentPage + 1))
   }
 
-  const hasFilters =
-    appliedSearch.length > 0 ||
-    statusFilter !== 'all'
+  const hasFilters = appliedSearch.length > 0 || statusFilter !== 'all'
 
-  const hasPreviousPage =
-    pagination.page > 1
+  const hasPreviousPage = pagination.page > 1
 
-  const hasNextPage =
-    pagination.page <
-    pagination.totalPages
+  const hasNextPage = pagination.page < pagination.totalPages
 
-  if (
-    activeGym &&
-    !canViewGraduations
-  ) {
+  if (activeGym && !canViewGraduations) {
     return (
-      <section
-        className="graduations-page"
-        data-testid="graduations-page"
-      >
-        <div
-          className="graduations-access-denied"
-          data-testid="graduations-access-denied"
-        >
-          <div className="graduations-access-denied-icon">
-            !
-          </div>
+      <section className="graduations-page" data-testid="graduations-page">
+        <div className="graduations-access-denied" data-testid="graduations-access-denied">
+          <div className="graduations-access-denied-icon">!</div>
 
-          <span className="graduations-eyebrow">
-            Acesso restrito
-          </span>
+          <span className="graduations-eyebrow">Acesso restrito</span>
 
-          <h1>
-            Área não disponível
-          </h1>
+          <h1>Área não disponível</h1>
 
-          <p>
-            Seu perfil nesta academia
-            não possui acesso à gestão
-            de graduações.
-          </p>
+          <p>Seu perfil nesta academia não possui acesso à gestão de graduações.</p>
         </div>
       </section>
     )
   }
 
   return (
-    <section
-      className="graduations-page"
-      data-testid="graduations-page"
-    >
+    <section className="graduations-page" data-testid="graduations-page">
       <header className="graduations-header">
         <div>
-          <span className="graduations-eyebrow">
-            Gestão acadêmica
-          </span>
+          <span className="graduations-eyebrow">Gestão acadêmica</span>
 
-          <h1>
-            Graduações
-          </h1>
+          <h1>Graduações</h1>
 
-          <p>
-            Consulte as faixas e
-            graduações configuradas
-            para cada modalidade da
-            academia.
-          </p>
+          <p>Consulte as faixas e graduações configuradas para cada modalidade da academia.</p>
         </div>
       </header>
 
       {modalitiesLoading ? (
-        <div
-          className="graduations-state"
-          data-testid="graduations-modalities-loading"
-        >
-          <div
-            className="graduations-loading-spinner"
-            aria-hidden="true"
-          />
+        <div className="graduations-state" data-testid="graduations-modalities-loading">
+          <div className="graduations-loading-spinner" aria-hidden="true" />
 
-          <span>
-            Carregando modalidades...
-          </span>
+          <span>Carregando modalidades...</span>
         </div>
       ) : modalitiesError ? (
         <div
           className="graduations-state graduations-state-error"
           data-testid="graduations-modalities-error"
         >
-          <strong>
-            Não foi possível carregar as modalidades
-          </strong>
+          <strong>Não foi possível carregar as modalidades</strong>
 
-          <span>
-            {modalitiesError}
-          </span>
+          <span>{modalitiesError}</span>
 
           <button
             type="button"
@@ -700,71 +379,32 @@ export function GraduationsPage() {
             Tentar novamente
           </button>
         </div>
-      ) : modalities.length ===
-        0 ? (
-        <div
-          className="graduations-empty"
-          data-testid="graduations-no-modalities"
-        >
-          <h2>
-            Nenhuma modalidade cadastrada
-          </h2>
+      ) : modalities.length === 0 ? (
+        <div className="graduations-empty" data-testid="graduations-no-modalities">
+          <h2>Nenhuma modalidade cadastrada</h2>
 
-          <p>
-            Cadastre uma modalidade
-            antes de configurar suas
-            graduações.
-          </p>
+          <p>Cadastre uma modalidade antes de configurar suas graduações.</p>
         </div>
       ) : (
         <>
-          <div
-            className="graduations-modality-panel"
-            data-testid="graduations-modality-panel"
-          >
+          <div className="graduations-modality-panel" data-testid="graduations-modality-panel">
             <div className="graduations-field">
-              <label
-                htmlFor="graduations-modality"
-              >
-                Modalidade
-              </label>
+              <label htmlFor="graduations-modality">Modalidade</label>
 
               <select
                 id="graduations-modality"
-                value={
-                  selectedModalityId
-                }
+                value={selectedModalityId}
                 data-testid="graduations-modality-select"
-                onChange={(
-                  event,
-                ) => {
-                  handleModalityChange(
-                    event.target
-                      .value,
-                  )
+                onChange={(event) => {
+                  handleModalityChange(event.target.value)
                 }}
               >
-                {modalities.map(
-                  (
-                    modality,
-                  ) => (
-                    <option
-                      key={
-                        modality.id
-                      }
-                      value={
-                        modality.id
-                      }
-                    >
-                      {
-                        modality.name
-                      }
-                      {!modality.active
-                        ? ' — Inativa'
-                        : ''}
-                    </option>
-                  ),
-                )}
+                {modalities.map((modality) => (
+                  <option key={modality.id} value={modality.id}>
+                    {modality.name}
+                    {!modality.active ? ' — Inativa' : ''}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -778,129 +418,65 @@ export function GraduationsPage() {
                   style={
                     selectedModality.color
                       ? {
-                          backgroundColor:
-                            selectedModality.color,
+                          backgroundColor: selectedModality.color,
                         }
                       : undefined
                   }
                   data-testid="graduations-selected-modality-color"
                 >
-                  {!selectedModality.color
-                    ? selectedModality.name
-                        .charAt(0)
-                        .toUpperCase()
-                    : null}
+                  {!selectedModality.color ? selectedModality.name.charAt(0).toUpperCase() : null}
                 </div>
 
                 <div>
-                  <span>
-                    Modalidade selecionada
-                  </span>
+                  <span>Modalidade selecionada</span>
 
-                  <strong>
-                    {
-                      selectedModality.name
-                    }
-                  </strong>
+                  <strong>{selectedModality.name}</strong>
 
-                  <small>
-                    {selectedModality.active
-                      ? 'Ativa'
-                      : 'Inativa'}
-                  </small>
+                  <small>{selectedModality.active ? 'Ativa' : 'Inativa'}</small>
                 </div>
               </div>
             ) : null}
           </div>
 
-          <div
-            className="graduations-summary"
-            data-testid="graduations-summary"
-          >
-            <div
-              className="graduations-summary-card"
-              data-testid="graduations-summary-total"
-            >
-              <span>
-                Total
-              </span>
+          <div className="graduations-summary" data-testid="graduations-summary">
+            <div className="graduations-summary-card" data-testid="graduations-summary-total">
+              <span>Total</span>
 
-              <strong>
-                {summary.total}
-              </strong>
+              <strong>{summary.total}</strong>
 
-              <small>
-                Graduações cadastradas
-              </small>
+              <small>Graduações cadastradas</small>
             </div>
 
-            <div
-              className="graduations-summary-card"
-              data-testid="graduations-summary-active"
-            >
-              <span>
-                Ativas
-              </span>
+            <div className="graduations-summary-card" data-testid="graduations-summary-active">
+              <span>Ativas</span>
 
-              <strong>
-                {summary.active}
-              </strong>
+              <strong>{summary.active}</strong>
 
-              <small>
-                Graduações ativas
-              </small>
+              <small>Graduações ativas</small>
             </div>
 
-            <div
-              className="graduations-summary-card"
-              data-testid="graduations-summary-inactive"
-            >
-              <span>
-                Inativas
-              </span>
+            <div className="graduations-summary-card" data-testid="graduations-summary-inactive">
+              <span>Inativas</span>
 
-              <strong>
-                {summary.inactive}
-              </strong>
+              <strong>{summary.inactive}</strong>
 
-              <small>
-                Graduações inativas
-              </small>
+              <small>Graduações inativas</small>
             </div>
           </div>
 
-          <div
-            className="graduations-filters"
-            data-testid="graduations-filters"
-          >
-            <form
-              className="graduations-search-form"
-              onSubmit={
-                handleSearch
-              }
-            >
+          <div className="graduations-filters" data-testid="graduations-filters">
+            <form className="graduations-search-form" onSubmit={handleSearch}>
               <div className="graduations-field">
-                <label
-                  htmlFor="graduations-search"
-                >
-                  Buscar graduação
-                </label>
+                <label htmlFor="graduations-search">Buscar graduação</label>
 
                 <input
                   id="graduations-search"
                   type="search"
-                  value={
-                    searchInput
-                  }
+                  value={searchInput}
                   placeholder="Nome da graduação"
                   data-testid="graduations-search-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setSearchInput(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setSearchInput(event.target.value)
                   }}
                 />
               </div>
@@ -916,40 +492,23 @@ export function GraduationsPage() {
 
             <div className="graduations-filter-actions">
               <div className="graduations-field">
-                <label
-                  htmlFor="graduations-status"
-                >
-                  Status
-                </label>
+                <label htmlFor="graduations-status">Status</label>
 
                 <select
                   id="graduations-status"
-                  value={
-                    statusFilter
-                  }
+                  value={statusFilter}
                   data-testid="graduations-status-filter"
-                  onChange={(
-                    event,
-                  ) => {
-                    setStatusFilter(
-                      event.target
-                        .value as StatusFilter,
-                    )
+                  onChange={(event) => {
+                    setStatusFilter(event.target.value as StatusFilter)
 
                     setPage(1)
                   }}
                 >
-                  <option value="all">
-                    Todas
-                  </option>
+                  <option value="all">Todas</option>
 
-                  <option value="active">
-                    Ativas
-                  </option>
+                  <option value="active">Ativas</option>
 
-                  <option value="inactive">
-                    Inativas
-                  </option>
+                  <option value="inactive">Inativas</option>
                 </select>
               </div>
 
@@ -958,9 +517,7 @@ export function GraduationsPage() {
                   type="button"
                   className="graduations-button graduations-button-secondary"
                   data-testid="graduations-clear-filters-button"
-                  onClick={
-                    handleClearFilters
-                  }
+                  onClick={handleClearFilters}
                 >
                   Limpar filtros
                 </button>
@@ -969,31 +526,19 @@ export function GraduationsPage() {
           </div>
 
           {loading ? (
-            <div
-              className="graduations-state"
-              data-testid="graduations-loading"
-            >
-              <div
-                className="graduations-loading-spinner"
-                aria-hidden="true"
-              />
+            <div className="graduations-state" data-testid="graduations-loading">
+              <div className="graduations-loading-spinner" aria-hidden="true" />
 
-              <span>
-                Carregando graduações...
-              </span>
+              <span>Carregando graduações...</span>
             </div>
           ) : error ? (
             <div
               className="graduations-state graduations-state-error"
               data-testid="graduations-error"
             >
-              <strong>
-                Não foi possível carregar as graduações
-              </strong>
+              <strong>Não foi possível carregar as graduações</strong>
 
-              <span>
-                {error}
-              </span>
+              <span>{error}</span>
 
               <button
                 type="button"
@@ -1007,15 +552,9 @@ export function GraduationsPage() {
                 Tentar novamente
               </button>
             </div>
-          ) : graduations.length ===
-            0 ? (
-            <div
-              className="graduations-empty"
-              data-testid="graduations-empty"
-            >
-              <h2>
-                Nenhuma graduação encontrada
-              </h2>
+          ) : graduations.length === 0 ? (
+            <div className="graduations-empty" data-testid="graduations-empty">
+              <h2>Nenhuma graduação encontrada</h2>
 
               <p>
                 {hasFilters
@@ -1025,132 +564,85 @@ export function GraduationsPage() {
             </div>
           ) : (
             <>
-              <div
-                className="graduations-list"
-                data-testid="graduations-list"
-              >
-                {graduations.map(
-                  (
-                    graduation,
-                  ) => (
-                    <article
-                      key={
-                        graduation.id
-                      }
-                      className="graduation-card"
-                      data-testid={`graduation-card-${graduation.id}`}
-                    >
-                      <div className="graduation-card-main">
-                        <div
-                          className="graduation-order"
-                          data-testid={`graduation-order-${graduation.id}`}
-                        >
-                          <span>
-                            Ordem
-                          </span>
+              <div className="graduations-list" data-testid="graduations-list">
+                {graduations.map((graduation) => (
+                  <article
+                    key={graduation.id}
+                    className="graduation-card"
+                    data-testid={`graduation-card-${graduation.id}`}
+                  >
+                    <div className="graduation-card-main">
+                      <div
+                        className="graduation-order"
+                        data-testid={`graduation-order-${graduation.id}`}
+                      >
+                        <span>Ordem</span>
 
-                          <strong>
-                            {
-                              graduation.order
+                        <strong>{graduation.order}</strong>
+                      </div>
+
+                      <div
+                        className="graduation-color"
+                        data-testid={`graduation-color-${graduation.id}`}
+                        style={{
+                          backgroundColor: graduation.color ?? '#27272a',
+
+                          color: graduation.textColor ?? '#fafafa',
+                        }}
+                      >
+                        {!graduation.color
+                          ? getGraduationInitial(graduation.name)
+                          : graduation.order}
+                      </div>
+
+                      <div className="graduation-info">
+                        <div className="graduation-name-row">
+                          <h2>{graduation.name}</h2>
+
+                          <span
+                            className={
+                              graduation.active
+                                ? 'graduation-status graduation-status-active'
+                                : 'graduation-status graduation-status-inactive'
                             }
-                          </strong>
+                            data-testid={`graduation-status-${graduation.id}`}
+                          >
+                            {graduation.active ? 'Ativa' : 'Inativa'}
+                          </span>
                         </div>
 
-                        <div
-                          className="graduation-color"
-                          data-testid={`graduation-color-${graduation.id}`}
-                          style={{
-                            backgroundColor:
-                              graduation.color ??
-                              '#27272a',
+                        <p className="graduation-description">
+                          {graduation.description ?? 'Descrição não informada.'}
+                        </p>
 
-                            color:
-                              graduation.textColor ??
-                              '#fafafa',
-                          }}
-                        >
-                          {!graduation.color
-                            ? getGraduationInitial(
-                                graduation.name,
-                              )
-                            : graduation.order}
-                        </div>
-
-                        <div className="graduation-info">
-                          <div className="graduation-name-row">
-                            <h2>
-                              {
-                                graduation.name
-                              }
-                            </h2>
-
-                            <span
-                              className={
-                                graduation.active
-                                  ? 'graduation-status graduation-status-active'
-                                  : 'graduation-status graduation-status-inactive'
-                              }
-                              data-testid={`graduation-status-${graduation.id}`}
-                            >
-                              {graduation.active
-                                ? 'Ativa'
-                                : 'Inativa'}
+                        <div className="graduation-meta">
+                          {graduation.color ? (
+                            <span>
+                              Cor: <strong>{graduation.color}</strong>
                             </span>
-                          </div>
+                          ) : (
+                            <span>Cor não informada</span>
+                          )}
 
-                          <p className="graduation-description">
-                            {graduation.description ??
-                              'Descrição não informada.'}
-                          </p>
-
-                          <div className="graduation-meta">
-                            {graduation.color ? (
-                              <span>
-                                Cor:{' '}
-                                <strong>
-                                  {
-                                    graduation.color
-                                  }
-                                </strong>
-                              </span>
-                            ) : (
-                              <span>
-                                Cor não informada
-                              </span>
-                            )}
-
-                            {graduation.textColor ? (
-                              <span>
-                                Texto:{' '}
-                                <strong>
-                                  {
-                                    graduation.textColor
-                                  }
-                                </strong>
-                              </span>
-                            ) : null}
-                          </div>
+                          {graduation.textColor ? (
+                            <span>
+                              Texto: <strong>{graduation.textColor}</strong>
+                            </span>
+                          ) : null}
                         </div>
                       </div>
-                    </article>
-                  ),
-                )}
+                    </div>
+                  </article>
+                ))}
               </div>
 
-              <div
-                className="graduations-pagination"
-                data-testid="graduations-pagination"
-              >
+              <div className="graduations-pagination" data-testid="graduations-pagination">
                 <button
                   type="button"
                   className="graduations-button graduations-button-secondary"
-                  disabled={
-                    !hasPreviousPage
-                  }
+                  disabled={!hasPreviousPage}
                   data-testid="graduations-pagination-previous"
-                  onClick={
-                    handlePreviousPage
-                  }
+                  onClick={handlePreviousPage}
                 >
                   Anterior
                 </button>
@@ -1159,30 +651,16 @@ export function GraduationsPage() {
                   className="graduations-pagination-info"
                   data-testid="graduations-pagination-info"
                 >
-                  Página{' '}
-                  <strong>
-                    {
-                      pagination.page
-                    }
-                  </strong>{' '}
-                  de{' '}
-                  <strong>
-                    {
-                      pagination.totalPages
-                    }
-                  </strong>
+                  Página <strong>{pagination.page}</strong> de{' '}
+                  <strong>{pagination.totalPages}</strong>
                 </span>
 
                 <button
                   type="button"
                   className="graduations-button graduations-button-secondary"
-                  disabled={
-                    !hasNextPage
-                  }
+                  disabled={!hasNextPage}
                   data-testid="graduations-pagination-next"
-                  onClick={
-                    handleNextPage
-                  }
+                  onClick={handleNextPage}
                 >
                   Próxima
                 </button>

@@ -15,31 +15,15 @@ function getRefreshCookieOptions() {
   }
 }
 
-export function setRefreshTokenCookie(
-  reply: FastifyReply,
-  refreshToken: string,
-) {
-  const maxAge =
-    env.JWT_REFRESH_EXPIRATION_DAYS *
-    24 *
-    60 *
-    60
+export function setRefreshTokenCookie(reply: FastifyReply, refreshToken: string) {
+  const maxAge = env.JWT_REFRESH_EXPIRATION_DAYS * 24 * 60 * 60
 
-  reply.setCookie(
-    REFRESH_TOKEN_COOKIE_NAME,
-    refreshToken,
-    {
-      ...getRefreshCookieOptions(),
-      maxAge,
-    },
-  )
+  reply.setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+    ...getRefreshCookieOptions(),
+    maxAge,
+  })
 }
 
-export function clearRefreshTokenCookie(
-  reply: FastifyReply,
-) {
-  reply.clearCookie(
-    REFRESH_TOKEN_COOKIE_NAME,
-    getRefreshCookieOptions(),
-  )
+export function clearRefreshTokenCookie(reply: FastifyReply) {
+  reply.clearCookie(REFRESH_TOKEN_COOKIE_NAME, getRefreshCookieOptions())
 }

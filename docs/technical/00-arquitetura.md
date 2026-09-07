@@ -1,6 +1,7 @@
 # Arquitetura
 
 ## Status
+
 🟢 Base implementada
 
 ```text

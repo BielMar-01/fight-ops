@@ -1,14 +1,8 @@
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
-import {
-  createAuditLog,
-} from '../audit/audit.service.js'
+import { createAuditLog } from '../audit/audit.service.js'
 
 import type {
   CreateStudentInput,
@@ -23,71 +17,47 @@ interface StudentAuditContext {
   userAgent?: string | null
 }
 
-function normalizeOptionalText(
-  value?: string | null,
-) {
-  const normalized =
-    value?.trim()
+function normalizeOptionalText(value?: string | null) {
+  const normalized = value?.trim()
 
-  return normalized ||
-    null
+  return normalized || null
 }
 
-function parseOptionalDate(
-  value?: string | null,
-) {
+function parseOptionalDate(value?: string | null) {
   if (!value) {
     return null
   }
 
-  return new Date(
-    `${value}T00:00:00.000Z`,
-  )
+  return new Date(`${value}T00:00:00.000Z`)
 }
 
-function parseJoinedAt(
-  value?: string | null,
-) {
+function parseJoinedAt(value?: string | null) {
   if (!value) {
     return new Date()
   }
 
-  return new Date(
-    `${value}T00:00:00.000Z`,
-  )
+  return new Date(`${value}T00:00:00.000Z`)
 }
 
-function parseOptionalJoinedAt(
-  value?: string | null,
-) {
+function parseOptionalJoinedAt(value?: string | null) {
   if (!value) {
     return undefined
   }
 
-  return new Date(
-    `${value}T00:00:00.000Z`,
-  )
+  return new Date(`${value}T00:00:00.000Z`)
 }
 
-export async function listStudents(
-  gymId: string,
-  input: ListStudentsInput,
-) {
-  const skip =
-    (input.page - 1) *
-    input.limit
+export async function listStudents(gymId: string, input: ListStudentsInput) {
+  const skip = (input.page - 1) * input.limit
 
-  const search =
-    input.search?.trim()
+  const search = input.search?.trim()
 
   const where = {
     gymId,
 
-    ...(typeof input.active ===
-    'boolean'
+    ...(typeof input.active === 'boolean'
       ? {
-          active:
-            input.active,
+          active: input.active,
         }
       : {}),
 
@@ -96,31 +66,25 @@ export async function listStudents(
           OR: [
             {
               name: {
-                contains:
-                  search,
+                contains: search,
 
-                mode:
-                  'insensitive' as const,
+                mode: 'insensitive' as const,
               },
             },
 
             {
               email: {
-                contains:
-                  search,
+                contains: search,
 
-                mode:
-                  'insensitive' as const,
+                mode: 'insensitive' as const,
               },
             },
 
             {
               phone: {
-                contains:
-                  search,
+                contains: search,
 
-                mode:
-                  'insensitive' as const,
+                mode: 'insensitive' as const,
               },
             },
           ],
@@ -128,80 +92,17 @@ export async function listStudents(
       : {}),
   }
 
-  const [
-    students,
-    total,
-  ] =
-    await prisma.$transaction([
-      prisma.student.findMany({
-        where,
+  const [students, total] = await prisma.$transaction([
+    prisma.student.findMany({
+      where,
 
-        orderBy: {
-          name:
-            'asc',
-        },
-
-        skip,
-
-        take:
-          input.limit,
-
-        select: {
-          id: true,
-          gymId: true,
-          userId: true,
-          name: true,
-          email: true,
-          phone: true,
-          birthDate: true,
-          emergencyContact: true,
-          emergencyPhone: true,
-          notes: true,
-          active: true,
-          joinedAt: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      }),
-
-      prisma.student.count({
-        where,
-      }),
-    ])
-
-  return {
-    students,
-
-    pagination: {
-      page:
-        input.page,
-
-      limit:
-        input.limit,
-
-      total,
-
-      totalPages:
-        Math.ceil(
-          total /
-            input.limit,
-        ),
-    },
-  }
-}
-
-export async function getStudentById(
-  gymId: string,
-  studentId: string,
-) {
-  const student =
-    await prisma.student.findFirst({
-      where: {
-        id:
-          studentId,
-
-        gymId,
+      orderBy: {
+        name: 'asc',
       },
+
+      skip,
+
+      take: input.limit,
 
       select: {
         id: true,
@@ -219,14 +120,56 @@ export async function getStudentById(
         createdAt: true,
         updatedAt: true,
       },
-    })
+    }),
+
+    prisma.student.count({
+      where,
+    }),
+  ])
+
+  return {
+    students,
+
+    pagination: {
+      page: input.page,
+
+      limit: input.limit,
+
+      total,
+
+      totalPages: Math.ceil(total / input.limit),
+    },
+  }
+}
+
+export async function getStudentById(gymId: string, studentId: string) {
+  const student = await prisma.student.findFirst({
+    where: {
+      id: studentId,
+
+      gymId,
+    },
+
+    select: {
+      id: true,
+      gymId: true,
+      userId: true,
+      name: true,
+      email: true,
+      phone: true,
+      birthDate: true,
+      emergencyContact: true,
+      emergencyPhone: true,
+      notes: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
 
   if (!student) {
-    throw new AppError(
-      'STUDENT_NOT_FOUND',
-      404,
-      'Aluno não encontrado.',
-    )
+    throw new AppError('STUDENT_NOT_FOUND', 404, 'Aluno não encontrado.')
   }
 
   return student
@@ -237,96 +180,65 @@ export async function createStudent(
   input: CreateStudentInput,
   auditContext: StudentAuditContext,
 ) {
-  const student =
-    await prisma.student.create({
-      data: {
-        gymId,
+  const student = await prisma.student.create({
+    data: {
+      gymId,
 
-        name:
-          input.name.trim(),
+      name: input.name.trim(),
 
-        email:
-          normalizeOptionalText(
-            input.email,
-          ),
+      email: normalizeOptionalText(input.email),
 
-        phone:
-          normalizeOptionalText(
-            input.phone,
-          ),
+      phone: normalizeOptionalText(input.phone),
 
-        birthDate:
-          parseOptionalDate(
-            input.birthDate,
-          ),
+      birthDate: parseOptionalDate(input.birthDate),
 
-        emergencyContact:
-          normalizeOptionalText(
-            input.emergencyContact,
-          ),
+      emergencyContact: normalizeOptionalText(input.emergencyContact),
 
-        emergencyPhone:
-          normalizeOptionalText(
-            input.emergencyPhone,
-          ),
+      emergencyPhone: normalizeOptionalText(input.emergencyPhone),
 
-        notes:
-          normalizeOptionalText(
-            input.notes,
-          ),
+      notes: normalizeOptionalText(input.notes),
 
-        joinedAt:
-          parseJoinedAt(
-            input.joinedAt,
-          ),
-      },
+      joinedAt: parseJoinedAt(input.joinedAt),
+    },
 
-      select: {
-        id: true,
-        gymId: true,
-        userId: true,
-        name: true,
-        email: true,
-        phone: true,
-        birthDate: true,
-        emergencyContact: true,
-        emergencyPhone: true,
-        notes: true,
-        active: true,
-        joinedAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    select: {
+      id: true,
+      gymId: true,
+      userId: true,
+      name: true,
+      email: true,
+      phone: true,
+      birthDate: true,
+      emergencyContact: true,
+      emergencyPhone: true,
+      notes: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
 
   await createAuditLog({
     gymId,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'CREATE',
+    action: 'CREATE',
 
-    entity:
-      'STUDENT',
+    entity: 'STUDENT',
 
-    entityId:
-      student.id,
+    entityId: student.id,
 
-    newValues:
-      student,
+    newValues: student,
 
     metadata: {
-      source:
-        'students',
+      source: 'students',
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return student
@@ -338,114 +250,77 @@ export async function updateStudent(
   input: UpdateStudentInput,
   auditContext: StudentAuditContext,
 ) {
-  const currentStudent =
-    await getStudentById(
-      gymId,
-      studentId,
-    )
+  const currentStudent = await getStudentById(gymId, studentId)
 
-  const joinedAt =
-    parseOptionalJoinedAt(
-      input.joinedAt,
-    )
+  const joinedAt = parseOptionalJoinedAt(input.joinedAt)
 
-  const student =
-    await prisma.student.update({
-      where: {
-        id:
-          studentId,
-      },
+  const student = await prisma.student.update({
+    where: {
+      id: studentId,
+    },
 
-      data: {
-        name:
-          input.name.trim(),
+    data: {
+      name: input.name.trim(),
 
-        email:
-          normalizeOptionalText(
-            input.email,
-          ),
+      email: normalizeOptionalText(input.email),
 
-        phone:
-          normalizeOptionalText(
-            input.phone,
-          ),
+      phone: normalizeOptionalText(input.phone),
 
-        birthDate:
-          parseOptionalDate(
-            input.birthDate,
-          ),
+      birthDate: parseOptionalDate(input.birthDate),
 
-        emergencyContact:
-          normalizeOptionalText(
-            input.emergencyContact,
-          ),
+      emergencyContact: normalizeOptionalText(input.emergencyContact),
 
-        emergencyPhone:
-          normalizeOptionalText(
-            input.emergencyPhone,
-          ),
+      emergencyPhone: normalizeOptionalText(input.emergencyPhone),
 
-        notes:
-          normalizeOptionalText(
-            input.notes,
-          ),
+      notes: normalizeOptionalText(input.notes),
 
-        ...(joinedAt
-          ? {
-              joinedAt,
-            }
-          : {}),
-      },
+      ...(joinedAt
+        ? {
+            joinedAt,
+          }
+        : {}),
+    },
 
-      select: {
-        id: true,
-        gymId: true,
-        userId: true,
-        name: true,
-        email: true,
-        phone: true,
-        birthDate: true,
-        emergencyContact: true,
-        emergencyPhone: true,
-        notes: true,
-        active: true,
-        joinedAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    select: {
+      id: true,
+      gymId: true,
+      userId: true,
+      name: true,
+      email: true,
+      phone: true,
+      birthDate: true,
+      emergencyContact: true,
+      emergencyPhone: true,
+      notes: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
 
   await createAuditLog({
     gymId,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'UPDATE',
+    action: 'UPDATE',
 
-    entity:
-      'STUDENT',
+    entity: 'STUDENT',
 
-    entityId:
-      student.id,
+    entityId: student.id,
 
-    oldValues:
-      currentStudent,
+    oldValues: currentStudent,
 
-    newValues:
-      student,
+    newValues: student,
 
     metadata: {
-      source:
-        'students',
+      source: 'students',
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return student
@@ -457,95 +332,71 @@ export async function updateStudentStatus(
   input: UpdateStudentStatusInput,
   auditContext: StudentAuditContext,
 ) {
-  const currentStudent =
-    await getStudentById(
-      gymId,
-      studentId,
-    )
+  const currentStudent = await getStudentById(gymId, studentId)
 
-  if (
-    currentStudent.active ===
-    input.active
-  ) {
+  if (currentStudent.active === input.active) {
     throw new AppError(
-      input.active
-        ? 'STUDENT_ALREADY_ACTIVE'
-        : 'STUDENT_ALREADY_INACTIVE',
+      input.active ? 'STUDENT_ALREADY_ACTIVE' : 'STUDENT_ALREADY_INACTIVE',
       409,
-      input.active
-        ? 'O aluno já está ativo.'
-        : 'O aluno já está inativo.',
+      input.active ? 'O aluno já está ativo.' : 'O aluno já está inativo.',
     )
   }
 
-  const student =
-    await prisma.student.update({
-      where: {
-        id:
-          studentId,
-      },
+  const student = await prisma.student.update({
+    where: {
+      id: studentId,
+    },
 
-      data: {
-        active:
-          input.active,
-      },
+    data: {
+      active: input.active,
+    },
 
-      select: {
-        id: true,
-        gymId: true,
-        userId: true,
-        name: true,
-        email: true,
-        phone: true,
-        birthDate: true,
-        emergencyContact: true,
-        emergencyPhone: true,
-        notes: true,
-        active: true,
-        joinedAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+    select: {
+      id: true,
+      gymId: true,
+      userId: true,
+      name: true,
+      email: true,
+      phone: true,
+      birthDate: true,
+      emergencyContact: true,
+      emergencyPhone: true,
+      notes: true,
+      active: true,
+      joinedAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
 
   await createAuditLog({
     gymId,
 
-    userId:
-      auditContext.userId,
+    userId: auditContext.userId,
 
-    action:
-      'STATUS_CHANGE',
+    action: 'STATUS_CHANGE',
 
-    entity:
-      'STUDENT',
+    entity: 'STUDENT',
 
-    entityId:
-      student.id,
+    entityId: student.id,
 
     oldValues: {
-      active:
-        currentStudent.active,
+      active: currentStudent.active,
     },
 
     newValues: {
-      active:
-        student.active,
+      active: student.active,
     },
 
     metadata: {
-      source:
-        'students',
+      source: 'students',
 
-      studentName:
-        student.name,
+      studentName: student.name,
     },
 
-    ipAddress:
-      auditContext.ipAddress,
+    ipAddress: auditContext.ipAddress,
 
-    userAgent:
-      auditContext.userAgent,
+    userAgent: auditContext.userAgent,
   })
 
   return student

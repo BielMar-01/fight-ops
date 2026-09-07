@@ -1,18 +1,10 @@
-import type {
-  FastifyInstance,
-} from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
-import {
-  createAuditLog,
-} from '../audit/audit.service.js'
+import { createAuditLog } from '../audit/audit.service.js'
 
-import {
-  authenticate,
-} from '../auth/authenticate.js'
+import { authenticate } from '../auth/authenticate.js'
 
-import {
-  requireGymRole,
-} from '../gyms/gym-access.js'
+import { requireGymRole } from '../gyms/gym-access.js'
 
 import {
   createModalityBodySchema,
@@ -31,9 +23,7 @@ import {
   updateModalityStatus,
 } from './modalities.service.js'
 
-export async function modalityRoutes(
-  app: FastifyInstance,
-) {
+export async function modalityRoutes(app: FastifyInstance) {
   /*
    * =========================================================
    * LIST
@@ -43,40 +33,16 @@ export async function modalityRoutes(
   app.get(
     '/gyms/:gymId/modalities',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-          'PROFESSOR',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST', 'PROFESSOR')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        gymParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = gymParamsSchema.parse(request.params)
 
-      const query =
-        listModalitiesQuerySchema.parse(
-          request.query,
-        )
+      const query = listModalitiesQuerySchema.parse(request.query)
 
-      const result =
-        await listModalities(
-          params.gymId,
-          query,
-        )
+      const result = await listModalities(params.gymId, query)
 
-      return reply.send(
-        result,
-      )
+      return reply.send(result)
     },
   )
 
@@ -89,31 +55,12 @@ export async function modalityRoutes(
   app.get(
     '/gyms/:gymId/modalities/:modalityId',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-          'PROFESSOR',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST', 'PROFESSOR')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        modalityParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = modalityParamsSchema.parse(request.params)
 
-      const modality =
-        await getModalityById(
-          params.gymId,
-          params.modalityId,
-        )
+      const modality = await getModalityById(params.gymId, params.modalityId)
 
       return reply.send({
         modality,
@@ -130,75 +77,40 @@ export async function modalityRoutes(
   app.post(
     '/gyms/:gymId/modalities',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        gymParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = gymParamsSchema.parse(request.params)
 
-      const body =
-        createModalityBodySchema.parse(
-          request.body,
-        )
+      const body = createModalityBodySchema.parse(request.body)
 
-      const modality =
-        await createModality(
-          params.gymId,
-          body,
-        )
+      const modality = await createModality(params.gymId, body)
 
       await createAuditLog({
-        gymId:
-          params.gymId,
+        gymId: params.gymId,
 
-        userId:
-          request.user!.id,
+        userId: request.user!.id,
 
-        action:
-          'CREATE',
+        action: 'CREATE',
 
-        entity:
-          'MODALITY',
+        entity: 'MODALITY',
 
-        entityId:
-          modality.id,
+        entityId: modality.id,
 
-        newValues:
-          modality,
+        newValues: modality,
 
         metadata: {
-          source:
-            'modalities',
+          source: 'modalities',
         },
 
-        ipAddress:
-          request.ip,
+        ipAddress: request.ip,
 
-        userAgent:
-          request.headers[
-            'user-agent'
-          ],
+        userAgent: request.headers['user-agent'],
       })
 
-      return reply
-        .status(
-          201,
-        )
-        .send({
-          modality,
-        })
+      return reply.status(201).send({
+        modality,
+      })
     },
   )
 
@@ -211,76 +123,39 @@ export async function modalityRoutes(
   app.put(
     '/gyms/:gymId/modalities/:modalityId',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        modalityParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = modalityParamsSchema.parse(request.params)
 
-      const body =
-        updateModalityBodySchema.parse(
-          request.body,
-        )
+      const body = updateModalityBodySchema.parse(request.body)
 
-      const previousModality =
-        await getModalityById(
-          params.gymId,
-          params.modalityId,
-        )
+      const previousModality = await getModalityById(params.gymId, params.modalityId)
 
-      const modality =
-        await updateModality(
-          params.gymId,
-          params.modalityId,
-          body,
-        )
+      const modality = await updateModality(params.gymId, params.modalityId, body)
 
       await createAuditLog({
-        gymId:
-          params.gymId,
+        gymId: params.gymId,
 
-        userId:
-          request.user!.id,
+        userId: request.user!.id,
 
-        action:
-          'UPDATE',
+        action: 'UPDATE',
 
-        entity:
-          'MODALITY',
+        entity: 'MODALITY',
 
-        entityId:
-          modality.id,
+        entityId: modality.id,
 
-        oldValues:
-          previousModality,
+        oldValues: previousModality,
 
-        newValues:
-          modality,
+        newValues: modality,
 
         metadata: {
-          source:
-            'modalities',
+          source: 'modalities',
         },
 
-        ipAddress:
-          request.ip,
+        ipAddress: request.ip,
 
-        userAgent:
-          request.headers[
-            'user-agent'
-          ],
+        userAgent: request.headers['user-agent'],
       })
 
       return reply.send({
@@ -298,80 +173,43 @@ export async function modalityRoutes(
   app.patch(
     '/gyms/:gymId/modalities/:modalityId/status',
     {
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        modalityParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = modalityParamsSchema.parse(request.params)
 
-      const body =
-        updateModalityStatusBodySchema.parse(
-          request.body,
-        )
+      const body = updateModalityStatusBodySchema.parse(request.body)
 
-      const previousModality =
-        await getModalityById(
-          params.gymId,
-          params.modalityId,
-        )
+      const previousModality = await getModalityById(params.gymId, params.modalityId)
 
-      const modality =
-        await updateModalityStatus(
-          params.gymId,
-          params.modalityId,
-          body,
-        )
+      const modality = await updateModalityStatus(params.gymId, params.modalityId, body)
 
       await createAuditLog({
-        gymId:
-          params.gymId,
+        gymId: params.gymId,
 
-        userId:
-          request.user!.id,
+        userId: request.user!.id,
 
-        action:
-          'STATUS_CHANGE',
+        action: 'STATUS_CHANGE',
 
-        entity:
-          'MODALITY',
+        entity: 'MODALITY',
 
-        entityId:
-          modality.id,
+        entityId: modality.id,
 
         oldValues: {
-          active:
-            previousModality.active,
+          active: previousModality.active,
         },
 
         newValues: {
-          active:
-            modality.active,
+          active: modality.active,
         },
 
         metadata: {
-          source:
-            'modalities',
+          source: 'modalities',
         },
 
-        ipAddress:
-          request.ip,
+        ipAddress: request.ip,
 
-        userAgent:
-          request.headers[
-            'user-agent'
-          ],
+        userAgent: request.headers['user-agent'],
       })
 
       return reply.send({

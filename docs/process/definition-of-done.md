@@ -1,11 +1,13 @@
 # Definition of Done
 
 ## Negócio
+
 - [ ] objetivo e regras definidos
 - [ ] papéis/permissões definidos
 - [ ] exceções definidas
 
 ## Backend
+
 - [ ] schema/migration
 - [ ] service/rotas
 - [ ] Zod
@@ -15,6 +17,7 @@
 - [ ] Swagger
 
 ## Frontend
+
 - [ ] fluxo
 - [ ] loading
 - [ ] erro
@@ -25,6 +28,7 @@
 - [ ] integração API
 
 ## Testes
+
 - [ ] Postman sucesso/erros
 - [ ] testes automatizados aplicáveis
 - [ ] typecheck
@@ -34,12 +38,14 @@
 - [ ] pós-deploy
 
 ## Documentação
+
 - [ ] business
 - [ ] technical
 - [ ] endpoints
 - [ ] ADR se necessário
 
 ## Git
+
 - [ ] sem segredos
 - [ ] status revisado
 - [ ] commit descritivo

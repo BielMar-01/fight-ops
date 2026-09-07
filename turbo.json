@@ -4,12 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "dist/**",
-        "src/generated/prisma/**",
-        ".next/**",
-        "!.next/cache/**"
-      ],
+      "outputs": ["dist/**", "src/generated/prisma/**", ".next/**", "!.next/cache/**"],
       "env": [
         "NODE_ENV",
         "LOG_LEVEL",

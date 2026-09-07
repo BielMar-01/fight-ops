@@ -1,6 +1,4 @@
-import {
-  apiRequest,
-} from './api'
+import { apiRequest } from './api'
 
 import type {
   AddGymMemberInput,
@@ -13,37 +11,22 @@ import type {
   UpdateGymMemberStatusInput,
 } from '../types/gym-member'
 
-export function getGymMembers(
-  gymId: string,
-) {
-  return apiRequest<GymMembersResponse>(
-    `/gyms/${gymId}/members`,
-    {
-      method: 'GET',
-    },
-  )
+export function getGymMembers(gymId: string) {
+  return apiRequest<GymMembersResponse>(`/gyms/${gymId}/members`, {
+    method: 'GET',
+  })
 }
 
-export function addGymMember(
-  gymId: string,
-  input: AddGymMemberInput,
-) {
-  return apiRequest<AddGymMemberResponse>(
-    `/gyms/${gymId}/members`,
-    {
-      method: 'POST',
+export function addGymMember(gymId: string, input: AddGymMemberInput) {
+  return apiRequest<AddGymMemberResponse>(`/gyms/${gymId}/members`, {
+    method: 'POST',
 
-      headers: {
-        'Content-Type':
-          'application/json',
-      },
-
-      body:
-        JSON.stringify(
-          input,
-        ),
+    headers: {
+      'Content-Type': 'application/json',
     },
-  )
+
+    body: JSON.stringify(input),
+  })
 }
 
 export function updateGymMemberRole(
@@ -51,22 +34,15 @@ export function updateGymMemberRole(
   memberId: string,
   input: UpdateGymMemberRoleInput,
 ) {
-  return apiRequest<UpdateGymMemberResponse>(
-    `/gyms/${gymId}/members/${memberId}/role`,
-    {
-      method: 'PATCH',
+  return apiRequest<UpdateGymMemberResponse>(`/gyms/${gymId}/members/${memberId}/role`, {
+    method: 'PATCH',
 
-      headers: {
-        'Content-Type':
-          'application/json',
-      },
-
-      body:
-        JSON.stringify(
-          input,
-        ),
+    headers: {
+      'Content-Type': 'application/json',
     },
-  )
+
+    body: JSON.stringify(input),
+  })
 }
 
 export function updateGymMemberStatus(
@@ -74,22 +50,15 @@ export function updateGymMemberStatus(
   memberId: string,
   input: UpdateGymMemberStatusInput,
 ) {
-  return apiRequest<UpdateGymMemberResponse>(
-    `/gyms/${gymId}/members/${memberId}/status`,
-    {
-      method: 'PATCH',
+  return apiRequest<UpdateGymMemberResponse>(`/gyms/${gymId}/members/${memberId}/status`, {
+    method: 'PATCH',
 
-      headers: {
-        'Content-Type':
-          'application/json',
-      },
-
-      body:
-        JSON.stringify(
-          input,
-        ),
+    headers: {
+      'Content-Type': 'application/json',
     },
-  )
+
+    body: JSON.stringify(input),
+  })
 }
 
 export function resetGymMemberPassword(
@@ -97,20 +66,13 @@ export function resetGymMemberPassword(
   memberId: string,
   input: ResetGymMemberPasswordInput,
 ) {
-  return apiRequest<ResetGymMemberPasswordResponse>(
-    `/gyms/${gymId}/members/${memberId}/password`,
-    {
-      method: 'PATCH',
+  return apiRequest<ResetGymMemberPasswordResponse>(`/gyms/${gymId}/members/${memberId}/password`, {
+    method: 'PATCH',
 
-      headers: {
-        'Content-Type':
-          'application/json',
-      },
-
-      body:
-        JSON.stringify(
-          input,
-        ),
+    headers: {
+      'Content-Type': 'application/json',
     },
-  )
+
+    body: JSON.stringify(input),
+  })
 }

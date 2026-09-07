@@ -16,42 +16,23 @@ declare module 'fastify' {
   }
 }
 
-export async function authenticate(
-  request: FastifyRequest,
-  _reply: FastifyReply,
-) {
+export async function authenticate(request: FastifyRequest, _reply: FastifyReply) {
   const authorization = request.headers.authorization
 
   if (!authorization) {
-    throw new AppError(
-      'AUTH_TOKEN_REQUIRED',
-      401,
-      'Token de acesso não informado.',
-    )
+    throw new AppError('AUTH_TOKEN_REQUIRED', 401, 'Token de acesso não informado.')
   }
 
   const [scheme, token] = authorization.split(' ')
 
   if (scheme !== 'Bearer' || !token) {
-    throw new AppError(
-      'INVALID_AUTH_HEADER',
-      401,
-      'Formato do token de acesso inválido.',
-    )
+    throw new AppError('INVALID_AUTH_HEADER', 401, 'Formato do token de acesso inválido.')
   }
 
   const payload = await verifyAccessToken(token)
 
-  if (
-    !payload.sub ||
-    typeof payload.email !== 'string' ||
-    typeof payload.globalRole !== 'string'
-  ) {
-    throw new AppError(
-      'INVALID_ACCESS_TOKEN',
-      401,
-      'Token de acesso inválido ou expirado.',
-    )
+  if (!payload.sub || typeof payload.email !== 'string' || typeof payload.globalRole !== 'string') {
+    throw new AppError('INVALID_ACCESS_TOKEN', 401, 'Token de acesso inválido ou expirado.')
   }
 
   request.user = {

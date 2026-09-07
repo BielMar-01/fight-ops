@@ -1,15 +1,8 @@
-import type {
-  FastifyInstance,
-  FastifyRequest,
-} from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
 
-import {
-  authenticate,
-} from '../auth/authenticate.js'
+import { authenticate } from '../auth/authenticate.js'
 
-import {
-  requireGymRole,
-} from '../gyms/gym-access.js'
+import { requireGymRole } from '../gyms/gym-access.js'
 
 import {
   createStudentBodySchema,
@@ -28,9 +21,7 @@ import {
   updateStudentStatus,
 } from './students.service.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
 const security = [
   {
@@ -38,140 +29,101 @@ const security = [
   },
 ]
 
-function getAuditContext(
-  request: FastifyRequest,
-) {
+function getAuditContext(request: FastifyRequest) {
   if (!request.user) {
-    throw new AppError(
-      'AUTH_USER_NOT_FOUND',
-      401,
-      'Usuário autenticado não encontrado.',
-    )
+    throw new AppError('AUTH_USER_NOT_FOUND', 401, 'Usuário autenticado não encontrado.')
   }
 
   return {
-    userId:
-      request.user.id,
+    userId: request.user.id,
 
-    ipAddress:
-      request.ip,
+    ipAddress: request.ip,
 
-    userAgent:
-      request.headers[
-        'user-agent'
-      ] ??
-      null,
+    userAgent: request.headers['user-agent'] ?? null,
   }
 }
 
 const gymIdParamsSchema = {
-  type:
-    'object',
+  type: 'object',
 
-  required: [
-    'gymId',
-  ],
+  required: ['gymId'],
 
   properties: {
     gymId: {
-      type:
-        'string',
+      type: 'string',
 
-      format:
-        'uuid',
+      format: 'uuid',
 
-      description:
-        'Identificador da academia.',
+      description: 'Identificador da academia.',
     },
   },
 }
 
 const studentParamsOpenApiSchema = {
-  type:
-    'object',
+  type: 'object',
 
-  required: [
-    'gymId',
-    'studentId',
-  ],
+  required: ['gymId', 'studentId'],
 
   properties: {
     gymId: {
-      type:
-        'string',
+      type: 'string',
 
-      format:
-        'uuid',
+      format: 'uuid',
 
-      description:
-        'Identificador da academia.',
+      description: 'Identificador da academia.',
     },
 
     studentId: {
-      type:
-        'string',
+      type: 'string',
 
-      format:
-        'uuid',
+      format: 'uuid',
 
-      description:
-        'Identificador do aluno.',
+      description: 'Identificador do aluno.',
     },
   },
 }
 
 const studentProperties = {
   id: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'uuid',
+    format: 'uuid',
   },
 
   gymId: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'uuid',
+    format: 'uuid',
   },
 
   userId: {
     anyOf: [
       {
-        type:
-          'string',
+        type: 'string',
 
-        format:
-          'uuid',
+        format: 'uuid',
       },
 
       {
-        type:
-          'null',
+        type: 'null',
       },
     ],
   },
 
   name: {
-    type:
-      'string',
+    type: 'string',
   },
 
   email: {
     anyOf: [
       {
-        type:
-          'string',
+        type: 'string',
 
-        format:
-          'email',
+        format: 'email',
       },
 
       {
-        type:
-          'null',
+        type: 'null',
       },
     ],
   },
@@ -179,13 +131,11 @@ const studentProperties = {
   phone: {
     anyOf: [
       {
-        type:
-          'string',
+        type: 'string',
       },
 
       {
-        type:
-          'null',
+        type: 'null',
       },
     ],
   },
@@ -193,16 +143,13 @@ const studentProperties = {
   birthDate: {
     anyOf: [
       {
-        type:
-          'string',
+        type: 'string',
 
-        format:
-          'date-time',
+        format: 'date-time',
       },
 
       {
-        type:
-          'null',
+        type: 'null',
       },
     ],
   },
@@ -210,13 +157,11 @@ const studentProperties = {
   emergencyContact: {
     anyOf: [
       {
-        type:
-          'string',
+        type: 'string',
       },
 
       {
-        type:
-          'null',
+        type: 'null',
       },
     ],
   },
@@ -224,13 +169,11 @@ const studentProperties = {
   emergencyPhone: {
     anyOf: [
       {
-        type:
-          'string',
+        type: 'string',
       },
 
       {
-        type:
-          'null',
+        type: 'null',
       },
     ],
   },
@@ -238,310 +181,223 @@ const studentProperties = {
   notes: {
     anyOf: [
       {
-        type:
-          'string',
+        type: 'string',
       },
 
       {
-        type:
-          'null',
+        type: 'null',
       },
     ],
   },
 
   active: {
-    type:
-      'boolean',
+    type: 'boolean',
   },
 
   joinedAt: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'date-time',
+    format: 'date-time',
   },
 
   createdAt: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'date-time',
+    format: 'date-time',
   },
 
   updatedAt: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'date-time',
+    format: 'date-time',
   },
 }
 
 const studentSchema = {
-  type:
-    'object',
+  type: 'object',
 
-  properties:
-    studentProperties,
+  properties: studentProperties,
 }
 
 const studentResponseSchema = {
-  type:
-    'object',
+  type: 'object',
 
   properties: {
-    student:
-      studentSchema,
+    student: studentSchema,
   },
 }
 
 const studentBodyProperties = {
   name: {
-    type:
-      'string',
+    type: 'string',
 
-    minLength:
-      2,
+    minLength: 2,
 
-    maxLength:
-      150,
+    maxLength: 150,
   },
 
   email: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'email',
+    format: 'email',
   },
 
   phone: {
-    type:
-      'string',
+    type: 'string',
   },
 
   birthDate: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'date',
+    format: 'date',
   },
 
   emergencyContact: {
-    type:
-      'string',
+    type: 'string',
   },
 
   emergencyPhone: {
-    type:
-      'string',
+    type: 'string',
   },
 
   notes: {
-    type:
-      'string',
+    type: 'string',
   },
 
   joinedAt: {
-    type:
-      'string',
+    type: 'string',
 
-    format:
-      'date',
+    format: 'date',
   },
 }
 
 const studentBodySchema = {
-  type:
-    'object',
+  type: 'object',
 
-  required: [
-    'name',
-  ],
+  required: ['name'],
 
-  properties:
-    studentBodyProperties,
+  properties: studentBodyProperties,
 }
 
 const errorResponseSchema = {
-  type:
-    'object',
+  type: 'object',
 
   properties: {
     code: {
-      type:
-        'string',
+      type: 'string',
     },
 
     message: {
-      type:
-        'string',
+      type: 'string',
     },
   },
 }
 
-export async function studentRoutes(
-  app: FastifyInstance,
-) {
+export async function studentRoutes(app: FastifyInstance) {
   app.get(
     '/gyms/:gymId/students',
     {
       schema: {
-        tags: [
-          'Students',
-        ],
+        tags: ['Students'],
 
-        summary:
-          'Listar alunos',
+        summary: 'Listar alunos',
 
-        description:
-          'Lista os alunos da academia com paginação, busca e filtro por status.',
+        description: 'Lista os alunos da academia com paginação, busca e filtro por status.',
 
         security,
 
-        params:
-          gymIdParamsSchema,
+        params: gymIdParamsSchema,
 
         querystring: {
-          type:
-            'object',
+          type: 'object',
 
           properties: {
             page: {
-              type:
-                'integer',
+              type: 'integer',
 
-              minimum:
-                1,
+              minimum: 1,
 
-              default:
-                1,
+              default: 1,
             },
 
             limit: {
-              type:
-                'integer',
+              type: 'integer',
 
-              minimum:
-                1,
+              minimum: 1,
 
-              maximum:
-                100,
+              maximum: 100,
 
-              default:
-                20,
+              default: 20,
             },
 
             search: {
-              type:
-                'string',
+              type: 'string',
 
-              description:
-                'Busca por nome, e-mail ou telefone.',
+              description: 'Busca por nome, e-mail ou telefone.',
             },
 
             active: {
-              type:
-                'boolean',
+              type: 'boolean',
 
-              description:
-                'Filtra alunos ativos ou inativos.',
+              description: 'Filtra alunos ativos ou inativos.',
             },
           },
         },
 
         response: {
           200: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               students: {
-                type:
-                  'array',
+                type: 'array',
 
-                items:
-                  studentSchema,
+                items: studentSchema,
               },
 
               pagination: {
-                type:
-                  'object',
+                type: 'object',
 
                 properties: {
                   page: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
 
                   limit: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
 
                   total: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
 
                   totalPages: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
                 },
               },
             },
           },
 
-          401:
-            errorResponseSchema,
+          401: errorResponseSchema,
 
-          403:
-            errorResponseSchema,
+          403: errorResponseSchema,
 
-          404:
-            errorResponseSchema,
+          404: errorResponseSchema,
         },
       },
 
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-          'PROFESSOR',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST', 'PROFESSOR')],
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        studentListParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = studentListParamsSchema.parse(request.params)
 
-      const query =
-        listStudentsQuerySchema.parse(
-          request.query,
-        )
+      const query = listStudentsQuerySchema.parse(request.query)
 
-      const result =
-        await listStudents(
-          params.gymId,
-          query,
-        )
+      const result = await listStudents(params.gymId, query)
 
-      return reply.send(
-        result,
-      )
+      return reply.send(result)
     },
   )
 
@@ -549,62 +405,34 @@ export async function studentRoutes(
     '/gyms/:gymId/students/:studentId',
     {
       schema: {
-        tags: [
-          'Students',
-        ],
+        tags: ['Students'],
 
-        summary:
-          'Consultar aluno',
+        summary: 'Consultar aluno',
 
-        description:
-          'Retorna os dados de um aluno pertencente à academia.',
+        description: 'Retorna os dados de um aluno pertencente à academia.',
 
         security,
 
-        params:
-          studentParamsOpenApiSchema,
+        params: studentParamsOpenApiSchema,
 
         response: {
-          200:
-            studentResponseSchema,
+          200: studentResponseSchema,
 
-          401:
-            errorResponseSchema,
+          401: errorResponseSchema,
 
-          403:
-            errorResponseSchema,
+          403: errorResponseSchema,
 
-          404:
-            errorResponseSchema,
+          404: errorResponseSchema,
         },
       },
 
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-          'PROFESSOR',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST', 'PROFESSOR')],
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        studentParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = studentParamsSchema.parse(request.params)
 
-      const student =
-        await getStudentById(
-          params.gymId,
-          params.studentId,
-        )
+      const student = await getStudentById(params.gymId, params.studentId)
 
       return reply.send({
         student,
@@ -616,81 +444,44 @@ export async function studentRoutes(
     '/gyms/:gymId/students',
     {
       schema: {
-        tags: [
-          'Students',
-        ],
+        tags: ['Students'],
 
-        summary:
-          'Cadastrar aluno',
+        summary: 'Cadastrar aluno',
 
-        description:
-          'Cadastra um novo aluno na academia.',
+        description: 'Cadastra um novo aluno na academia.',
 
         security,
 
-        params:
-          gymIdParamsSchema,
+        params: gymIdParamsSchema,
 
-        body:
-          studentBodySchema,
+        body: studentBodySchema,
 
         response: {
-          201:
-            studentResponseSchema,
+          201: studentResponseSchema,
 
-          400:
-            errorResponseSchema,
+          400: errorResponseSchema,
 
-          401:
-            errorResponseSchema,
+          401: errorResponseSchema,
 
-          403:
-            errorResponseSchema,
+          403: errorResponseSchema,
 
-          404:
-            errorResponseSchema,
+          404: errorResponseSchema,
         },
       },
 
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST')],
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        studentListParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = studentListParamsSchema.parse(request.params)
 
-      const body =
-        createStudentBodySchema.parse(
-          request.body,
-        )
+      const body = createStudentBodySchema.parse(request.body)
 
-      const student =
-        await createStudent(
-          params.gymId,
-          body,
-          getAuditContext(
-            request,
-          ),
-        )
+      const student = await createStudent(params.gymId, body, getAuditContext(request))
 
-      return reply
-        .status(201)
-        .send({
-          student,
-        })
+      return reply.status(201).send({
+        student,
+      })
     },
   )
 
@@ -698,76 +489,45 @@ export async function studentRoutes(
     '/gyms/:gymId/students/:studentId',
     {
       schema: {
-        tags: [
-          'Students',
-        ],
+        tags: ['Students'],
 
-        summary:
-          'Atualizar aluno',
+        summary: 'Atualizar aluno',
 
-        description:
-          'Atualiza os dados cadastrais de um aluno da academia.',
+        description: 'Atualiza os dados cadastrais de um aluno da academia.',
 
         security,
 
-        params:
-          studentParamsOpenApiSchema,
+        params: studentParamsOpenApiSchema,
 
-        body:
-          studentBodySchema,
+        body: studentBodySchema,
 
         response: {
-          200:
-            studentResponseSchema,
+          200: studentResponseSchema,
 
-          400:
-            errorResponseSchema,
+          400: errorResponseSchema,
 
-          401:
-            errorResponseSchema,
+          401: errorResponseSchema,
 
-          403:
-            errorResponseSchema,
+          403: errorResponseSchema,
 
-          404:
-            errorResponseSchema,
+          404: errorResponseSchema,
         },
       },
 
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST')],
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        studentParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = studentParamsSchema.parse(request.params)
 
-      const body =
-        updateStudentBodySchema.parse(
-          request.body,
-        )
+      const body = updateStudentBodySchema.parse(request.body)
 
-      const student =
-        await updateStudent(
-          params.gymId,
-          params.studentId,
-          body,
-          getAuditContext(
-            request,
-          ),
-        )
+      const student = await updateStudent(
+        params.gymId,
+        params.studentId,
+        body,
+        getAuditContext(request),
+      )
 
       return reply.send({
         student,
@@ -779,92 +539,57 @@ export async function studentRoutes(
     '/gyms/:gymId/students/:studentId/status',
     {
       schema: {
-        tags: [
-          'Students',
-        ],
+        tags: ['Students'],
 
-        summary:
-          'Alterar status do aluno',
+        summary: 'Alterar status do aluno',
 
-        description:
-          'Ativa ou inativa um aluno sem removê-lo do histórico da academia.',
+        description: 'Ativa ou inativa um aluno sem removê-lo do histórico da academia.',
 
         security,
 
-        params:
-          studentParamsOpenApiSchema,
+        params: studentParamsOpenApiSchema,
 
         body: {
-          type:
-            'object',
+          type: 'object',
 
-          required: [
-            'active',
-          ],
+          required: ['active'],
 
           properties: {
             active: {
-              type:
-                'boolean',
+              type: 'boolean',
             },
           },
         },
 
         response: {
-          200:
-            studentResponseSchema,
+          200: studentResponseSchema,
 
-          400:
-            errorResponseSchema,
+          400: errorResponseSchema,
 
-          401:
-            errorResponseSchema,
+          401: errorResponseSchema,
 
-          403:
-            errorResponseSchema,
+          403: errorResponseSchema,
 
-          404:
-            errorResponseSchema,
+          404: errorResponseSchema,
 
-          409:
-            errorResponseSchema,
+          409: errorResponseSchema,
         },
       },
 
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-          'RECEPTIONIST',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN', 'RECEPTIONIST')],
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        studentParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = studentParamsSchema.parse(request.params)
 
-      const body =
-        updateStudentStatusBodySchema.parse(
-          request.body,
-        )
+      const body = updateStudentStatusBodySchema.parse(request.body)
 
-      const student =
-        await updateStudentStatus(
-          params.gymId,
-          params.studentId,
-          body,
-          getAuditContext(
-            request,
-          ),
-        )
+      const student = await updateStudentStatus(
+        params.gymId,
+        params.studentId,
+        body,
+        getAuditContext(request),
+      )
 
       return reply.send({
         student,

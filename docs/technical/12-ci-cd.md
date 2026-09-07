@@ -1,6 +1,7 @@
 # CI/CD
 
 ## Status
+
 🟡 A evoluir
 
 Pipeline recomendado:
@@ -16,6 +17,7 @@ install
 ```
 
 Recomendações:
+
 - PR para mudanças relevantes;
 - checks obrigatórios;
 - migrations revisadas;

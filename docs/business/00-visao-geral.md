@@ -1,11 +1,13 @@
 # Visão Geral do Produto
 
 ## Status
+
 🟢 Documento base ativo
 
 FightOps é uma plataforma de gestão para academias e centros de treinamento.
 
 ## Objetivos
+
 - centralizar a operação;
 - organizar usuários, membros, professores e alunos;
 - permitir múltiplas academias por usuário;
@@ -15,6 +17,7 @@ FightOps é uma plataforma de gestão para academias e centros de treinamento.
 - permitir conteúdo público configurável.
 
 ## Conceitos
+
 **User** = conta de acesso.  
 **Gym** = tenant principal.  
 **GymMembership** = vínculo entre usuário e academia.  
@@ -31,6 +34,7 @@ Gabriel
 ```
 
 ## Área pública
+
 - Início
 - Funcionalidades
 - Planos
@@ -40,6 +44,7 @@ Gabriel
 - Recuperação de senha
 
 ## Área autenticada
+
 ```text
 Login
   ↓
@@ -52,4 +57,5 @@ GET /gyms
 ```
 
 ## Isolamento
+
 Dados operacionais devem ser associados ao `gymId`. Uma academia nunca deve acessar dados de outra apenas manipulando IDs.

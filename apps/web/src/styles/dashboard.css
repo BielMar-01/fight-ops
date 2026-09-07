@@ -22,24 +22,17 @@
 .dashboard-page-heading h1 {
   margin: 10px 0 8px;
 
-  font-size:
-    clamp(
-      2rem,
-      8vw,
-      3.4rem
-    );
+  font-size: clamp(2rem, 8vw, 3.4rem);
 
   line-height: 1;
 
-  letter-spacing:
-    -0.045em;
+  letter-spacing: -0.045em;
 }
 
 .dashboard-page-heading p {
   margin: 0;
 
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   line-height: 1.6;
 }
@@ -64,19 +57,15 @@
 
   padding: 20px;
 
-  border:
-    1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 14px;
 
-  background:
-    var(--color-surface);
+  background: var(--color-surface);
 }
 
 .dashboard-metric-card span {
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.78rem;
 
@@ -88,8 +77,7 @@
 }
 
 .dashboard-metric-card small {
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.68rem;
 }
@@ -109,14 +97,11 @@
 
   padding: 22px;
 
-  border:
-    1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 14px;
 
-  background:
-    var(--color-surface);
+  background: var(--color-surface);
 }
 
 .dashboard-panel-heading {
@@ -124,18 +109,15 @@
 }
 
 .dashboard-panel-eyebrow {
-  color:
-    var(--color-primary);
+  color: var(--color-primary);
 
   font-size: 0.67rem;
 
   font-weight: 800;
 
-  letter-spacing:
-    0.1em;
+  letter-spacing: 0.1em;
 
-  text-transform:
-    uppercase;
+  text-transform: uppercase;
 }
 
 .dashboard-panel-heading h2 {
@@ -159,9 +141,7 @@
 
   padding: 16px 0;
 
-  border-bottom:
-    1px solid
-    var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dashboard-step:last-child {
@@ -177,38 +157,23 @@
 
   flex-shrink: 0;
 
-  border:
-    1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 50%;
 
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.75rem;
 
   font-weight: 800;
 }
 
-.dashboard-step.completed
-.dashboard-step-number {
-  border-color:
-    color-mix(
-      in srgb,
-      var(--color-primary) 50%,
-      transparent
-    );
+.dashboard-step.completed .dashboard-step-number {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
 
-  background:
-    color-mix(
-      in srgb,
-      var(--color-primary) 12%,
-      transparent
-    );
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
 
-  color:
-    var(--color-primary);
+  color: var(--color-primary);
 }
 
 .dashboard-step strong {
@@ -222,8 +187,7 @@
 .dashboard-step p {
   margin: 0;
 
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.78rem;
 
@@ -245,9 +209,7 @@
 
   padding: 14px 0;
 
-  border-bottom:
-    1px solid
-    var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dashboard-account-list > div:last-child {
@@ -255,8 +217,7 @@
 }
 
 .dashboard-account-list dt {
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.72rem;
 }
@@ -288,20 +249,9 @@
 }
 
 .status-badge.active {
-  background:
-    rgba(
-      34,
-      197,
-      94,
-      0.12
-    );
+  background: rgba(34, 197, 94, 0.12);
 
-  color:
-    rgb(
-      74,
-      222,
-      128
-    );
+  color: rgb(74, 222, 128);
 }
 
 /* =========================================================
@@ -310,21 +260,13 @@
 
 @media (min-width: 580px) {
   .dashboard-metrics {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 900px) {
   .dashboard-metrics {
-    grid-template-columns:
-      repeat(
-        4,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -353,13 +295,11 @@
 
   margin-bottom: 22px;
 
-  border: 1px solid
-    var(--border-color);
+  border: 1px solid var(--border-color);
 
   border-radius: 14px;
 
-  background:
-    var(--border-color);
+  background: var(--border-color);
 }
 
 .dashboard-current-gym > div {
@@ -372,30 +312,23 @@
 
   padding: 16px;
 
-  background:
-    var(--color-surface);
+  background: var(--color-surface);
 }
 
 .dashboard-current-gym span {
-  color:
-    var(--color-text-muted);
+  color: var(--color-text-muted);
 
   font-size: 0.7rem;
 }
 
 .dashboard-current-gym strong {
-  overflow-wrap:
-    anywhere;
+  overflow-wrap: anywhere;
 
   font-size: 0.88rem;
 }
 
 @media (min-width: 700px) {
   .dashboard-current-gym {
-    grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

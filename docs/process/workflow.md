@@ -15,6 +15,7 @@
 ```
 
 Status:
+
 - 🟢 Implementado
 - 🟡 Em desenvolvimento
 - ⚪ Planejado

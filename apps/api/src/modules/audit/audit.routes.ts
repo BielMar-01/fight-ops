@@ -1,23 +1,12 @@
-import type {
-  FastifyInstance,
-} from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
-import {
-  authenticate,
-} from '../auth/authenticate.js'
+import { authenticate } from '../auth/authenticate.js'
 
-import {
-  requireGymRole,
-} from '../gyms/gym-access.js'
+import { requireGymRole } from '../gyms/gym-access.js'
 
-import {
-  auditGymParamsSchema,
-  listAuditLogsQuerySchema,
-} from './audit.schemas.js'
+import { auditGymParamsSchema, listAuditLogsQuerySchema } from './audit.schemas.js'
 
-import {
-  listAuditLogs,
-} from './audit.service.js'
+import { listAuditLogs } from './audit.service.js'
 
 const security = [
   {
@@ -26,18 +15,15 @@ const security = [
 ]
 
 const errorResponseSchema = {
-  type:
-    'object',
+  type: 'object',
 
   properties: {
     code: {
-      type:
-        'string',
+      type: 'string',
     },
 
     message: {
-      type:
-        'string',
+      type: 'string',
     },
   },
 }
@@ -45,72 +31,55 @@ const errorResponseSchema = {
 const auditUserSchema = {
   anyOf: [
     {
-      type:
-        'object',
+      type: 'object',
 
       properties: {
         id: {
-          type:
-            'string',
+          type: 'string',
 
-          format:
-            'uuid',
+          format: 'uuid',
         },
 
         name: {
-          type:
-            'string',
+          type: 'string',
         },
 
         email: {
-          type:
-            'string',
+          type: 'string',
 
-          format:
-            'email',
+          format: 'email',
         },
       },
 
-      required: [
-        'id',
-        'name',
-        'email',
-      ],
+      required: ['id', 'name', 'email'],
     },
 
     {
-      type:
-        'null',
+      type: 'null',
     },
   ],
 }
 
 const auditLogSchema = {
-  type:
-    'object',
+  type: 'object',
 
   properties: {
     id: {
-      type:
-        'string',
+      type: 'string',
 
-      format:
-        'uuid',
+      format: 'uuid',
     },
 
     gymId: {
       anyOf: [
         {
-          type:
-            'string',
+          type: 'string',
 
-          format:
-            'uuid',
+          format: 'uuid',
         },
 
         {
-          type:
-            'null',
+          type: 'null',
         },
       ],
     },
@@ -118,40 +87,33 @@ const auditLogSchema = {
     userId: {
       anyOf: [
         {
-          type:
-            'string',
+          type: 'string',
 
-          format:
-            'uuid',
+          format: 'uuid',
         },
 
         {
-          type:
-            'null',
+          type: 'null',
         },
       ],
     },
 
     action: {
-      type:
-        'string',
+      type: 'string',
     },
 
     entity: {
-      type:
-        'string',
+      type: 'string',
     },
 
     entityId: {
       anyOf: [
         {
-          type:
-            'string',
+          type: 'string',
         },
 
         {
-          type:
-            'null',
+          type: 'null',
         },
       ],
     },
@@ -165,13 +127,11 @@ const auditLogSchema = {
     ipAddress: {
       anyOf: [
         {
-          type:
-            'string',
+          type: 'string',
         },
 
         {
-          type:
-            'null',
+          type: 'null',
         },
       ],
     },
@@ -179,27 +139,22 @@ const auditLogSchema = {
     userAgent: {
       anyOf: [
         {
-          type:
-            'string',
+          type: 'string',
         },
 
         {
-          type:
-            'null',
+          type: 'null',
         },
       ],
     },
 
     createdAt: {
-      type:
-        'string',
+      type: 'string',
 
-      format:
-        'date-time',
+      format: 'date-time',
     },
 
-    user:
-      auditUserSchema,
+    user: auditUserSchema,
   },
 
   required: [
@@ -219,229 +174,153 @@ const auditLogSchema = {
   ],
 }
 
-export async function auditRoutes(
-  app: FastifyInstance,
-) {
+export async function auditRoutes(app: FastifyInstance) {
   app.get(
     '/gyms/:gymId/audit-logs',
     {
       schema: {
-        tags: [
-          'Audit',
-        ],
+        tags: ['Audit'],
 
-        summary:
-          'Listar logs de auditoria',
+        summary: 'Listar logs de auditoria',
 
-        description:
-          'Lista as alterações auditadas da academia com paginação e filtros.',
+        description: 'Lista as alterações auditadas da academia com paginação e filtros.',
 
         security,
 
         params: {
-          type:
-            'object',
+          type: 'object',
 
-          required: [
-            'gymId',
-          ],
+          required: ['gymId'],
 
           properties: {
             gymId: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'uuid',
+              format: 'uuid',
 
-              description:
-                'Identificador da academia.',
+              description: 'Identificador da academia.',
             },
           },
         },
 
         querystring: {
-          type:
-            'object',
+          type: 'object',
 
           properties: {
             page: {
-              type:
-                'integer',
+              type: 'integer',
 
-              minimum:
-                1,
+              minimum: 1,
 
-              default:
-                1,
+              default: 1,
             },
 
             limit: {
-              type:
-                'integer',
+              type: 'integer',
 
-              minimum:
-                1,
+              minimum: 1,
 
-              maximum:
-                100,
+              maximum: 100,
 
-              default:
-                20,
+              default: 20,
             },
 
             action: {
-              type:
-                'string',
+              type: 'string',
 
-              description:
-                'Filtra pela ação registrada.',
+              description: 'Filtra pela ação registrada.',
             },
 
             entity: {
-              type:
-                'string',
+              type: 'string',
 
-              description:
-                'Filtra pela entidade auditada.',
+              description: 'Filtra pela entidade auditada.',
             },
 
             userId: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'uuid',
+              format: 'uuid',
 
-              description:
-                'Filtra pelo usuário que executou a ação.',
+              description: 'Filtra pelo usuário que executou a ação.',
             },
 
             startDate: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'date',
+              format: 'date',
 
-              description:
-                'Data inicial do período.',
+              description: 'Data inicial do período.',
             },
 
             endDate: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'date',
+              format: 'date',
 
-              description:
-                'Data final do período.',
+              description: 'Data final do período.',
             },
           },
         },
 
         response: {
           200: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               auditLogs: {
-                type:
-                  'array',
+                type: 'array',
 
-                items:
-                  auditLogSchema,
+                items: auditLogSchema,
               },
 
               pagination: {
-                type:
-                  'object',
+                type: 'object',
 
                 properties: {
                   page: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
 
                   limit: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
 
                   total: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
 
                   totalPages: {
-                    type:
-                      'integer',
+                    type: 'integer',
                   },
                 },
 
-                required: [
-                  'page',
-                  'limit',
-                  'total',
-                  'totalPages',
-                ],
+                required: ['page', 'limit', 'total', 'totalPages'],
               },
             },
 
-            required: [
-              'auditLogs',
-              'pagination',
-            ],
+            required: ['auditLogs', 'pagination'],
           },
 
-          401:
-            errorResponseSchema,
+          401: errorResponseSchema,
 
-          403:
-            errorResponseSchema,
+          403: errorResponseSchema,
 
-          404:
-            errorResponseSchema,
+          404: errorResponseSchema,
         },
       },
 
-      preHandler: [
-        authenticate,
-
-        requireGymRole(
-          'OWNER',
-          'ADMIN',
-        ),
-      ],
+      preHandler: [authenticate, requireGymRole('OWNER', 'ADMIN')],
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const params =
-        auditGymParamsSchema.parse(
-          request.params,
-        )
+    async (request, reply) => {
+      const params = auditGymParamsSchema.parse(request.params)
 
-      const query =
-        listAuditLogsQuerySchema.parse(
-          request.query,
-        )
+      const query = listAuditLogsQuerySchema.parse(request.query)
 
-      const result =
-        await listAuditLogs(
-          params.gymId,
-          query,
-        )
+      const result = await listAuditLogs(params.gymId, query)
 
-      return reply
-        .status(200)
-        .send(
-          result,
-        )
+      return reply.status(200).send(result)
     },
   )
 }

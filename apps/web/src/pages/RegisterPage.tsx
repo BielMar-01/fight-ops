@@ -1,182 +1,97 @@
-import {
-  useState,
-} from 'react'
+import { useState } from 'react'
 
-import {
-  Link,
-  useNavigate,
-} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import {
-  PasswordInput,
-} from '../components/auth/PasswordInput'
+import { PasswordInput } from '../components/auth/PasswordInput'
 
-import {
-  useRegister,
-} from '../hooks/useAuth'
+import { useRegister } from '../hooks/useAuth'
 
-import {
-  ApiError,
-} from '../services/api'
+import { ApiError } from '../services/api'
 
 export function RegisterPage() {
-  const navigate =
-    useNavigate()
+  const navigate = useNavigate()
 
-  const registerMutation =
-    useRegister()
+  const registerMutation = useRegister()
 
-  const [
-    name,
-    setName,
-  ] =
-    useState('')
+  const [name, setName] = useState('')
 
-  const [
-    email,
-    setEmail,
-  ] =
-    useState('')
+  const [email, setEmail] = useState('')
 
-  const [
-    phone,
-    setPhone,
-  ] =
-    useState('')
+  const [phone, setPhone] = useState('')
 
-  const [
-    password,
-    setPassword,
-  ] =
-    useState('')
+  const [password, setPassword] = useState('')
 
-  const [
-    confirmPassword,
-    setConfirmPassword,
-  ] =
-    useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const [
-    formError,
-    setFormError,
-  ] =
-    useState<
-      string | null
-    >(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
-  async function handleSubmit(
-    event:
-      React.FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     setFormError(null)
 
-    if (
-      password !==
-      confirmPassword
-    ) {
-      setFormError(
-        'As senhas informadas não são iguais.',
-      )
+    if (password !== confirmPassword) {
+      setFormError('As senhas informadas não são iguais.')
 
       return
     }
 
-    if (
-      password.length < 8
-    ) {
-      setFormError(
-        'A senha deve possuir pelo menos 8 caracteres.',
-      )
+    if (password.length < 8) {
+      setFormError('A senha deve possuir pelo menos 8 caracteres.')
 
       return
     }
 
     try {
       await registerMutation.mutateAsync({
-        name:
-          name.trim(),
+        name: name.trim(),
 
-        email:
-          email.trim(),
+        email: email.trim(),
 
         password,
 
-        phone:
-          phone.trim()
-            ? phone.trim()
-            : undefined,
+        phone: phone.trim() ? phone.trim() : undefined,
       })
 
-      navigate(
-        '/login',
-        {
-          replace: true,
+      navigate('/login', {
+        replace: true,
 
-          state: {
-            accountCreated:
-              true,
-          },
+        state: {
+          accountCreated: true,
         },
-      )
+      })
     } catch (error) {
-      if (
-        error instanceof ApiError
-      ) {
-        setFormError(
-          error.message,
-        )
+      if (error instanceof ApiError) {
+        setFormError(error.message)
 
         return
       }
 
-      setFormError(
-        'Não foi possível criar sua conta. Tente novamente.',
-      )
+      setFormError('Não foi possível criar sua conta. Tente novamente.')
     }
   }
 
   return (
-    <main
-      className="auth-page"
-      data-testid="register-page"
-    >
+    <main className="auth-page" data-testid="register-page">
       <div className="auth-shell">
         <section className="auth-brand-panel">
-          <Link
-            to="/"
-            className="brand"
-            data-testid="register-logo-link"
-          >
-            <span className="brand-mark">
-              FO
-            </span>
+          <Link to="/" className="brand" data-testid="register-logo-link">
+            <span className="brand-mark">FO</span>
 
-            <span className="brand-text">
-              FightOps
-            </span>
+            <span className="brand-text">FightOps</span>
           </Link>
 
           <div>
-            <span className="eyebrow">
-              Comece agora
-            </span>
+            <span className="eyebrow">Comece agora</span>
 
             <h1>
               Organize sua academia.
-              <span>
-                {' '}
-                Evolua sua operação.
-              </span>
+              <span> Evolua sua operação.</span>
             </h1>
 
             <p>
-              Crie sua conta para
-              começar a organizar sua
-              academia, seus alunos e
-              sua operação em um só
-              lugar.
+              Crie sua conta para começar a organizar sua academia, seus alunos e sua operação em um
+              só lugar.
             </p>
           </div>
         </section>
@@ -184,29 +99,14 @@ export function RegisterPage() {
         <section className="auth-form-panel">
           <div className="auth-form-container">
             <div className="auth-heading">
-              <h2
-                data-testid="register-title"
-              >
-                Criar conta
-              </h2>
+              <h2 data-testid="register-title">Criar conta</h2>
 
-              <p>
-                Preencha seus dados
-                para começar a usar o
-                FightOps.
-              </p>
+              <p>Preencha seus dados para começar a usar o FightOps.</p>
             </div>
 
-            <form
-              onSubmit={
-                handleSubmit
-              }
-              data-testid="register-form"
-            >
+            <form onSubmit={handleSubmit} data-testid="register-form">
               <div className="form-field">
-                <label htmlFor="name">
-                  Nome
-                </label>
+                <label htmlFor="name">Nome</label>
 
                 <input
                   id="name"
@@ -216,24 +116,16 @@ export function RegisterPage() {
                   autoComplete="name"
                   required
                   value={name}
-                  disabled={
-                    registerMutation.isPending
-                  }
+                  disabled={registerMutation.isPending}
                   data-testid="register-name-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setName(
-                      event.target.value,
-                    )
+                  onChange={(event) => {
+                    setName(event.target.value)
                   }}
                 />
               </div>
 
               <div className="form-field">
-                <label htmlFor="email">
-                  E-mail
-                </label>
+                <label htmlFor="email">E-mail</label>
 
                 <input
                   id="email"
@@ -243,24 +135,16 @@ export function RegisterPage() {
                   autoComplete="email"
                   required
                   value={email}
-                  disabled={
-                    registerMutation.isPending
-                  }
+                  disabled={registerMutation.isPending}
                   data-testid="register-email-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setEmail(
-                      event.target.value,
-                    )
+                  onChange={(event) => {
+                    setEmail(event.target.value)
                   }}
                 />
               </div>
 
               <div className="form-field">
-                <label htmlFor="phone">
-                  Telefone
-                </label>
+                <label htmlFor="phone">Telefone</label>
 
                 <input
                   id="phone"
@@ -269,24 +153,16 @@ export function RegisterPage() {
                   placeholder="(11) 99999-9999"
                   autoComplete="tel"
                   value={phone}
-                  disabled={
-                    registerMutation.isPending
-                  }
+                  disabled={registerMutation.isPending}
                   data-testid="register-phone-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setPhone(
-                      event.target.value,
-                    )
+                  onChange={(event) => {
+                    setPhone(event.target.value)
                   }}
                 />
               </div>
 
               <div className="form-field">
-                <label htmlFor="password">
-                  Senha
-                </label>
+                <label htmlFor="password">Senha</label>
 
                 <PasswordInput
                   id="password"
@@ -297,9 +173,7 @@ export function RegisterPage() {
                   maxLength={128}
                   required
                   value={password}
-                  disabled={
-                    registerMutation.isPending
-                  }
+                  disabled={registerMutation.isPending}
                   inputTestId="register-password-input"
                   toggleTestId="register-password-toggle"
                   onChange={setPassword}
@@ -307,9 +181,7 @@ export function RegisterPage() {
               </div>
 
               <div className="form-field">
-                <label htmlFor="confirmPassword">
-                  Confirmar senha
-                </label>
+                <label htmlFor="confirmPassword">Confirmar senha</label>
 
                 <PasswordInput
                   id="confirmPassword"
@@ -320,23 +192,15 @@ export function RegisterPage() {
                   maxLength={128}
                   required
                   value={confirmPassword}
-                  disabled={
-                    registerMutation.isPending
-                  }
+                  disabled={registerMutation.isPending}
                   inputTestId="register-confirm-password-input"
                   toggleTestId="register-confirm-password-toggle"
-                  onChange={
-                    setConfirmPassword
-                  }
+                  onChange={setConfirmPassword}
                 />
               </div>
 
               {formError ? (
-                <div
-                  className="form-error"
-                  role="alert"
-                  data-testid="register-error"
-                >
+                <div className="form-error" role="alert" data-testid="register-error">
                   {formError}
                 </div>
               ) : null}
@@ -344,33 +208,21 @@ export function RegisterPage() {
               <button
                 type="submit"
                 className="button button-primary auth-submit"
-                disabled={
-                  registerMutation.isPending
-                }
+                disabled={registerMutation.isPending}
                 data-testid="register-submit-button"
               >
-                {registerMutation.isPending
-                  ? 'Criando conta...'
-                  : 'Criar conta'}
+                {registerMutation.isPending ? 'Criando conta...' : 'Criar conta'}
               </button>
             </form>
 
             <p className="auth-footer-text">
               Já possui uma conta?{' '}
-
-              <Link
-                to="/login"
-                data-testid="register-login-link"
-              >
+              <Link to="/login" data-testid="register-login-link">
                 Entrar
               </Link>
             </p>
 
-            <Link
-              to="/"
-              className="auth-back-link"
-              data-testid="register-back-home-link"
-            >
+            <Link to="/" className="auth-back-link" data-testid="register-back-home-link">
               Voltar para o início
             </Link>
           </div>

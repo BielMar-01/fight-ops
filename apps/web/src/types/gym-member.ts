@@ -1,6 +1,4 @@
-import type {
-  GymRole,
-} from './gym'
+import type { GymRole } from './gym'
 
 export interface GymMemberUser {
   id: string
@@ -28,11 +26,7 @@ export interface GymMembersResponse {
 export interface AddGymMemberInput {
   email: string
 
-  role:
-    | 'ADMIN'
-    | 'RECEPTIONIST'
-    | 'PROFESSOR'
-    | 'STUDENT'
+  role: 'ADMIN' | 'RECEPTIONIST' | 'PROFESSOR' | 'STUDENT'
 }
 
 export interface AddGymMemberResponse {

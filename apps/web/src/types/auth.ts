@@ -1,6 +1,4 @@
-export type GlobalRole =
-  | 'USER'
-  | 'SUPER_ADMIN'
+export type GlobalRole = 'USER' | 'SUPER_ADMIN'
 
 export interface AuthUser {
   id: string

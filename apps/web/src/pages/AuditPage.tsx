@@ -1,34 +1,16 @@
-import {
-  type FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
 
-import {
-  AuditDetailsModal,
-} from '../components/audit/AuditDetailsModal'
+import { AuditDetailsModal } from '../components/audit/AuditDetailsModal'
 
-import {
-  useGym,
-} from '../contexts/GymContext'
+import { useGym } from '../contexts/GymContext'
 
-import {
-  getAuditLogs,
-} from '../services/audit.service'
+import { getAuditLogs } from '../services/audit.service'
 
-import {
-  getGymMembers,
-} from '../services/gym-member.service'
+import { getGymMembers } from '../services/gym-member.service'
 
-import type {
-  AuditLog,
-  AuditPagination,
-} from '../types/audit'
+import type { AuditLog, AuditPagination } from '../types/audit'
 
-import type {
-  GymMember,
-} from '../types/gym-member'
+import type { GymMember } from '../types/gym-member'
 
 import '../styles/audit.css'
 
@@ -41,142 +23,79 @@ const initialPagination: AuditPagination = {
   totalPages: 0,
 }
 
-const actionLabels: Record<
-  string,
-  string
-> = {
-  CREATE:
-    'Criação',
+const actionLabels: Record<string, string> = {
+  CREATE: 'Criação',
 
-  UPDATE:
-    'Alteração',
+  UPDATE: 'Alteração',
 
-  STATUS_CHANGE:
-    'Alteração de status',
+  STATUS_CHANGE: 'Alteração de status',
 
-  DELETE:
-    'Exclusão',
+  DELETE: 'Exclusão',
 
-  LOGIN:
-    'Login',
+  LOGIN: 'Login',
 
-  LOGOUT:
-    'Logout',
+  LOGOUT: 'Logout',
 
-  PASSWORD_RESET_REQUESTED:
-    'Recuperação solicitada',
+  PASSWORD_RESET_REQUESTED: 'Recuperação solicitada',
 
-  PASSWORD_RESET_COMPLETED:
-    'Senha redefinida',
+  PASSWORD_RESET_COMPLETED: 'Senha redefinida',
 
-  PASSWORD_RESET_REQUESTED_BY_ADMIN:
-    'Reset solicitado por administrador',
+  PASSWORD_RESET_REQUESTED_BY_ADMIN: 'Reset solicitado por administrador',
 }
 
-const entityLabels: Record<
-  string,
-  string
-> = {
-  USER:
-    'Usuário',
+const entityLabels: Record<string, string> = {
+  USER: 'Usuário',
 
-  GYM:
-    'Academia',
+  GYM: 'Academia',
 
-  GYM_MEMBERSHIP:
-    'Membro',
+  GYM_MEMBERSHIP: 'Membro',
 
-  STUDENT:
-    'Aluno',
+  STUDENT: 'Aluno',
 
-  AUTH:
-    'Autenticação',
+  AUTH: 'Autenticação',
 
-  SYSTEM:
-    'Sistema',
+  SYSTEM: 'Sistema',
 }
 
-const roleLabels: Record<
-  string,
-  string
-> = {
-  OWNER:
-    'Proprietário',
+const roleLabels: Record<string, string> = {
+  OWNER: 'Proprietário',
 
-  ADMIN:
-    'Administrador',
+  ADMIN: 'Administrador',
 
-  RECEPTIONIST:
-    'Recepcionista',
+  RECEPTIONIST: 'Recepcionista',
 
-  PROFESSOR:
-    'Professor',
+  PROFESSOR: 'Professor',
 
-  STUDENT:
-    'Aluno',
+  STUDENT: 'Aluno',
 }
 
-function getActionLabel(
-  action: string,
-) {
-  return (
-    actionLabels[
-      action
-    ] ?? action
-  )
+function getActionLabel(action: string) {
+  return actionLabels[action] ?? action
 }
 
-function getEntityLabel(
-  entity: string,
-) {
-  return (
-    entityLabels[
-      entity
-    ] ?? entity
-  )
+function getEntityLabel(entity: string) {
+  return entityLabels[entity] ?? entity
 }
 
-function getRoleLabel(
-  role: string,
-) {
-  return (
-    roleLabels[
-      role
-    ] ?? role
-  )
+function getRoleLabel(role: string) {
+  return roleLabels[role] ?? role
 }
 
-function formatDateTime(
-  value: string,
-) {
-  const date =
-    new Date(value)
+function formatDateTime(value: string) {
+  const date = new Date(value)
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value
   }
 
-  return new Intl.DateTimeFormat(
-    'pt-BR',
-    {
-      dateStyle:
-        'short',
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
 
-      timeStyle:
-        'medium',
-    },
-  ).format(
-    date,
-  )
+    timeStyle: 'medium',
+  }).format(date)
 }
 
-function getUserInitials(
-  auditLog: AuditLog,
-) {
+function getUserInitials(auditLog: AuditLog) {
   if (!auditLog.user) {
     return 'S'
   }
@@ -185,124 +104,45 @@ function getUserInitials(
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map(
-      (part) =>
-        part.charAt(0),
-    )
+    .map((part) => part.charAt(0))
     .join('')
     .toUpperCase()
 }
 
 export function AuditPage() {
-  const {
-    activeGym,
-  } = useGym()
+  const { activeGym } = useGym()
 
-  const [
-    auditLogs,
-    setAuditLogs,
-  ] =
-    useState<AuditLog[]>(
-      [],
-    )
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
 
-  const [
-    members,
-    setMembers,
-  ] =
-    useState<GymMember[]>(
-      [],
-    )
+  const [members, setMembers] = useState<GymMember[]>([])
 
-  const [
-    pagination,
-    setPagination,
-  ] =
-    useState<AuditPagination>(
-      initialPagination,
-    )
+  const [pagination, setPagination] = useState<AuditPagination>(initialPagination)
 
-  const [
-    page,
-    setPage,
-  ] =
-    useState(1)
+  const [page, setPage] = useState(1)
 
-  const [
-    actionFilter,
-    setActionFilter,
-  ] =
-    useState('')
+  const [actionFilter, setActionFilter] = useState('')
 
-  const [
-    entityFilter,
-    setEntityFilter,
-  ] =
-    useState('')
+  const [entityFilter, setEntityFilter] = useState('')
 
-  const [
-    userFilter,
-    setUserFilter,
-  ] =
-    useState('')
+  const [userFilter, setUserFilter] = useState('')
 
-  const [
-    startDateInput,
-    setStartDateInput,
-  ] =
-    useState('')
+  const [startDateInput, setStartDateInput] = useState('')
 
-  const [
-    endDateInput,
-    setEndDateInput,
-  ] =
-    useState('')
+  const [endDateInput, setEndDateInput] = useState('')
 
-  const [
-    appliedStartDate,
-    setAppliedStartDate,
-  ] =
-    useState('')
+  const [appliedStartDate, setAppliedStartDate] = useState('')
 
-  const [
-    appliedEndDate,
-    setAppliedEndDate,
-  ] =
-    useState('')
+  const [appliedEndDate, setAppliedEndDate] = useState('')
 
-  const [
-    loading,
-    setLoading,
-  ] =
-    useState(true)
+  const [loading, setLoading] = useState(true)
 
-  const [
-    membersLoading,
-    setMembersLoading,
-  ] =
-    useState(false)
+  const [membersLoading, setMembersLoading] = useState(false)
 
-  const [
-    error,
-    setError,
-  ] =
-    useState<
-      string | null
-    >(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const [
-    selectedAuditLog,
-    setSelectedAuditLog,
-  ] =
-    useState<AuditLog | null>(
-      null,
-    )
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null)
 
-  const canViewAudit =
-    activeGym?.role ===
-      'OWNER' ||
-    activeGym?.role ===
-      'ADMIN'
+  const canViewAudit = activeGym?.role === 'OWNER' || activeGym?.role === 'ADMIN'
 
   const hasFilters =
     actionFilter.length > 0 ||
@@ -311,322 +151,168 @@ export function AuditPage() {
     appliedStartDate.length > 0 ||
     appliedEndDate.length > 0
 
-  const loadMembers =
-    useCallback(
-      async () => {
-        if (
-          !activeGym ||
-          !canViewAudit
-        ) {
-          setMembers(
-            [],
-          )
+  const loadMembers = useCallback(async () => {
+    if (!activeGym || !canViewAudit) {
+      setMembers([])
 
-          return
-        }
+      return
+    }
 
-        try {
-          setMembersLoading(
-            true,
-          )
+    try {
+      setMembersLoading(true)
 
-          const response =
-            await getGymMembers(
-              activeGym.id,
-            )
+      const response = await getGymMembers(activeGym.id)
 
-          const sortedMembers =
-            [...response.members].sort(
-              (
-                first,
-                second,
-              ) =>
-                first.user.name.localeCompare(
-                  second.user.name,
-                  'pt-BR',
-                ),
-            )
+      const sortedMembers = [...response.members].sort((first, second) =>
+        first.user.name.localeCompare(second.user.name, 'pt-BR'),
+      )
 
-          setMembers(
-            sortedMembers,
-          )
-        } catch {
-          setMembers(
-            [],
-          )
-        } finally {
-          setMembersLoading(
-            false,
-          )
-        }
-      },
-      [
-        activeGym,
-        canViewAudit,
-      ],
-    )
+      setMembers(sortedMembers)
+    } catch {
+      setMembers([])
+    } finally {
+      setMembersLoading(false)
+    }
+  }, [activeGym, canViewAudit])
 
-  const loadAuditLogs =
-    useCallback(
-      async () => {
-        if (
-          !activeGym ||
-          !canViewAudit
-        ) {
-          setAuditLogs(
-            [],
-          )
+  const loadAuditLogs = useCallback(async () => {
+    if (!activeGym || !canViewAudit) {
+      setAuditLogs([])
 
-          setPagination(
-            initialPagination,
-          )
+      setPagination(initialPagination)
 
-          setLoading(
-            false,
-          )
+      setLoading(false)
 
-          return
-        }
+      return
+    }
 
-        try {
-          setLoading(
-            true,
-          )
+    try {
+      setLoading(true)
 
-          setError(
-            null,
-          )
+      setError(null)
 
-          const response =
-            await getAuditLogs(
-              activeGym.id,
-              {
-                page,
-
-                limit:
-                  PAGE_LIMIT,
-
-                action:
-                  actionFilter ||
-                  undefined,
-
-                entity:
-                  entityFilter ||
-                  undefined,
-
-                userId:
-                  userFilter ||
-                  undefined,
-
-                startDate:
-                  appliedStartDate ||
-                  undefined,
-
-                endDate:
-                  appliedEndDate ||
-                  undefined,
-              },
-            )
-
-          setAuditLogs(
-            response.auditLogs,
-          )
-
-          setPagination(
-            response.pagination,
-          )
-        } catch {
-          setAuditLogs(
-            [],
-          )
-
-          setPagination(
-            initialPagination,
-          )
-
-          setError(
-            'Não foi possível carregar os registros de auditoria.',
-          )
-        } finally {
-          setLoading(
-            false,
-          )
-        }
-      },
-      [
-        activeGym,
-        canViewAudit,
+      const response = await getAuditLogs(activeGym.id, {
         page,
-        actionFilter,
-        entityFilter,
-        userFilter,
-        appliedStartDate,
-        appliedEndDate,
-      ],
-    )
+
+        limit: PAGE_LIMIT,
+
+        action: actionFilter || undefined,
+
+        entity: entityFilter || undefined,
+
+        userId: userFilter || undefined,
+
+        startDate: appliedStartDate || undefined,
+
+        endDate: appliedEndDate || undefined,
+      })
+
+      setAuditLogs(response.auditLogs)
+
+      setPagination(response.pagination)
+    } catch {
+      setAuditLogs([])
+
+      setPagination(initialPagination)
+
+      setError('Não foi possível carregar os registros de auditoria.')
+    } finally {
+      setLoading(false)
+    }
+  }, [
+    activeGym,
+    canViewAudit,
+    page,
+    actionFilter,
+    entityFilter,
+    userFilter,
+    appliedStartDate,
+    appliedEndDate,
+  ])
 
   useEffect(() => {
     void loadMembers()
-  }, [
-    loadMembers,
-  ])
+  }, [loadMembers])
 
   useEffect(() => {
     void loadAuditLogs()
-  }, [
-    loadAuditLogs,
-  ])
+  }, [loadAuditLogs])
 
   useEffect(() => {
     setPage(1)
 
-    setActionFilter(
-      '',
-    )
+    setActionFilter('')
 
-    setEntityFilter(
-      '',
-    )
+    setEntityFilter('')
 
-    setUserFilter(
-      '',
-    )
+    setUserFilter('')
 
-    setStartDateInput(
-      '',
-    )
+    setStartDateInput('')
 
-    setEndDateInput(
-      '',
-    )
+    setEndDateInput('')
 
-    setAppliedStartDate(
-      '',
-    )
+    setAppliedStartDate('')
 
-    setAppliedEndDate(
-      '',
-    )
+    setAppliedEndDate('')
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    setSelectedAuditLog(
-      null,
-    )
-  }, [
-    activeGym?.id,
-  ])
+    setSelectedAuditLog(null)
+  }, [activeGym?.id])
 
-  function handlePeriodSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  function handlePeriodSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     setPage(1)
 
-    setAppliedStartDate(
-      startDateInput,
-    )
+    setAppliedStartDate(startDateInput)
 
-    setAppliedEndDate(
-      endDateInput,
-    )
+    setAppliedEndDate(endDateInput)
   }
 
   function handleClearFilters() {
-    setActionFilter(
-      '',
-    )
+    setActionFilter('')
 
-    setEntityFilter(
-      '',
-    )
+    setEntityFilter('')
 
-    setUserFilter(
-      '',
-    )
+    setUserFilter('')
 
-    setStartDateInput(
-      '',
-    )
+    setStartDateInput('')
 
-    setEndDateInput(
-      '',
-    )
+    setEndDateInput('')
 
-    setAppliedStartDate(
-      '',
-    )
+    setAppliedStartDate('')
 
-    setAppliedEndDate(
-      '',
-    )
+    setAppliedEndDate('')
 
     setPage(1)
   }
 
   function handlePreviousPage() {
-    setPage(
-      (currentPage) =>
-        Math.max(
-          1,
-          currentPage -
-            1,
-        ),
-    )
+    setPage((currentPage) => Math.max(1, currentPage - 1))
   }
 
   function handleNextPage() {
-    setPage(
-      (currentPage) =>
-        Math.min(
-          pagination.totalPages,
-          currentPage +
-            1,
-        ),
-    )
+    setPage((currentPage) => Math.min(pagination.totalPages, currentPage + 1))
   }
 
-  const hasPreviousPage =
-    pagination.page > 1
+  const hasPreviousPage = pagination.page > 1
 
-  const hasNextPage =
-    pagination.page <
-    pagination.totalPages
+  const hasNextPage = pagination.page < pagination.totalPages
 
-  if (
-    activeGym &&
-    !canViewAudit
-  ) {
+  if (activeGym && !canViewAudit) {
     return (
-      <section
-        className="audit-page"
-        data-testid="audit-page"
-      >
-        <div
-          className="audit-access-denied"
-          data-testid="audit-access-denied"
-        >
-          <div className="audit-access-denied-icon">
-            !
-          </div>
+      <section className="audit-page" data-testid="audit-page">
+        <div className="audit-access-denied" data-testid="audit-access-denied">
+          <div className="audit-access-denied-icon">!</div>
 
-          <span className="audit-eyebrow">
-            Acesso restrito
-          </span>
+          <span className="audit-eyebrow">Acesso restrito</span>
 
-          <h1>
-            Auditoria não disponível
-          </h1>
+          <h1>Auditoria não disponível</h1>
 
           <p>
-            Apenas proprietários e
-            administradores podem
-            consultar os registros de
-            auditoria desta academia.
+            Apenas proprietários e administradores podem consultar os registros de auditoria desta
+            academia.
           </p>
         </div>
       </section>
@@ -634,292 +320,156 @@ export function AuditPage() {
   }
 
   return (
-    <section
-      className="audit-page"
-      data-testid="audit-page"
-    >
+    <section className="audit-page" data-testid="audit-page">
       <header className="audit-header">
         <div>
-          <span className="audit-eyebrow">
-            Administração
-          </span>
+          <span className="audit-eyebrow">Administração</span>
 
-          <h1>
-            Auditoria
-          </h1>
+          <h1>Auditoria</h1>
 
           <p>
-            Acompanhe as principais
-            alterações realizadas na
-            academia, identificando
-            quando ocorreram e quem
-            realizou cada ação.
+            Acompanhe as principais alterações realizadas na academia, identificando quando
+            ocorreram e quem realizou cada ação.
           </p>
         </div>
 
-        <div
-          className="audit-total"
-          data-testid="audit-total"
-        >
-          <strong>
-            {pagination.total}
-          </strong>
+        <div className="audit-total" data-testid="audit-total">
+          <strong>{pagination.total}</strong>
 
-          <span>
-            {pagination.total ===
-            1
-              ? 'registro'
-              : 'registros'}
-          </span>
+          <span>{pagination.total === 1 ? 'registro' : 'registros'}</span>
         </div>
       </header>
 
       <div className="audit-info-banner">
-        <div className="audit-info-icon">
-          ◷
-        </div>
+        <div className="audit-info-icon">◷</div>
 
         <div>
-          <strong>
-            Histórico de alterações
-          </strong>
+          <strong>Histórico de alterações</strong>
 
-          <p>
-            Utilize os filtros para
-            localizar ações específicas
-            dentro da academia.
-          </p>
+          <p>Utilize os filtros para localizar ações específicas dentro da academia.</p>
         </div>
       </div>
 
-      <div
-        className="audit-filters"
-        data-testid="audit-filters"
-      >
+      <div className="audit-filters" data-testid="audit-filters">
         <div className="audit-filter-grid">
           <div className="audit-field">
-            <label htmlFor="audit-action">
-              Ação
-            </label>
+            <label htmlFor="audit-action">Ação</label>
 
             <select
               id="audit-action"
-              value={
-                actionFilter
-              }
+              value={actionFilter}
               data-testid="audit-action-filter"
-              onChange={(
-                event,
-              ) => {
-                setActionFilter(
-                  event.target
-                    .value,
-                )
+              onChange={(event) => {
+                setActionFilter(event.target.value)
 
                 setPage(1)
               }}
             >
-              <option value="">
-                Todas
-              </option>
+              <option value="">Todas</option>
 
-              <option value="CREATE">
-                Criação
-              </option>
+              <option value="CREATE">Criação</option>
 
-              <option value="UPDATE">
-                Alteração
-              </option>
+              <option value="UPDATE">Alteração</option>
 
-              <option value="STATUS_CHANGE">
-                Alteração de status
-              </option>
+              <option value="STATUS_CHANGE">Alteração de status</option>
 
-              <option value="DELETE">
-                Exclusão
-              </option>
+              <option value="DELETE">Exclusão</option>
 
-              <option value="LOGIN">
-                Login
-              </option>
+              <option value="LOGIN">Login</option>
 
-              <option value="LOGOUT">
-                Logout
-              </option>
+              <option value="LOGOUT">Logout</option>
 
-              <option value="PASSWORD_RESET_REQUESTED">
-                Recuperação solicitada
-              </option>
+              <option value="PASSWORD_RESET_REQUESTED">Recuperação solicitada</option>
 
-              <option value="PASSWORD_RESET_COMPLETED">
-                Senha redefinida
-              </option>
+              <option value="PASSWORD_RESET_COMPLETED">Senha redefinida</option>
 
-              <option value="PASSWORD_RESET_REQUESTED_BY_ADMIN">
-                Reset por administrador
-              </option>
+              <option value="PASSWORD_RESET_REQUESTED_BY_ADMIN">Reset por administrador</option>
             </select>
           </div>
 
           <div className="audit-field">
-            <label htmlFor="audit-entity">
-              Entidade
-            </label>
+            <label htmlFor="audit-entity">Entidade</label>
 
             <select
               id="audit-entity"
-              value={
-                entityFilter
-              }
+              value={entityFilter}
               data-testid="audit-entity-filter"
-              onChange={(
-                event,
-              ) => {
-                setEntityFilter(
-                  event.target
-                    .value,
-                )
+              onChange={(event) => {
+                setEntityFilter(event.target.value)
 
                 setPage(1)
               }}
             >
-              <option value="">
-                Todas
-              </option>
+              <option value="">Todas</option>
 
-              <option value="USER">
-                Usuário
-              </option>
+              <option value="USER">Usuário</option>
 
-              <option value="GYM">
-                Academia
-              </option>
+              <option value="GYM">Academia</option>
 
-              <option value="GYM_MEMBERSHIP">
-                Membro
-              </option>
+              <option value="GYM_MEMBERSHIP">Membro</option>
 
-              <option value="STUDENT">
-                Aluno
-              </option>
+              <option value="STUDENT">Aluno</option>
 
-              <option value="AUTH">
-                Autenticação
-              </option>
+              <option value="AUTH">Autenticação</option>
 
-              <option value="SYSTEM">
-                Sistema
-              </option>
+              <option value="SYSTEM">Sistema</option>
             </select>
           </div>
 
           <div className="audit-field">
-            <label htmlFor="audit-user">
-              Usuário
-            </label>
+            <label htmlFor="audit-user">Usuário</label>
 
             <select
               id="audit-user"
-              value={
-                userFilter
-              }
-              disabled={
-                membersLoading
-              }
+              value={userFilter}
+              disabled={membersLoading}
               data-testid="audit-user-filter"
-              onChange={(
-                event,
-              ) => {
-                setUserFilter(
-                  event.target
-                    .value,
-                )
+              onChange={(event) => {
+                setUserFilter(event.target.value)
 
                 setPage(1)
               }}
             >
               <option value="">
-                {membersLoading
-                  ? 'Carregando usuários...'
-                  : 'Todos os usuários'}
+                {membersLoading ? 'Carregando usuários...' : 'Todos os usuários'}
               </option>
 
-              {members.map(
-                (member) => (
-                  <option
-                    key={
-                      member.id
-                    }
-                    value={
-                      member.user.id
-                    }
-                  >
-                    {member.user.name} —{' '}
-                    {getRoleLabel(
-                      member.role,
-                    )}
-                    {!member.active
-                      ? ' — Inativo'
-                      : ''}
-                  </option>
-                ),
-              )}
+              {members.map((member) => (
+                <option key={member.id} value={member.user.id}>
+                  {member.user.name} — {getRoleLabel(member.role)}
+                  {!member.active ? ' — Inativo' : ''}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
-        <form
-          className="audit-period-form"
-          onSubmit={
-            handlePeriodSubmit
-          }
-        >
+        <form className="audit-period-form" onSubmit={handlePeriodSubmit}>
           <div className="audit-field">
-            <label htmlFor="audit-start-date">
-              Data inicial
-            </label>
+            <label htmlFor="audit-start-date">Data inicial</label>
 
             <input
               id="audit-start-date"
               type="date"
-              value={
-                startDateInput
-              }
+              value={startDateInput}
               data-testid="audit-start-date-input"
-              onChange={(
-                event,
-              ) => {
-                setStartDateInput(
-                  event.target
-                    .value,
-                )
+              onChange={(event) => {
+                setStartDateInput(event.target.value)
               }}
             />
           </div>
 
           <div className="audit-field">
-            <label htmlFor="audit-end-date">
-              Data final
-            </label>
+            <label htmlFor="audit-end-date">Data final</label>
 
             <input
               id="audit-end-date"
               type="date"
-              value={
-                endDateInput
-              }
-              min={
-                startDateInput ||
-                undefined
-              }
+              value={endDateInput}
+              min={startDateInput || undefined}
               data-testid="audit-end-date-input"
-              onChange={(
-                event,
-              ) => {
-                setEndDateInput(
-                  event.target
-                    .value,
-                )
+              onChange={(event) => {
+                setEndDateInput(event.target.value)
               }}
             />
           </div>
@@ -935,10 +485,7 @@ export function AuditPage() {
 
         {hasFilters ? (
           <div className="audit-filter-footer">
-            <span
-              className="audit-filter-active"
-              data-testid="audit-filters-active"
-            >
+            <span className="audit-filter-active" data-testid="audit-filters-active">
               Filtros aplicados
             </span>
 
@@ -946,9 +493,7 @@ export function AuditPage() {
               type="button"
               className="audit-button audit-button-secondary"
               data-testid="audit-clear-filters-button"
-              onClick={
-                handleClearFilters
-              }
+              onClick={handleClearFilters}
             >
               Limpar filtros
             </button>
@@ -957,32 +502,16 @@ export function AuditPage() {
       </div>
 
       {loading ? (
-        <div
-          className="audit-state"
-          data-testid="audit-loading"
-        >
-          <div
-            className="audit-loading-spinner"
-            aria-hidden="true"
-          />
+        <div className="audit-state" data-testid="audit-loading">
+          <div className="audit-loading-spinner" aria-hidden="true" />
 
-          <span>
-            Carregando auditoria...
-          </span>
+          <span>Carregando auditoria...</span>
         </div>
       ) : error ? (
-        <div
-          className="audit-state audit-state-error"
-          data-testid="audit-error"
-        >
-          <strong>
-            Não foi possível carregar
-            a auditoria
-          </strong>
+        <div className="audit-state audit-state-error" data-testid="audit-error">
+          <strong>Não foi possível carregar a auditoria</strong>
 
-          <span>
-            {error}
-          </span>
+          <span>{error}</span>
 
           <button
             type="button"
@@ -995,19 +524,11 @@ export function AuditPage() {
             Tentar novamente
           </button>
         </div>
-      ) : auditLogs.length ===
-        0 ? (
-        <div
-          className="audit-empty"
-          data-testid="audit-empty"
-        >
-          <div className="audit-empty-icon">
-            ◷
-          </div>
+      ) : auditLogs.length === 0 ? (
+        <div className="audit-empty" data-testid="audit-empty">
+          <div className="audit-empty-icon">◷</div>
 
-          <h2>
-            Nenhum registro encontrado
-          </h2>
+          <h2>Nenhum registro encontrado</h2>
 
           <p>
             {hasFilters
@@ -1020,9 +541,7 @@ export function AuditPage() {
               type="button"
               className="audit-button audit-button-secondary"
               data-testid="audit-empty-clear-filters-button"
-              onClick={
-                handleClearFilters
-              }
+              onClick={handleClearFilters}
             >
               Limpar filtros
             </button>
@@ -1030,161 +549,89 @@ export function AuditPage() {
         </div>
       ) : (
         <>
-          <div
-            className="audit-list"
-            data-testid="audit-list"
-          >
-            {auditLogs.map(
-              (auditLog) => (
-                <article
-                  key={
-                    auditLog.id
-                  }
-                  className="audit-card"
-                  data-testid={`audit-card-${auditLog.id}`}
-                >
-                  <div className="audit-card-header">
-                    <div className="audit-user">
-                      <div className="audit-user-avatar">
-                        {getUserInitials(
-                          auditLog,
-                        )}
-                      </div>
+          <div className="audit-list" data-testid="audit-list">
+            {auditLogs.map((auditLog) => (
+              <article
+                key={auditLog.id}
+                className="audit-card"
+                data-testid={`audit-card-${auditLog.id}`}
+              >
+                <div className="audit-card-header">
+                  <div className="audit-user">
+                    <div className="audit-user-avatar">{getUserInitials(auditLog)}</div>
 
-                      <div className="audit-user-info">
-                        <strong>
-                          {auditLog.user
-                            ?.name ??
-                            'Sistema'}
-                        </strong>
+                    <div className="audit-user-info">
+                      <strong>{auditLog.user?.name ?? 'Sistema'}</strong>
 
-                        <span>
-                          {auditLog.user
-                            ?.email ??
-                            'Ação do sistema'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <span
-                      className="audit-action-badge"
-                      data-testid={`audit-action-${auditLog.id}`}
-                    >
-                      {getActionLabel(
-                        auditLog.action,
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="audit-card-content">
-                    <div className="audit-detail">
-                      <span>
-                        Entidade
-                      </span>
-
-                      <strong>
-                        {getEntityLabel(
-                          auditLog.entity,
-                        )}
-                      </strong>
-                    </div>
-
-                    <div className="audit-detail">
-                      <span>
-                        Data e hora
-                      </span>
-
-                      <strong>
-                        {formatDateTime(
-                          auditLog.createdAt,
-                        )}
-                      </strong>
-                    </div>
-
-                    <div className="audit-detail">
-                      <span>
-                        Identificador
-                      </span>
-
-                      <strong
-                        className="audit-entity-id"
-                        title={
-                          auditLog.entityId ??
-                          undefined
-                        }
-                      >
-                        {auditLog.entityId ??
-                          'Não informado'}
-                      </strong>
+                      <span>{auditLog.user?.email ?? 'Ação do sistema'}</span>
                     </div>
                   </div>
 
-                  <div className="audit-card-actions">
-                    <button
-                      type="button"
-                      className="audit-button audit-button-secondary"
-                      data-testid={`audit-details-button-${auditLog.id}`}
-                      onClick={() => {
-                        setSelectedAuditLog(
-                          auditLog,
-                        )
-                      }}
-                    >
-                      Ver detalhes
-                    </button>
+                  <span className="audit-action-badge" data-testid={`audit-action-${auditLog.id}`}>
+                    {getActionLabel(auditLog.action)}
+                  </span>
+                </div>
+
+                <div className="audit-card-content">
+                  <div className="audit-detail">
+                    <span>Entidade</span>
+
+                    <strong>{getEntityLabel(auditLog.entity)}</strong>
                   </div>
-                </article>
-              ),
-            )}
+
+                  <div className="audit-detail">
+                    <span>Data e hora</span>
+
+                    <strong>{formatDateTime(auditLog.createdAt)}</strong>
+                  </div>
+
+                  <div className="audit-detail">
+                    <span>Identificador</span>
+
+                    <strong className="audit-entity-id" title={auditLog.entityId ?? undefined}>
+                      {auditLog.entityId ?? 'Não informado'}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="audit-card-actions">
+                  <button
+                    type="button"
+                    className="audit-button audit-button-secondary"
+                    data-testid={`audit-details-button-${auditLog.id}`}
+                    onClick={() => {
+                      setSelectedAuditLog(auditLog)
+                    }}
+                  >
+                    Ver detalhes
+                  </button>
+                </div>
+              </article>
+            ))}
           </div>
 
-          <div
-            className="audit-pagination"
-            data-testid="audit-pagination"
-          >
+          <div className="audit-pagination" data-testid="audit-pagination">
             <button
               type="button"
               className="audit-button audit-button-secondary"
-              disabled={
-                !hasPreviousPage
-              }
+              disabled={!hasPreviousPage}
               data-testid="audit-pagination-previous"
-              onClick={
-                handlePreviousPage
-              }
+              onClick={handlePreviousPage}
             >
               Anterior
             </button>
 
-            <span
-              className="audit-pagination-info"
-              data-testid="audit-pagination-info"
-            >
-              Página{' '}
-              <strong>
-                {
-                  pagination.page
-                }
-              </strong>{' '}
-              de{' '}
-              <strong>
-                {Math.max(
-                  1,
-                  pagination.totalPages,
-                )}
-              </strong>
+            <span className="audit-pagination-info" data-testid="audit-pagination-info">
+              Página <strong>{pagination.page}</strong> de{' '}
+              <strong>{Math.max(1, pagination.totalPages)}</strong>
             </span>
 
             <button
               type="button"
               className="audit-button audit-button-secondary"
-              disabled={
-                !hasNextPage
-              }
+              disabled={!hasNextPage}
               data-testid="audit-pagination-next"
-              onClick={
-                handleNextPage
-              }
+              onClick={handleNextPage}
             >
               Próxima
             </button>
@@ -1194,13 +641,9 @@ export function AuditPage() {
 
       {selectedAuditLog ? (
         <AuditDetailsModal
-          auditLog={
-            selectedAuditLog
-          }
+          auditLog={selectedAuditLog}
           onClose={() => {
-            setSelectedAuditLog(
-              null,
-            )
+            setSelectedAuditLog(null)
           }}
         />
       ) : null}

@@ -1,6 +1,7 @@
 # Autenticação
 
 ## Estratégia
+
 - hash de senha com bcrypt;
 - access token JWT;
 - refresh/sessão persistida;
@@ -8,6 +9,7 @@
 - revogação no logout.
 
 ## Endpoints principais
+
 - POST `/auth/register`
 - POST `/auth/login`
 - POST `/auth/refresh`

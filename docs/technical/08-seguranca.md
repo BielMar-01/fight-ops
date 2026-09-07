@@ -1,6 +1,7 @@
 # Segurança
 
 ## API
+
 - Helmet
 - CORS
 - rate limit
@@ -10,12 +11,15 @@ CORS deve suportar os métodos usados:
 GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS.
 
 Headers permitidos:
+
 - Content-Type
 - Authorization
 - Accept
 
 ## Segredos
+
 Nunca versionar:
+
 - JWT secrets;
 - senhas;
 - SMTP/API keys;

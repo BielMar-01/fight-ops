@@ -1,13 +1,6 @@
-import {
-  type FormEvent,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
 
-import {
-  ApiError,
-} from '../../services/api'
+import { ApiError } from '../../services/api'
 
 import {
   getProfessorById,
@@ -15,10 +8,7 @@ import {
   updateProfessorStatus,
 } from '../../services/professor.service'
 
-import type {
-  Professor,
-  UpdateProfessorInput,
-} from '../../types/professor'
+import type { Professor, UpdateProfessorInput } from '../../types/professor'
 
 interface ManageProfessorModalProps {
   gymId: string
@@ -28,38 +18,24 @@ interface ManageProfessorModalProps {
   onUpdated: () => Promise<void>
 }
 
-type ModalMode =
-  | 'view'
-  | 'edit'
+type ModalMode = 'view' | 'edit'
 
-function normalizeOptionalValue(
-  value: string,
-) {
-  const normalized =
-    value.trim()
+function normalizeOptionalValue(value: string) {
+  const normalized = value.trim()
 
-  return normalized.length > 0
-    ? normalized
-    : undefined
+  return normalized.length > 0 ? normalized : undefined
 }
 
-function normalizeComparableValue(
-  value: string | null,
-) {
+function normalizeComparableValue(value: string | null) {
   return value?.trim() ?? ''
 }
 
-function formatDateInput(
-  value: string | null,
-) {
+function formatDateInput(value: string | null) {
   if (!value) {
     return ''
   }
 
-  return value.slice(
-    0,
-    10,
-  )
+  return value.slice(0, 10)
 }
 
 export function ManageProfessorModal({
@@ -69,123 +45,48 @@ export function ManageProfessorModal({
   onClose,
   onUpdated,
 }: ManageProfessorModalProps) {
-  const [
-    professor,
-    setProfessor,
-  ] =
-    useState<Professor | null>(
-      null,
-    )
+  const [professor, setProfessor] = useState<Professor | null>(null)
 
-  const [
-    mode,
-    setMode,
-  ] =
-    useState<ModalMode>(
-      'view',
-    )
+  const [mode, setMode] = useState<ModalMode>('view')
 
-  const [
-    name,
-    setName,
-  ] = useState('')
+  const [name, setName] = useState('')
 
-  const [
-    email,
-    setEmail,
-  ] = useState('')
+  const [email, setEmail] = useState('')
 
-  const [
-    phone,
-    setPhone,
-  ] = useState('')
+  const [phone, setPhone] = useState('')
 
-  const [
-    birthDate,
-    setBirthDate,
-  ] = useState('')
+  const [birthDate, setBirthDate] = useState('')
 
-  const [
-    hireDate,
-    setHireDate,
-  ] = useState('')
+  const [hireDate, setHireDate] = useState('')
 
-  const [
-    bio,
-    setBio,
-  ] = useState('')
+  const [bio, setBio] = useState('')
 
-  const [
-    notes,
-    setNotes,
-  ] = useState('')
+  const [notes, setNotes] = useState('')
 
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const [
-    isSubmitting,
-    setIsSubmitting,
-  ] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [
-    isChangingStatus,
-    setIsChangingStatus,
-  ] = useState(false)
+  const [isChangingStatus, setIsChangingStatus] = useState(false)
 
-  const [
-    isConfirmingStatus,
-    setIsConfirmingStatus,
-  ] = useState(false)
+  const [isConfirmingStatus, setIsConfirmingStatus] = useState(false)
 
-  const [
-    error,
-    setError,
-  ] =
-    useState<string | null>(
-      null,
-    )
+  const [error, setError] = useState<string | null>(null)
 
-  function applyProfessorValues(
-    loadedProfessor: Professor,
-  ) {
-    setName(
-      loadedProfessor.name,
-    )
+  function applyProfessorValues(loadedProfessor: Professor) {
+    setName(loadedProfessor.name)
 
-    setEmail(
-      loadedProfessor.email ??
-        '',
-    )
+    setEmail(loadedProfessor.email ?? '')
 
-    setPhone(
-      loadedProfessor.phone ??
-        '',
-    )
+    setPhone(loadedProfessor.phone ?? '')
 
-    setBirthDate(
-      formatDateInput(
-        loadedProfessor.birthDate,
-      ),
-    )
+    setBirthDate(formatDateInput(loadedProfessor.birthDate))
 
-    setHireDate(
-      formatDateInput(
-        loadedProfessor.hireDate,
-      ),
-    )
+    setHireDate(formatDateInput(loadedProfessor.hireDate))
 
-    setBio(
-      loadedProfessor.bio ??
-        '',
-    )
+    setBio(loadedProfessor.bio ?? '')
 
-    setNotes(
-      loadedProfessor.notes ??
-        '',
-    )
+    setNotes(loadedProfessor.notes ?? '')
   }
 
   useEffect(() => {
@@ -193,55 +94,34 @@ export function ManageProfessorModal({
 
     async function loadProfessor() {
       try {
-        setIsLoading(
-          true,
-        )
+        setIsLoading(true)
 
-        setError(
-          null,
-        )
+        setError(null)
 
-        const response =
-          await getProfessorById(
-            gymId,
-            professorId,
-          )
+        const response = await getProfessorById(gymId, professorId)
 
         if (cancelled) {
           return
         }
 
-        setProfessor(
-          response.professor,
-        )
+        setProfessor(response.professor)
 
-        applyProfessorValues(
-          response.professor,
-        )
+        applyProfessorValues(response.professor)
       } catch (caughtError) {
         if (cancelled) {
           return
         }
 
-        if (
-          caughtError instanceof
-          ApiError
-        ) {
-          setError(
-            caughtError.message,
-          )
+        if (caughtError instanceof ApiError) {
+          setError(caughtError.message)
 
           return
         }
 
-        setError(
-          'Não foi possível carregar os dados do professor.',
-        )
+        setError('Não foi possível carregar os dados do professor.')
       } finally {
         if (!cancelled) {
-          setIsLoading(
-            false,
-          )
+          setIsLoading(false)
         }
       }
     }
@@ -251,54 +131,30 @@ export function ManageProfessorModal({
     return () => {
       cancelled = true
     }
-  }, [
-    gymId,
-    professorId,
-  ])
+  }, [gymId, professorId])
 
   useEffect(() => {
-    function handleKeyDown(
-      event: KeyboardEvent,
-    ) {
-      if (
-        event.key !==
-        'Escape'
-      ) {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') {
         return
       }
 
-      if (
-        isSubmitting ||
-        isChangingStatus
-      ) {
+      if (isSubmitting || isChangingStatus) {
         return
       }
 
-      if (
-        isConfirmingStatus
-      ) {
-        setIsConfirmingStatus(
-          false,
-        )
+      if (isConfirmingStatus) {
+        setIsConfirmingStatus(false)
 
         return
       }
 
-      if (
-        mode === 'edit' &&
-        professor
-      ) {
-        applyProfessorValues(
-          professor,
-        )
+      if (mode === 'edit' && professor) {
+        applyProfessorValues(professor)
 
-        setError(
-          null,
-        )
+        setError(null)
 
-        setMode(
-          'view',
-        )
+        setMode('view')
 
         return
       }
@@ -306,91 +162,39 @@ export function ManageProfessorModal({
       onClose()
     }
 
-    window.addEventListener(
-      'keydown',
-      handleKeyDown,
-    )
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      window.removeEventListener(
-        'keydown',
-        handleKeyDown,
-      )
+      window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [
-    isSubmitting,
-    isChangingStatus,
-    isConfirmingStatus,
-    mode,
-    professor,
-    onClose,
-  ])
+  }, [isSubmitting, isChangingStatus, isConfirmingStatus, mode, professor, onClose])
 
-  const hasChanges =
-    useMemo(() => {
-      if (!professor) {
-        return false
-      }
+  const hasChanges = useMemo(() => {
+    if (!professor) {
+      return false
+    }
 
-      return (
-        name.trim() !==
-          professor.name.trim() ||
-        email.trim() !==
-          normalizeComparableValue(
-            professor.email,
-          ) ||
-        phone.trim() !==
-          normalizeComparableValue(
-            professor.phone,
-          ) ||
-        birthDate !==
-          formatDateInput(
-            professor.birthDate,
-          ) ||
-        hireDate !==
-          formatDateInput(
-            professor.hireDate,
-          ) ||
-        bio.trim() !==
-          normalizeComparableValue(
-            professor.bio,
-          ) ||
-        notes.trim() !==
-          normalizeComparableValue(
-            professor.notes,
-          )
-      )
-    }, [
-      professor,
-      name,
-      email,
-      phone,
-      birthDate,
-      hireDate,
-      bio,
-      notes,
-    ])
+    return (
+      name.trim() !== professor.name.trim() ||
+      email.trim() !== normalizeComparableValue(professor.email) ||
+      phone.trim() !== normalizeComparableValue(professor.phone) ||
+      birthDate !== formatDateInput(professor.birthDate) ||
+      hireDate !== formatDateInput(professor.hireDate) ||
+      bio.trim() !== normalizeComparableValue(professor.bio) ||
+      notes.trim() !== normalizeComparableValue(professor.notes)
+    )
+  }, [professor, name, email, phone, birthDate, hireDate, bio, notes])
 
   function handleStartEdit() {
-    if (
-      !canEdit ||
-      isSubmitting ||
-      isChangingStatus
-    ) {
+    if (!canEdit || isSubmitting || isChangingStatus) {
       return
     }
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    setIsConfirmingStatus(
-      false,
-    )
+    setIsConfirmingStatus(false)
 
-    setMode(
-      'edit',
-    )
+    setMode('edit')
   }
 
   function handleCancelEdit() {
@@ -398,23 +202,14 @@ export function ManageProfessorModal({
       return
     }
 
-    applyProfessorValues(
-      professor,
-    )
+    applyProfessorValues(professor)
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    setMode(
-      'view',
-    )
+    setMode('view')
   }
 
-  async function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (
@@ -428,192 +223,102 @@ export function ManageProfessorModal({
       return
     }
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    const normalizedName =
-      name.trim()
+    const normalizedName = name.trim()
 
-    if (
-      normalizedName.length <
-      2
-    ) {
-      setError(
-        'Informe o nome do professor com pelo menos 2 caracteres.',
-      )
+    if (normalizedName.length < 2) {
+      setError('Informe o nome do professor com pelo menos 2 caracteres.')
 
       return
     }
 
-    const input:
-      UpdateProfessorInput = {
-        name:
-          normalizedName,
+    const input: UpdateProfessorInput = {
+      name: normalizedName,
 
-        email:
-          normalizeOptionalValue(
-            email,
-          ),
+      email: normalizeOptionalValue(email),
 
-        phone:
-          normalizeOptionalValue(
-            phone,
-          ),
+      phone: normalizeOptionalValue(phone),
 
-        birthDate:
-          normalizeOptionalValue(
-            birthDate,
-          ),
+      birthDate: normalizeOptionalValue(birthDate),
 
-        hireDate:
-          normalizeOptionalValue(
-            hireDate,
-          ),
+      hireDate: normalizeOptionalValue(hireDate),
 
-        bio:
-          normalizeOptionalValue(
-            bio,
-          ),
+      bio: normalizeOptionalValue(bio),
 
-        notes:
-          normalizeOptionalValue(
-            notes,
-          ),
-      }
+      notes: normalizeOptionalValue(notes),
+    }
 
-    setIsSubmitting(
-      true,
-    )
+    setIsSubmitting(true)
 
     try {
-      const response =
-        await updateProfessor(
-          gymId,
-          professorId,
-          input,
-        )
+      const response = await updateProfessor(gymId, professorId, input)
 
-      setProfessor(
-        response.professor,
-      )
+      setProfessor(response.professor)
 
-      applyProfessorValues(
-        response.professor,
-      )
+      applyProfessorValues(response.professor)
 
-      setMode(
-        'view',
-      )
+      setMode('view')
 
       await onUpdated()
     } catch (caughtError) {
-      if (
-        caughtError instanceof
-        ApiError
-      ) {
-        setError(
-          caughtError.message,
-        )
+      if (caughtError instanceof ApiError) {
+        setError(caughtError.message)
 
         return
       }
 
-      setError(
-        'Não foi possível atualizar o professor.',
-      )
+      setError('Não foi possível atualizar o professor.')
     } finally {
-      setIsSubmitting(
-        false,
-      )
+      setIsSubmitting(false)
     }
   }
 
   async function handleConfirmStatusChange() {
-    if (
-      !professor ||
-      !canEdit ||
-      isChangingStatus ||
-      isSubmitting
-    ) {
+    if (!professor || !canEdit || isChangingStatus || isSubmitting) {
       return
     }
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    setIsChangingStatus(
-      true,
-    )
+    setIsChangingStatus(true)
 
     try {
-      const response =
-        await updateProfessorStatus(
-          gymId,
-          professorId,
-          {
-            active:
-              !professor.active,
-          },
-        )
+      const response = await updateProfessorStatus(gymId, professorId, {
+        active: !professor.active,
+      })
 
-      setProfessor(
-        response.professor,
-      )
+      setProfessor(response.professor)
 
-      applyProfessorValues(
-        response.professor,
-      )
+      applyProfessorValues(response.professor)
 
-      setIsConfirmingStatus(
-        false,
-      )
+      setIsConfirmingStatus(false)
 
       await onUpdated()
     } catch (caughtError) {
-      if (
-        caughtError instanceof
-        ApiError
-      ) {
-        setError(
-          caughtError.message,
-        )
+      if (caughtError instanceof ApiError) {
+        setError(caughtError.message)
 
         return
       }
 
-      setError(
-        'Não foi possível alterar o status do professor.',
-      )
+      setError('Não foi possível alterar o status do professor.')
     } finally {
-      setIsChangingStatus(
-        false,
-      )
+      setIsChangingStatus(false)
     }
   }
 
-  const isEditing =
-    mode === 'edit'
+  const isEditing = mode === 'edit'
 
-  const fieldsDisabled =
-    !isEditing ||
-    isSubmitting
+  const fieldsDisabled = !isEditing || isSubmitting
 
   return (
     <div
       className="professor-modal-backdrop"
       role="presentation"
       data-testid="professor-manage-modal-backdrop"
-      onMouseDown={(
-        event,
-      ) => {
-        if (
-          event.target ===
-            event.currentTarget &&
-          !isSubmitting &&
-          !isChangingStatus
-        ) {
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !isSubmitting && !isChangingStatus) {
           onClose()
         }
       }}
@@ -627,16 +332,10 @@ export function ManageProfessorModal({
       >
         <header className="professor-modal-header">
           <div>
-            <span className="professors-eyebrow">
-              Gestão acadêmica
-            </span>
+            <span className="professors-eyebrow">Gestão acadêmica</span>
 
-            <h2
-              id="professor-manage-modal-title"
-            >
-              {isEditing
-                ? 'Editar professor'
-                : 'Detalhes do professor'}
+            <h2 id="professor-manage-modal-title">
+              {isEditing ? 'Editar professor' : 'Detalhes do professor'}
             </h2>
 
             <p>
@@ -650,24 +349,16 @@ export function ManageProfessorModal({
             type="button"
             className="professor-modal-close"
             aria-label="Fechar"
-            disabled={
-              isSubmitting ||
-              isChangingStatus
-            }
+            disabled={isSubmitting || isChangingStatus}
             data-testid="professor-manage-close-button"
-            onClick={
-              onClose
-            }
+            onClick={onClose}
           >
             ×
           </button>
         </header>
 
         {isLoading ? (
-          <div
-            className="professor-modal-state"
-            data-testid="professor-manage-loading"
-          >
+          <div className="professor-modal-state" data-testid="professor-manage-loading">
             Carregando dados do professor...
           </div>
         ) : !professor ? (
@@ -675,32 +366,23 @@ export function ManageProfessorModal({
             className="professor-modal-state professor-modal-state-error"
             data-testid="professor-manage-load-error"
           >
-            {error ??
-              'Professor não encontrado.'}
+            {error ?? 'Professor não encontrado.'}
           </div>
         ) : (
           <form
             className="professor-modal-form"
             data-testid="professor-manage-form"
-            onSubmit={(
-              event,
-            ) => {
-              void handleSubmit(
-                event,
-              )
+            onSubmit={(event) => {
+              void handleSubmit(event)
             }}
           >
             <div className="professor-detail-summary">
               <div className="professor-detail-avatar">
-                {professor.name
-                  .charAt(0)
-                  .toUpperCase()}
+                {professor.name.charAt(0).toUpperCase()}
               </div>
 
               <div>
-                <strong>
-                  {professor.name}
-                </strong>
+                <strong>{professor.name}</strong>
 
                 <span
                   className={
@@ -710,191 +392,112 @@ export function ManageProfessorModal({
                   }
                   data-testid="professor-manage-status"
                 >
-                  {professor.active
-                    ? 'Ativo'
-                    : 'Inativo'}
+                  {professor.active ? 'Ativo' : 'Inativo'}
                 </span>
               </div>
             </div>
 
             <div className="professor-form-grid">
               <label className="professor-form-field professor-form-field-full">
-                <span>
-                  Nome *
-                </span>
+                <span>Nome *</span>
 
                 <input
                   type="text"
                   value={name}
-                  maxLength={
-                    150
-                  }
+                  maxLength={150}
                   required
-                  disabled={
-                    fieldsDisabled
-                  }
+                  disabled={fieldsDisabled}
                   data-testid="professor-manage-name-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setName(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setName(event.target.value)
                   }}
                 />
               </label>
 
               <label className="professor-form-field">
-                <span>
-                  E-mail
-                </span>
+                <span>E-mail</span>
 
                 <input
                   type="email"
                   value={email}
-                  maxLength={
-                    255
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  maxLength={255}
+                  disabled={fieldsDisabled}
                   data-testid="professor-manage-email-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setEmail(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setEmail(event.target.value)
                   }}
                 />
               </label>
 
               <label className="professor-form-field">
-                <span>
-                  Telefone
-                </span>
+                <span>Telefone</span>
 
                 <input
                   type="tel"
                   value={phone}
-                  maxLength={
-                    30
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  maxLength={30}
+                  disabled={fieldsDisabled}
                   data-testid="professor-manage-phone-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setPhone(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setPhone(event.target.value)
                   }}
                 />
               </label>
 
               <label className="professor-form-field">
-                <span>
-                  Data de nascimento
-                </span>
+                <span>Data de nascimento</span>
 
                 <input
                   type="date"
-                  value={
-                    birthDate
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  value={birthDate}
+                  disabled={fieldsDisabled}
                   data-testid="professor-manage-birth-date-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setBirthDate(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setBirthDate(event.target.value)
                   }}
                 />
               </label>
 
               <label className="professor-form-field">
-                <span>
-                  Data de contratação
-                </span>
+                <span>Data de contratação</span>
 
                 <input
                   type="date"
-                  value={
-                    hireDate
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  value={hireDate}
+                  disabled={fieldsDisabled}
                   data-testid="professor-manage-hire-date-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setHireDate(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setHireDate(event.target.value)
                   }}
                 />
               </label>
 
               <label className="professor-form-field professor-form-field-full">
-                <span>
-                  Bio
-                </span>
+                <span>Bio</span>
 
                 <textarea
                   value={bio}
                   rows={4}
-                  maxLength={
-                    5000
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  maxLength={5000}
+                  disabled={fieldsDisabled}
                   data-testid="professor-manage-bio-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setBio(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setBio(event.target.value)
                   }}
                 />
               </label>
 
               <label className="professor-form-field professor-form-field-full">
-                <span>
-                  Observações
-                </span>
+                <span>Observações</span>
 
                 <textarea
                   value={notes}
                   rows={4}
-                  maxLength={
-                    5000
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  maxLength={5000}
+                  disabled={fieldsDisabled}
                   data-testid="professor-manage-notes-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setNotes(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setNotes(event.target.value)
                   }}
                 />
               </label>
@@ -902,41 +505,21 @@ export function ManageProfessorModal({
 
             <div className="professor-detail-metadata">
               <div>
-                <span>
-                  ID do professor
-                </span>
+                <span>ID do professor</span>
 
-                <strong>
-                  {professor.id}
-                </strong>
+                <strong>{professor.id}</strong>
               </div>
 
               <div>
-                <span>
-                  Criado em
-                </span>
+                <span>Criado em</span>
 
-                <strong>
-                  {new Date(
-                    professor.createdAt,
-                  ).toLocaleString(
-                    'pt-BR',
-                  )}
-                </strong>
+                <strong>{new Date(professor.createdAt).toLocaleString('pt-BR')}</strong>
               </div>
 
               <div>
-                <span>
-                  Última atualização
-                </span>
+                <span>Última atualização</span>
 
-                <strong>
-                  {new Date(
-                    professor.updatedAt,
-                  ).toLocaleString(
-                    'pt-BR',
-                  )}
-                </strong>
+                <strong>{new Date(professor.updatedAt).toLocaleString('pt-BR')}</strong>
               </div>
             </div>
 
@@ -946,11 +529,7 @@ export function ManageProfessorModal({
                 data-testid="professor-status-confirmation"
               >
                 <div>
-                  <strong>
-                    {professor.active
-                      ? 'Inativar professor?'
-                      : 'Ativar professor?'}
-                  </strong>
+                  <strong>{professor.active ? 'Inativar professor?' : 'Ativar professor?'}</strong>
 
                   <p>
                     {professor.active
@@ -963,14 +542,10 @@ export function ManageProfessorModal({
                   <button
                     type="button"
                     className="professors-button professors-button-secondary"
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="professor-status-cancel-button"
                     onClick={() => {
-                      setIsConfirmingStatus(
-                        false,
-                      )
+                      setIsConfirmingStatus(false)
                     }}
                   >
                     Cancelar
@@ -983,9 +558,7 @@ export function ManageProfessorModal({
                         ? 'professors-button professors-button-danger'
                         : 'professors-button professors-button-success'
                     }
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="professor-status-confirm-button"
                     onClick={() => {
                       void handleConfirmStatusChange()
@@ -1017,13 +590,9 @@ export function ManageProfessorModal({
                   <button
                     type="button"
                     className="professors-button professors-button-secondary"
-                    disabled={
-                      isSubmitting
-                    }
+                    disabled={isSubmitting}
                     data-testid="professor-manage-cancel-edit-button"
-                    onClick={
-                      handleCancelEdit
-                    }
+                    onClick={handleCancelEdit}
                   >
                     Cancelar edição
                   </button>
@@ -1031,15 +600,10 @@ export function ManageProfessorModal({
                   <button
                     type="submit"
                     className="professors-button professors-button-primary"
-                    disabled={
-                      isSubmitting ||
-                      !hasChanges
-                    }
+                    disabled={isSubmitting || !hasChanges}
                     data-testid="professor-manage-save-button"
                   >
-                    {isSubmitting
-                      ? 'Salvando...'
-                      : 'Salvar alterações'}
+                    {isSubmitting ? 'Salvando...' : 'Salvar alterações'}
                   </button>
                 </>
               ) : (
@@ -1047,13 +611,9 @@ export function ManageProfessorModal({
                   <button
                     type="button"
                     className="professors-button professors-button-secondary"
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="professor-manage-close-footer-button"
-                    onClick={
-                      onClose
-                    }
+                    onClick={onClose}
                   >
                     Fechar
                   </button>
@@ -1067,35 +627,23 @@ export function ManageProfessorModal({
                             ? 'professors-button professors-button-danger-outline'
                             : 'professors-button professors-button-success-outline'
                         }
-                        disabled={
-                          isChangingStatus
-                        }
+                        disabled={isChangingStatus}
                         data-testid="professor-manage-status-button"
                         onClick={() => {
-                          setError(
-                            null,
-                          )
+                          setError(null)
 
-                          setIsConfirmingStatus(
-                            true,
-                          )
+                          setIsConfirmingStatus(true)
                         }}
                       >
-                        {professor.active
-                          ? 'Inativar professor'
-                          : 'Ativar professor'}
+                        {professor.active ? 'Inativar professor' : 'Ativar professor'}
                       </button>
 
                       <button
                         type="button"
                         className="professors-button professors-button-primary"
-                        disabled={
-                          isChangingStatus
-                        }
+                        disabled={isChangingStatus}
                         data-testid="professor-manage-edit-button"
-                        onClick={
-                          handleStartEdit
-                        }
+                        onClick={handleStartEdit}
                       >
                         Editar professor
                       </button>

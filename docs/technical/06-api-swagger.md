@@ -5,6 +5,7 @@ Validação: Zod.
 Documentação executável: Swagger/OpenAPI.
 
 ## Domínios atuais
+
 - base/health;
 - autenticação;
 - área pública;
@@ -12,6 +13,7 @@ Documentação executável: Swagger/OpenAPI.
 - membros.
 
 ## Padrão de erro
+
 ```json
 {
   "error": {

@@ -1,24 +1,10 @@
-import {
-  type FormEvent,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
 
-import {
-  ApiError,
-} from '../../services/api'
+import { ApiError } from '../../services/api'
 
-import {
-  getStudentById,
-  updateStudent,
-  updateStudentStatus,
-} from '../../services/student.service'
+import { getStudentById, updateStudent, updateStudentStatus } from '../../services/student.service'
 
-import type {
-  Student,
-  UpdateStudentInput,
-} from '../../types/student'
+import type { Student, UpdateStudentInput } from '../../types/student'
 
 interface ManageStudentModalProps {
   gymId: string
@@ -28,38 +14,24 @@ interface ManageStudentModalProps {
   onUpdated: () => Promise<void>
 }
 
-type ModalMode =
-  | 'view'
-  | 'edit'
+type ModalMode = 'view' | 'edit'
 
-function normalizeOptionalValue(
-  value: string,
-) {
-  const normalized =
-    value.trim()
+function normalizeOptionalValue(value: string) {
+  const normalized = value.trim()
 
-  return normalized.length > 0
-    ? normalized
-    : null
+  return normalized.length > 0 ? normalized : null
 }
 
-function normalizeComparableValue(
-  value: string | null,
-) {
+function normalizeComparableValue(value: string | null) {
   return value?.trim() ?? ''
 }
 
-function formatDateInput(
-  value: string | null,
-) {
+function formatDateInput(value: string | null) {
   if (!value) {
     return ''
   }
 
-  return value.slice(
-    0,
-    10,
-  )
+  return value.slice(0, 10)
 }
 
 export function ManageStudentModal({
@@ -69,135 +41,52 @@ export function ManageStudentModal({
   onClose,
   onUpdated,
 }: ManageStudentModalProps) {
-  const [
-    student,
-    setStudent,
-  ] =
-    useState<Student | null>(
-      null,
-    )
+  const [student, setStudent] = useState<Student | null>(null)
 
-  const [
-    mode,
-    setMode,
-  ] =
-    useState<ModalMode>(
-      'view',
-    )
+  const [mode, setMode] = useState<ModalMode>('view')
 
-  const [
-    name,
-    setName,
-  ] = useState('')
+  const [name, setName] = useState('')
 
-  const [
-    email,
-    setEmail,
-  ] = useState('')
+  const [email, setEmail] = useState('')
 
-  const [
-    phone,
-    setPhone,
-  ] = useState('')
+  const [phone, setPhone] = useState('')
 
-  const [
-    birthDate,
-    setBirthDate,
-  ] = useState('')
+  const [birthDate, setBirthDate] = useState('')
 
-  const [
-    emergencyContact,
-    setEmergencyContact,
-  ] = useState('')
+  const [emergencyContact, setEmergencyContact] = useState('')
 
-  const [
-    emergencyPhone,
-    setEmergencyPhone,
-  ] = useState('')
+  const [emergencyPhone, setEmergencyPhone] = useState('')
 
-  const [
-    joinedAt,
-    setJoinedAt,
-  ] = useState('')
+  const [joinedAt, setJoinedAt] = useState('')
 
-  const [
-    notes,
-    setNotes,
-  ] = useState('')
+  const [notes, setNotes] = useState('')
 
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const [
-    isSubmitting,
-    setIsSubmitting,
-  ] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [
-    isChangingStatus,
-    setIsChangingStatus,
-  ] = useState(false)
+  const [isChangingStatus, setIsChangingStatus] = useState(false)
 
-  const [
-    isConfirmingStatus,
-    setIsConfirmingStatus,
-  ] = useState(false)
+  const [isConfirmingStatus, setIsConfirmingStatus] = useState(false)
 
-  const [
-    error,
-    setError,
-  ] =
-    useState<string | null>(
-      null,
-    )
+  const [error, setError] = useState<string | null>(null)
 
-  function applyStudentValues(
-    loadedStudent: Student,
-  ) {
-    setName(
-      loadedStudent.name,
-    )
+  function applyStudentValues(loadedStudent: Student) {
+    setName(loadedStudent.name)
 
-    setEmail(
-      loadedStudent.email ??
-        '',
-    )
+    setEmail(loadedStudent.email ?? '')
 
-    setPhone(
-      loadedStudent.phone ??
-        '',
-    )
+    setPhone(loadedStudent.phone ?? '')
 
-    setBirthDate(
-      formatDateInput(
-        loadedStudent.birthDate,
-      ),
-    )
+    setBirthDate(formatDateInput(loadedStudent.birthDate))
 
-    setEmergencyContact(
-      loadedStudent
-        .emergencyContact ??
-        '',
-    )
+    setEmergencyContact(loadedStudent.emergencyContact ?? '')
 
-    setEmergencyPhone(
-      loadedStudent
-        .emergencyPhone ??
-        '',
-    )
+    setEmergencyPhone(loadedStudent.emergencyPhone ?? '')
 
-    setJoinedAt(
-      formatDateInput(
-        loadedStudent.joinedAt,
-      ),
-    )
+    setJoinedAt(formatDateInput(loadedStudent.joinedAt))
 
-    setNotes(
-      loadedStudent.notes ??
-        '',
-    )
+    setNotes(loadedStudent.notes ?? '')
   }
 
   useEffect(() => {
@@ -205,55 +94,34 @@ export function ManageStudentModal({
 
     async function loadStudent() {
       try {
-        setIsLoading(
-          true,
-        )
+        setIsLoading(true)
 
-        setError(
-          null,
-        )
+        setError(null)
 
-        const response =
-          await getStudentById(
-            gymId,
-            studentId,
-          )
+        const response = await getStudentById(gymId, studentId)
 
         if (cancelled) {
           return
         }
 
-        setStudent(
-          response.student,
-        )
+        setStudent(response.student)
 
-        applyStudentValues(
-          response.student,
-        )
+        applyStudentValues(response.student)
       } catch (caughtError) {
         if (cancelled) {
           return
         }
 
-        if (
-          caughtError instanceof
-          ApiError
-        ) {
-          setError(
-            caughtError.message,
-          )
+        if (caughtError instanceof ApiError) {
+          setError(caughtError.message)
 
           return
         }
 
-        setError(
-          'Não foi possível carregar os dados do aluno.',
-        )
+        setError('Não foi possível carregar os dados do aluno.')
       } finally {
         if (!cancelled) {
-          setIsLoading(
-            false,
-          )
+          setIsLoading(false)
         }
       }
     }
@@ -263,54 +131,30 @@ export function ManageStudentModal({
     return () => {
       cancelled = true
     }
-  }, [
-    gymId,
-    studentId,
-  ])
+  }, [gymId, studentId])
 
   useEffect(() => {
-    function handleKeyDown(
-      event: KeyboardEvent,
-    ) {
-      if (
-        event.key !==
-        'Escape'
-      ) {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') {
         return
       }
 
-      if (
-        isSubmitting ||
-        isChangingStatus
-      ) {
+      if (isSubmitting || isChangingStatus) {
         return
       }
 
-      if (
-        isConfirmingStatus
-      ) {
-        setIsConfirmingStatus(
-          false,
-        )
+      if (isConfirmingStatus) {
+        setIsConfirmingStatus(false)
 
         return
       }
 
-      if (
-        mode === 'edit' &&
-        student
-      ) {
-        applyStudentValues(
-          student,
-        )
+      if (mode === 'edit' && student) {
+        applyStudentValues(student)
 
-        setError(
-          null,
-        )
+        setError(null)
 
-        setMode(
-          'view',
-        )
+        setMode('view')
 
         return
       }
@@ -318,96 +162,40 @@ export function ManageStudentModal({
       onClose()
     }
 
-    window.addEventListener(
-      'keydown',
-      handleKeyDown,
-    )
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      window.removeEventListener(
-        'keydown',
-        handleKeyDown,
-      )
+      window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [
-    isSubmitting,
-    isChangingStatus,
-    isConfirmingStatus,
-    mode,
-    student,
-    onClose,
-  ])
+  }, [isSubmitting, isChangingStatus, isConfirmingStatus, mode, student, onClose])
 
-  const hasChanges =
-    useMemo(() => {
-      if (!student) {
-        return false
-      }
+  const hasChanges = useMemo(() => {
+    if (!student) {
+      return false
+    }
 
-      return (
-        name.trim() !==
-          student.name.trim() ||
-        email.trim() !==
-          normalizeComparableValue(
-            student.email,
-          ) ||
-        phone.trim() !==
-          normalizeComparableValue(
-            student.phone,
-          ) ||
-        birthDate !==
-          formatDateInput(
-            student.birthDate,
-          ) ||
-        emergencyContact.trim() !==
-          normalizeComparableValue(
-            student.emergencyContact,
-          ) ||
-        emergencyPhone.trim() !==
-          normalizeComparableValue(
-            student.emergencyPhone,
-          ) ||
-        joinedAt !==
-          formatDateInput(
-            student.joinedAt,
-          ) ||
-        notes.trim() !==
-          normalizeComparableValue(
-            student.notes,
-          )
-      )
-    }, [
-      student,
-      name,
-      email,
-      phone,
-      birthDate,
-      emergencyContact,
-      emergencyPhone,
-      joinedAt,
-      notes,
-    ])
+    return (
+      name.trim() !== student.name.trim() ||
+      email.trim() !== normalizeComparableValue(student.email) ||
+      phone.trim() !== normalizeComparableValue(student.phone) ||
+      birthDate !== formatDateInput(student.birthDate) ||
+      emergencyContact.trim() !== normalizeComparableValue(student.emergencyContact) ||
+      emergencyPhone.trim() !== normalizeComparableValue(student.emergencyPhone) ||
+      joinedAt !== formatDateInput(student.joinedAt) ||
+      notes.trim() !== normalizeComparableValue(student.notes)
+    )
+  }, [student, name, email, phone, birthDate, emergencyContact, emergencyPhone, joinedAt, notes])
 
   function handleStartEdit() {
-    if (
-      !canEdit ||
-      isSubmitting ||
-      isChangingStatus
-    ) {
+    if (!canEdit || isSubmitting || isChangingStatus) {
       return
     }
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    setIsConfirmingStatus(
-      false,
-    )
+    setIsConfirmingStatus(false)
 
-    setMode(
-      'edit',
-    )
+    setMode('edit')
   }
 
   function handleCancelEdit() {
@@ -415,23 +203,14 @@ export function ManageStudentModal({
       return
     }
 
-    applyStudentValues(
-      student,
-    )
+    applyStudentValues(student)
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    setMode(
-      'view',
-    )
+    setMode('view')
   }
 
-  async function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (
@@ -445,197 +224,104 @@ export function ManageStudentModal({
       return
     }
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    const normalizedName =
-      name.trim()
+    const normalizedName = name.trim()
 
-    if (
-      normalizedName.length <
-      2
-    ) {
-      setError(
-        'Informe o nome do aluno com pelo menos 2 caracteres.',
-      )
+    if (normalizedName.length < 2) {
+      setError('Informe o nome do aluno com pelo menos 2 caracteres.')
 
       return
     }
 
-    const input:
-      UpdateStudentInput = {
-        name:
-          normalizedName,
+    const input: UpdateStudentInput = {
+      name: normalizedName,
 
-        email:
-          normalizeOptionalValue(
-            email,
-          ),
+      email: normalizeOptionalValue(email),
 
-        phone:
-          normalizeOptionalValue(
-            phone,
-          ),
+      phone: normalizeOptionalValue(phone),
 
-        birthDate:
-          normalizeOptionalValue(
-            birthDate,
-          ),
+      birthDate: normalizeOptionalValue(birthDate),
 
-        emergencyContact:
-          normalizeOptionalValue(
-            emergencyContact,
-          ),
+      emergencyContact: normalizeOptionalValue(emergencyContact),
 
-        emergencyPhone:
-          normalizeOptionalValue(
-            emergencyPhone,
-          ),
+      emergencyPhone: normalizeOptionalValue(emergencyPhone),
 
-        joinedAt:
-          normalizeOptionalValue(
-            joinedAt,
-          ),
+      joinedAt: normalizeOptionalValue(joinedAt),
 
-        notes:
-          normalizeOptionalValue(
-            notes,
-          ),
-      }
+      notes: normalizeOptionalValue(notes),
+    }
 
-    setIsSubmitting(
-      true,
-    )
+    setIsSubmitting(true)
 
     try {
-      const response =
-        await updateStudent(
-          gymId,
-          studentId,
-          input,
-        )
+      const response = await updateStudent(gymId, studentId, input)
 
-      setStudent(
-        response.student,
-      )
+      setStudent(response.student)
 
-      applyStudentValues(
-        response.student,
-      )
+      applyStudentValues(response.student)
 
-      setMode(
-        'view',
-      )
+      setMode('view')
 
       await onUpdated()
     } catch (caughtError) {
-      if (
-        caughtError instanceof
-        ApiError
-      ) {
-        setError(
-          caughtError.message,
-        )
+      if (caughtError instanceof ApiError) {
+        setError(caughtError.message)
 
         return
       }
 
-      setError(
-        'Não foi possível atualizar o aluno.',
-      )
+      setError('Não foi possível atualizar o aluno.')
     } finally {
-      setIsSubmitting(
-        false,
-      )
+      setIsSubmitting(false)
     }
   }
 
   async function handleConfirmStatusChange() {
-    if (
-      !student ||
-      !canEdit ||
-      isChangingStatus ||
-      isSubmitting
-    ) {
+    if (!student || !canEdit || isChangingStatus || isSubmitting) {
       return
     }
 
-    setError(
-      null,
-    )
+    setError(null)
 
-    setIsChangingStatus(
-      true,
-    )
+    setIsChangingStatus(true)
 
     try {
-      const response =
-        await updateStudentStatus(
-          gymId,
-          studentId,
-          {
-            active:
-              !student.active,
-          },
-        )
+      const response = await updateStudentStatus(gymId, studentId, {
+        active: !student.active,
+      })
 
-      setStudent(
-        response.student,
-      )
+      setStudent(response.student)
 
-      applyStudentValues(
-        response.student,
-      )
+      applyStudentValues(response.student)
 
-      setIsConfirmingStatus(
-        false,
-      )
+      setIsConfirmingStatus(false)
 
       await onUpdated()
     } catch (caughtError) {
-      if (
-        caughtError instanceof
-        ApiError
-      ) {
-        setError(
-          caughtError.message,
-        )
+      if (caughtError instanceof ApiError) {
+        setError(caughtError.message)
 
         return
       }
 
-      setError(
-        'Não foi possível alterar o status do aluno.',
-      )
+      setError('Não foi possível alterar o status do aluno.')
     } finally {
-      setIsChangingStatus(
-        false,
-      )
+      setIsChangingStatus(false)
     }
   }
 
-  const isEditing =
-    mode === 'edit'
+  const isEditing = mode === 'edit'
 
-  const fieldsDisabled =
-    !isEditing ||
-    isSubmitting
+  const fieldsDisabled = !isEditing || isSubmitting
 
   return (
     <div
       className="student-modal-backdrop"
       role="presentation"
       data-testid="student-manage-modal-backdrop"
-      onMouseDown={(
-        event,
-      ) => {
-        if (
-          event.target ===
-            event.currentTarget &&
-          !isSubmitting &&
-          !isChangingStatus
-        ) {
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !isSubmitting && !isChangingStatus) {
           onClose()
         }
       }}
@@ -649,16 +335,10 @@ export function ManageStudentModal({
       >
         <header className="student-modal-header">
           <div>
-            <span className="students-eyebrow">
-              Gestão acadêmica
-            </span>
+            <span className="students-eyebrow">Gestão acadêmica</span>
 
-            <h2
-              id="student-manage-modal-title"
-            >
-              {isEditing
-                ? 'Editar aluno'
-                : 'Detalhes do aluno'}
+            <h2 id="student-manage-modal-title">
+              {isEditing ? 'Editar aluno' : 'Detalhes do aluno'}
             </h2>
 
             <p>
@@ -672,24 +352,16 @@ export function ManageStudentModal({
             type="button"
             className="student-modal-close"
             aria-label="Fechar"
-            disabled={
-              isSubmitting ||
-              isChangingStatus
-            }
+            disabled={isSubmitting || isChangingStatus}
             data-testid="student-manage-close-button"
-            onClick={
-              onClose
-            }
+            onClick={onClose}
           >
             ×
           </button>
         </header>
 
         {isLoading ? (
-          <div
-            className="student-modal-state"
-            data-testid="student-manage-loading"
-          >
+          <div className="student-modal-state" data-testid="student-manage-loading">
             Carregando dados do aluno...
           </div>
         ) : !student ? (
@@ -697,32 +369,21 @@ export function ManageStudentModal({
             className="student-modal-state student-modal-state-error"
             data-testid="student-manage-load-error"
           >
-            {error ??
-              'Aluno não encontrado.'}
+            {error ?? 'Aluno não encontrado.'}
           </div>
         ) : (
           <form
             className="student-modal-form"
             data-testid="student-manage-form"
-            onSubmit={(
-              event,
-            ) => {
-              void handleSubmit(
-                event,
-              )
+            onSubmit={(event) => {
+              void handleSubmit(event)
             }}
           >
             <div className="student-detail-summary">
-              <div className="student-detail-avatar">
-                {student.name
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
+              <div className="student-detail-avatar">{student.name.charAt(0).toUpperCase()}</div>
 
               <div>
-                <strong>
-                  {student.name}
-                </strong>
+                <strong>{student.name}</strong>
 
                 <span
                   className={
@@ -732,221 +393,127 @@ export function ManageStudentModal({
                   }
                   data-testid="student-manage-status"
                 >
-                  {student.active
-                    ? 'Ativo'
-                    : 'Inativo'}
+                  {student.active ? 'Ativo' : 'Inativo'}
                 </span>
               </div>
             </div>
 
             <div className="student-form-grid">
               <label className="student-form-field student-form-field-full">
-                <span>
-                  Nome *
-                </span>
+                <span>Nome *</span>
 
                 <input
                   type="text"
                   value={name}
-                  maxLength={
-                    150
-                  }
+                  maxLength={150}
                   required
-                  disabled={
-                    fieldsDisabled
-                  }
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-name-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setName(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setName(event.target.value)
                   }}
                 />
               </label>
 
               <label className="student-form-field">
-                <span>
-                  E-mail
-                </span>
+                <span>E-mail</span>
 
                 <input
                   type="email"
                   value={email}
-                  maxLength={
-                    255
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  maxLength={255}
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-email-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setEmail(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setEmail(event.target.value)
                   }}
                 />
               </label>
 
               <label className="student-form-field">
-                <span>
-                  Telefone
-                </span>
+                <span>Telefone</span>
 
                 <input
                   type="tel"
                   value={phone}
-                  maxLength={
-                    30
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  maxLength={30}
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-phone-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setPhone(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setPhone(event.target.value)
                   }}
                 />
               </label>
 
               <label className="student-form-field">
-                <span>
-                  Data de nascimento
-                </span>
+                <span>Data de nascimento</span>
 
                 <input
                   type="date"
-                  value={
-                    birthDate
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  value={birthDate}
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-birth-date-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setBirthDate(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setBirthDate(event.target.value)
                   }}
                 />
               </label>
 
               <label className="student-form-field">
-                <span>
-                  Data de entrada
-                </span>
+                <span>Data de entrada</span>
 
                 <input
                   type="date"
-                  value={
-                    joinedAt
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  value={joinedAt}
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-joined-at-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setJoinedAt(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setJoinedAt(event.target.value)
                   }}
                 />
               </label>
 
               <label className="student-form-field">
-                <span>
-                  Contato de emergência
-                </span>
+                <span>Contato de emergência</span>
 
                 <input
                   type="text"
-                  value={
-                    emergencyContact
-                  }
-                  maxLength={
-                    150
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  value={emergencyContact}
+                  maxLength={150}
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-emergency-contact-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setEmergencyContact(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setEmergencyContact(event.target.value)
                   }}
                 />
               </label>
 
               <label className="student-form-field">
-                <span>
-                  Telefone de emergência
-                </span>
+                <span>Telefone de emergência</span>
 
                 <input
                   type="tel"
-                  value={
-                    emergencyPhone
-                  }
-                  maxLength={
-                    30
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  value={emergencyPhone}
+                  maxLength={30}
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-emergency-phone-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setEmergencyPhone(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setEmergencyPhone(event.target.value)
                   }}
                 />
               </label>
 
               <label className="student-form-field student-form-field-full">
-                <span>
-                  Observações
-                </span>
+                <span>Observações</span>
 
                 <textarea
                   value={notes}
                   rows={4}
-                  maxLength={
-                    5000
-                  }
-                  disabled={
-                    fieldsDisabled
-                  }
+                  maxLength={5000}
+                  disabled={fieldsDisabled}
                   data-testid="student-manage-notes-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setNotes(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setNotes(event.target.value)
                   }}
                 />
               </label>
@@ -954,41 +521,21 @@ export function ManageStudentModal({
 
             <div className="student-detail-metadata">
               <div>
-                <span>
-                  ID do aluno
-                </span>
+                <span>ID do aluno</span>
 
-                <strong>
-                  {student.id}
-                </strong>
+                <strong>{student.id}</strong>
               </div>
 
               <div>
-                <span>
-                  Criado em
-                </span>
+                <span>Criado em</span>
 
-                <strong>
-                  {new Date(
-                    student.createdAt,
-                  ).toLocaleString(
-                    'pt-BR',
-                  )}
-                </strong>
+                <strong>{new Date(student.createdAt).toLocaleString('pt-BR')}</strong>
               </div>
 
               <div>
-                <span>
-                  Última atualização
-                </span>
+                <span>Última atualização</span>
 
-                <strong>
-                  {new Date(
-                    student.updatedAt,
-                  ).toLocaleString(
-                    'pt-BR',
-                  )}
-                </strong>
+                <strong>{new Date(student.updatedAt).toLocaleString('pt-BR')}</strong>
               </div>
             </div>
 
@@ -998,11 +545,7 @@ export function ManageStudentModal({
                 data-testid="student-status-confirmation"
               >
                 <div>
-                  <strong>
-                    {student.active
-                      ? 'Inativar aluno?'
-                      : 'Ativar aluno?'}
-                  </strong>
+                  <strong>{student.active ? 'Inativar aluno?' : 'Ativar aluno?'}</strong>
 
                   <p>
                     {student.active
@@ -1015,14 +558,10 @@ export function ManageStudentModal({
                   <button
                     type="button"
                     className="students-button students-button-secondary"
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="student-status-cancel-button"
                     onClick={() => {
-                      setIsConfirmingStatus(
-                        false,
-                      )
+                      setIsConfirmingStatus(false)
                     }}
                   >
                     Cancelar
@@ -1035,9 +574,7 @@ export function ManageStudentModal({
                         ? 'students-button students-button-danger'
                         : 'students-button students-button-success'
                     }
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="student-status-confirm-button"
                     onClick={() => {
                       void handleConfirmStatusChange()
@@ -1054,11 +591,7 @@ export function ManageStudentModal({
             ) : null}
 
             {error ? (
-              <div
-                className="student-form-error"
-                role="alert"
-                data-testid="student-manage-error"
-              >
+              <div className="student-form-error" role="alert" data-testid="student-manage-error">
                 {error}
               </div>
             ) : null}
@@ -1069,13 +602,9 @@ export function ManageStudentModal({
                   <button
                     type="button"
                     className="students-button students-button-secondary"
-                    disabled={
-                      isSubmitting
-                    }
+                    disabled={isSubmitting}
                     data-testid="student-manage-cancel-edit-button"
-                    onClick={
-                      handleCancelEdit
-                    }
+                    onClick={handleCancelEdit}
                   >
                     Cancelar edição
                   </button>
@@ -1083,15 +612,10 @@ export function ManageStudentModal({
                   <button
                     type="submit"
                     className="students-button students-button-primary"
-                    disabled={
-                      isSubmitting ||
-                      !hasChanges
-                    }
+                    disabled={isSubmitting || !hasChanges}
                     data-testid="student-manage-save-button"
                   >
-                    {isSubmitting
-                      ? 'Salvando...'
-                      : 'Salvar alterações'}
+                    {isSubmitting ? 'Salvando...' : 'Salvar alterações'}
                   </button>
                 </>
               ) : (
@@ -1099,13 +623,9 @@ export function ManageStudentModal({
                   <button
                     type="button"
                     className="students-button students-button-secondary"
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="student-manage-close-footer-button"
-                    onClick={
-                      onClose
-                    }
+                    onClick={onClose}
                   >
                     Fechar
                   </button>
@@ -1119,35 +639,23 @@ export function ManageStudentModal({
                             ? 'students-button students-button-danger-outline'
                             : 'students-button students-button-success-outline'
                         }
-                        disabled={
-                          isChangingStatus
-                        }
+                        disabled={isChangingStatus}
                         data-testid="student-manage-status-button"
                         onClick={() => {
-                          setError(
-                            null,
-                          )
+                          setError(null)
 
-                          setIsConfirmingStatus(
-                            true,
-                          )
+                          setIsConfirmingStatus(true)
                         }}
                       >
-                        {student.active
-                          ? 'Inativar aluno'
-                          : 'Ativar aluno'}
+                        {student.active ? 'Inativar aluno' : 'Ativar aluno'}
                       </button>
 
                       <button
                         type="button"
                         className="students-button students-button-primary"
-                        disabled={
-                          isChangingStatus
-                        }
+                        disabled={isChangingStatus}
                         data-testid="student-manage-edit-button"
-                        onClick={
-                          handleStartEdit
-                        }
+                        onClick={handleStartEdit}
                       >
                         Editar aluno
                       </button>

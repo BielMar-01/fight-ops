@@ -1,174 +1,95 @@
 import Fastify from 'fastify'
 
-import type {
-  FastifyInstance,
-} from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
-import {
-  env,
-} from './config/env.js'
+import { env } from './config/env.js'
 
-import {
-  registerErrorHandlers,
-} from './http/error-handler.js'
+import { registerErrorHandlers } from './http/error-handler.js'
 
-import {
-  auditRoutes,
-} from './modules/audit/audit.routes.js'
+import { auditRoutes } from './modules/audit/audit.routes.js'
 
-import {
-  authRoutes,
-} from './modules/auth/auth.routes.js'
+import { authRoutes } from './modules/auth/auth.routes.js'
 
-import {
-  graduationRoutes,
-} from './modules/graduations/graduations.routes.js'
+import { graduationRoutes } from './modules/graduations/graduations.routes.js'
 
-import {
-  gymRoutes,
-} from './modules/gyms/gyms.routes.js'
+import { gymRoutes } from './modules/gyms/gyms.routes.js'
 
-import {
-  modalityRoutes,
-} from './modules/modalities/modalities.routes.js'
+import { modalityRoutes } from './modules/modalities/modalities.routes.js'
 
-import {
-  professorRoutes,
-} from './modules/professors/professors.routes.js'
+import { professorRoutes } from './modules/professors/professors.routes.js'
 
-import {
-  publicSiteRoutes,
-} from './modules/public-site/public-site.routes.js'
+import { publicSiteRoutes } from './modules/public-site/public-site.routes.js'
 
-import {
-  studentRoutes,
-} from './modules/students/students.routes.js'
+import { studentRoutes } from './modules/students/students.routes.js'
 
-import {
-  registerCookiePlugin,
-} from './plugins/cookie.js'
+import { registerCookiePlugin } from './plugins/cookie.js'
 
-import {
-  registerSecurityPlugins,
-} from './plugins/security.js'
+import { registerSecurityPlugins } from './plugins/security.js'
 
-import {
-  registerSwagger,
-} from './plugins/swagger.js'
+import { registerSwagger } from './plugins/swagger.js'
 
-import {
-  databaseTestRoutes,
-} from './routes/database-test.routes.js'
+import { databaseTestRoutes } from './routes/database-test.routes.js'
 
-import {
-  healthRoutes,
-} from './routes/health.routes.js'
+import { healthRoutes } from './routes/health.routes.js'
 
 export function getFastifyOptions() {
   return {
     logger: {
-      level:
-        env.LOG_LEVEL,
+      level: env.LOG_LEVEL,
 
       redact: {
-        paths: [
-          'req.headers.authorization',
-          'req.headers.cookie',
-          'res.headers.set-cookie',
-        ],
+        paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers.set-cookie'],
 
-        censor:
-          '[REDACTED]',
+        censor: '[REDACTED]',
       },
     },
   }
 }
 
-export function configureApp(
-  app: FastifyInstance,
-) {
-  registerErrorHandlers(
-    app,
-  )
+export function configureApp(app: FastifyInstance) {
+  registerErrorHandlers(app)
 
-  registerCookiePlugin(
-    app,
-  )
+  registerCookiePlugin(app)
 
-  registerSecurityPlugins(
-    app,
-  )
+  registerSecurityPlugins(app)
 
-  registerSwagger(
-    app,
-  )
+  registerSwagger(app)
 
-  app.get(
-    '/',
-    async () => {
-      return {
-        status:
-          'ok',
+  app.get('/', async () => {
+    return {
+      status: 'ok',
 
-        service:
-          'fightops-api',
+      service: 'fightops-api',
 
-        environment:
-          env.NODE_ENV,
-      }
-    },
-  )
+      environment: env.NODE_ENV,
+    }
+  })
 
-  app.register(
-    healthRoutes,
-  )
+  app.register(healthRoutes)
 
-  app.register(
-    databaseTestRoutes,
-  )
+  app.register(databaseTestRoutes)
 
-  app.register(
-    authRoutes,
-  )
+  app.register(authRoutes)
 
-  app.register(
-    publicSiteRoutes,
-  )
+  app.register(publicSiteRoutes)
 
-  app.register(
-    gymRoutes,
-  )
+  app.register(gymRoutes)
 
-  app.register(
-    studentRoutes,
-  )
+  app.register(studentRoutes)
 
-  app.register(
-    professorRoutes,
-  )
+  app.register(professorRoutes)
 
-  app.register(
-    modalityRoutes,
-  )
+  app.register(modalityRoutes)
 
-  app.register(
-    graduationRoutes,
-  )
+  app.register(graduationRoutes)
 
-  app.register(
-    auditRoutes,
-  )
+  app.register(auditRoutes)
 
   return app
 }
 
 export function buildApp() {
-  const app =
-    Fastify(
-      getFastifyOptions(),
-    )
+  const app = Fastify(getFastifyOptions())
 
-  return configureApp(
-    app,
-  )
+  return configureApp(app)
 }

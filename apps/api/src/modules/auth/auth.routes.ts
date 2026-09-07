@@ -1,19 +1,10 @@
-import type {
-  FastifyInstance,
-  FastifyRequest,
-} from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
-import {
-  createAuditLog,
-} from '../audit/audit.service.js'
+import { createAuditLog } from '../audit/audit.service.js'
 
-import {
-  authenticate,
-} from './authenticate.js'
+import { authenticate } from './authenticate.js'
 
 import {
   forgotPasswordSchema,
@@ -23,11 +14,7 @@ import {
   verifyPasswordResetSchema,
 } from './auth.schemas.js'
 
-import {
-  authenticateUser,
-  getAuthenticatedUser,
-  registerUser,
-} from './auth.service.js'
+import { authenticateUser, getAuthenticatedUser, registerUser } from './auth.service.js'
 
 import {
   requestPasswordReset,
@@ -41,54 +28,34 @@ import {
   setRefreshTokenCookie,
 } from './refresh-cookie.js'
 
-import {
-  createSession,
-  revokeSession,
-  rotateSession,
-} from './session.js'
+import { createSession, revokeSession, rotateSession } from './session.js'
 
-import {
-  signAccessToken,
-} from './token.js'
+import { signAccessToken } from './token.js'
 
-function getRequestContext(
-  request: FastifyRequest,
-) {
+function getRequestContext(request: FastifyRequest) {
   return {
-    ipAddress:
-      request.ip,
+    ipAddress: request.ip,
 
-    userAgent:
-      request.headers[
-        'user-agent'
-      ] ??
-      null,
+    userAgent: request.headers['user-agent'] ?? null,
   }
 }
 
-export async function authRoutes(
-  app: FastifyInstance,
-) {
+export async function authRoutes(app: FastifyInstance) {
   app.get(
     '/auth/status',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Verificar disponibilidade do módulo de autenticação',
+        summary: 'Verificar disponibilidade do módulo de autenticação',
       },
     },
 
     async () => {
       return {
-        status:
-          'ok',
+        status: 'ok',
 
-        module:
-          'auth',
+        module: 'auth',
       }
     },
   )
@@ -97,165 +64,114 @@ export async function authRoutes(
     '/auth/register',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Cadastrar usuário',
+        summary: 'Cadastrar usuário',
 
         body: {
-          type:
-            'object',
+          type: 'object',
 
-          required: [
-            'name',
-            'email',
-            'password',
-          ],
+          required: ['name', 'email', 'password'],
 
           properties: {
             name: {
-              type:
-                'string',
+              type: 'string',
 
-              minLength:
-                3,
+              minLength: 3,
 
-              maxLength:
-                150,
+              maxLength: 150,
             },
 
             email: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'email',
+              format: 'email',
 
-              maxLength:
-                255,
+              maxLength: 255,
             },
 
             password: {
-              type:
-                'string',
+              type: 'string',
 
-              minLength:
-                8,
+              minLength: 8,
 
-              maxLength:
-                128,
+              maxLength: 128,
             },
 
             phone: {
-              type:
-                'string',
+              type: 'string',
 
-              minLength:
-                8,
+              minLength: 8,
 
-              maxLength:
-                30,
+              maxLength: 30,
             },
           },
         },
 
         response: {
           201: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               user: {
-                type:
-                  'object',
+                type: 'object',
 
                 properties: {
                   id: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   name: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   email: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   phone: {
                     anyOf: [
                       {
-                        type:
-                          'string',
+                        type: 'string',
                       },
 
                       {
-                        type:
-                          'null',
+                        type: 'null',
                       },
                     ],
                   },
 
                   globalRole: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   active: {
-                    type:
-                      'boolean',
+                    type: 'boolean',
                   },
 
                   createdAt: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
                 },
 
-                required: [
-                  'id',
-                  'name',
-                  'email',
-                  'phone',
-                  'globalRole',
-                  'active',
-                  'createdAt',
-                ],
+                required: ['id', 'name', 'email', 'phone', 'globalRole', 'active', 'createdAt'],
               },
             },
 
-            required: [
-              'user',
-            ],
+            required: ['user'],
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const input =
-        registerSchema.parse(
-          request.body,
-        )
+    async (request, reply) => {
+      const input = registerSchema.parse(request.body)
 
-      const user =
-        await registerUser(
-          input,
-        )
+      const user = await registerUser(input)
 
-      return reply
-        .status(201)
-        .send({
-          user,
-        })
+      return reply.status(201).send({
+        user,
+      })
     },
   )
 
@@ -263,177 +179,117 @@ export async function authRoutes(
     '/auth/login',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Autenticar usuário',
+        summary: 'Autenticar usuário',
 
         body: {
-          type:
-            'object',
+          type: 'object',
 
-          required: [
-            'email',
-            'password',
-          ],
+          required: ['email', 'password'],
 
           properties: {
             email: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'email',
+              format: 'email',
             },
 
             password: {
-              type:
-                'string',
+              type: 'string',
 
-              minLength:
-                1,
+              minLength: 1,
             },
           },
         },
 
         response: {
           200: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               accessToken: {
-                type:
-                  'string',
+                type: 'string',
               },
 
               user: {
-                type:
-                  'object',
+                type: 'object',
 
                 properties: {
                   id: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   name: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   email: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   globalRole: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
                 },
 
-                required: [
-                  'id',
-                  'name',
-                  'email',
-                  'globalRole',
-                ],
+                required: ['id', 'name', 'email', 'globalRole'],
               },
             },
 
-            required: [
-              'accessToken',
-              'user',
-            ],
+            required: ['accessToken', 'user'],
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const input =
-        loginSchema.parse(
-          request.body,
-        )
+    async (request, reply) => {
+      const input = loginSchema.parse(request.body)
 
-      const user =
-        await authenticateUser(
-          input,
-        )
+      const user = await authenticateUser(input)
 
-      const accessToken =
-        await signAccessToken({
-          userId:
-            user.id,
+      const accessToken = await signAccessToken({
+        userId: user.id,
 
-          email:
-            user.email,
+        email: user.email,
 
-          globalRole:
-            user.globalRole,
-        })
-
-      const refreshToken =
-        await createSession({
-          userId:
-            user.id,
-
-          userAgent:
-            request.headers[
-              'user-agent'
-            ],
-
-          ipAddress:
-            request.ip,
-        })
-
-      setRefreshTokenCookie(
-        reply,
-        refreshToken,
-      )
-
-      const requestContext =
-        getRequestContext(
-          request,
-        )
-
-      await createAuditLog({
-        userId:
-          user.id,
-
-        action:
-          'LOGIN',
-
-        entity:
-          'AUTH',
-
-        entityId:
-          user.id,
-
-        metadata: {
-          source:
-            'auth-login',
-        },
-
-        ipAddress:
-          requestContext.ipAddress,
-
-        userAgent:
-          requestContext.userAgent,
+        globalRole: user.globalRole,
       })
 
-      return reply
-        .status(200)
-        .send({
-          accessToken,
-          user,
-        })
+      const refreshToken = await createSession({
+        userId: user.id,
+
+        userAgent: request.headers['user-agent'],
+
+        ipAddress: request.ip,
+      })
+
+      setRefreshTokenCookie(reply, refreshToken)
+
+      const requestContext = getRequestContext(request)
+
+      await createAuditLog({
+        userId: user.id,
+
+        action: 'LOGIN',
+
+        entity: 'AUTH',
+
+        entityId: user.id,
+
+        metadata: {
+          source: 'auth-login',
+        },
+
+        ipAddress: requestContext.ipAddress,
+
+        userAgent: requestContext.userAgent,
+      })
+
+      return reply.status(200).send({
+        accessToken,
+        user,
+      })
     },
   )
 
@@ -441,115 +297,74 @@ export async function authRoutes(
     '/auth/refresh',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Renovar token de acesso',
+        summary: 'Renovar token de acesso',
 
         response: {
           200: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               accessToken: {
-                type:
-                  'string',
+                type: 'string',
               },
 
               user: {
-                type:
-                  'object',
+                type: 'object',
 
                 properties: {
                   id: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   name: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   email: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   globalRole: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
                 },
 
-                required: [
-                  'id',
-                  'name',
-                  'email',
-                  'globalRole',
-                ],
+                required: ['id', 'name', 'email', 'globalRole'],
               },
             },
 
-            required: [
-              'accessToken',
-              'user',
-            ],
+            required: ['accessToken', 'user'],
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const refreshToken =
-        request.cookies[
-          REFRESH_TOKEN_COOKIE_NAME
-        ]
+    async (request, reply) => {
+      const refreshToken = request.cookies[REFRESH_TOKEN_COOKIE_NAME]
 
       if (!refreshToken) {
-        throw new AppError(
-          'REFRESH_TOKEN_REQUIRED',
-          401,
-          'Token de renovação não informado.',
-        )
+        throw new AppError('REFRESH_TOKEN_REQUIRED', 401, 'Token de renovação não informado.')
       }
 
-      const result =
-        await rotateSession(
-          refreshToken,
-        )
+      const result = await rotateSession(refreshToken)
 
-      const accessToken =
-        await signAccessToken({
-          userId:
-            result.user.id,
+      const accessToken = await signAccessToken({
+        userId: result.user.id,
 
-          email:
-            result.user.email,
+        email: result.user.email,
 
-          globalRole:
-            result.user.globalRole,
-        })
+        globalRole: result.user.globalRole,
+      })
 
-      setRefreshTokenCookie(
-        reply,
-        result.refreshToken,
-      )
+      setRefreshTokenCookie(reply, result.refreshToken)
 
-      return reply
-        .status(200)
-        .send({
-          accessToken,
+      return reply.status(200).send({
+        accessToken,
 
-          user:
-            result.user,
-        })
+        user: result.user,
+      })
     },
   )
 
@@ -557,139 +372,98 @@ export async function authRoutes(
     '/auth/logout',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Encerrar sessão do usuário',
+        summary: 'Encerrar sessão do usuário',
 
         response: {
           204: {
-            type:
-              'null',
+            type: 'null',
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const refreshToken =
-        request.cookies[
-          REFRESH_TOKEN_COOKIE_NAME
-        ]
+    async (request, reply) => {
+      const refreshToken = request.cookies[REFRESH_TOKEN_COOKIE_NAME]
 
       if (refreshToken) {
-        const revokedSession =
-          await revokeSession(
-            refreshToken,
-          )
+        const revokedSession = await revokeSession(refreshToken)
 
-        if (
-          revokedSession
-        ) {
-          const requestContext =
-            getRequestContext(
-              request,
-            )
+        if (revokedSession) {
+          const requestContext = getRequestContext(request)
 
           await createAuditLog({
-            userId:
-              revokedSession.userId,
+            userId: revokedSession.userId,
 
-            action:
-              'LOGOUT',
+            action: 'LOGOUT',
 
-            entity:
-              'AUTH',
+            entity: 'AUTH',
 
-            entityId:
-              revokedSession.userId,
+            entityId: revokedSession.userId,
 
             metadata: {
-              source:
-                'auth-logout',
+              source: 'auth-logout',
             },
 
-            ipAddress:
-              requestContext.ipAddress,
+            ipAddress: requestContext.ipAddress,
 
-            userAgent:
-              requestContext.userAgent,
+            userAgent: requestContext.userAgent,
           })
         }
       }
 
-      clearRefreshTokenCookie(
-        reply,
-      )
+      clearRefreshTokenCookie(reply)
 
-      return reply
-        .status(204)
-        .send()
+      return reply.status(204).send()
     },
   )
 
   app.get(
     '/auth/me',
     {
-      preHandler:
-        authenticate,
+      preHandler: authenticate,
 
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Consultar usuário autenticado',
+        summary: 'Consultar usuário autenticado',
 
         security: [
           {
-            bearerAuth:
-              [],
+            bearerAuth: [],
           },
         ],
 
         response: {
           200: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               user: {
-                type:
-                  'object',
+                type: 'object',
 
                 properties: {
                   id: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   name: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   email: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   phone: {
                     anyOf: [
                       {
-                        type:
-                          'string',
+                        type: 'string',
                       },
 
                       {
-                        type:
-                          'null',
+                        type: 'null',
                       },
                     ],
                   },
@@ -697,44 +471,37 @@ export async function authRoutes(
                   avatarUrl: {
                     anyOf: [
                       {
-                        type:
-                          'string',
+                        type: 'string',
                       },
 
                       {
-                        type:
-                          'null',
+                        type: 'null',
                       },
                     ],
                   },
 
                   globalRole: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
 
                   active: {
-                    type:
-                      'boolean',
+                    type: 'boolean',
                   },
 
                   emailVerifiedAt: {
                     anyOf: [
                       {
-                        type:
-                          'string',
+                        type: 'string',
                       },
 
                       {
-                        type:
-                          'null',
+                        type: 'null',
                       },
                     ],
                   },
 
                   createdAt: {
-                    type:
-                      'string',
+                    type: 'string',
                   },
                 },
 
@@ -752,41 +519,24 @@ export async function authRoutes(
               },
             },
 
-            required: [
-              'user',
-            ],
+            required: ['user'],
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const authenticatedUser =
-        request.user
+    async (request, reply) => {
+      const authenticatedUser = request.user
 
-      if (
-        !authenticatedUser
-      ) {
-        throw new AppError(
-          'UNAUTHENTICATED',
-          401,
-          'Usuário não autenticado.',
-        )
+      if (!authenticatedUser) {
+        throw new AppError('UNAUTHENTICATED', 401, 'Usuário não autenticado.')
       }
 
-      const user =
-        await getAuthenticatedUser(
-          authenticatedUser.id,
-        )
+      const user = await getAuthenticatedUser(authenticatedUser.id)
 
-      return reply
-        .status(200)
-        .send({
-          user,
-        })
+      return reply.status(200).send({
+        user,
+      })
     },
   )
 
@@ -794,104 +544,70 @@ export async function authRoutes(
     '/auth/password/forgot',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Solicitar recuperação de senha',
+        summary: 'Solicitar recuperação de senha',
 
         body: {
-          type:
-            'object',
+          type: 'object',
 
-          required: [
-            'email',
-          ],
+          required: ['email'],
 
           properties: {
             email: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'email',
+              format: 'email',
             },
           },
         },
 
         response: {
           202: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               message: {
-                type:
-                  'string',
+                type: 'string',
               },
             },
 
-            required: [
-              'message',
-            ],
+            required: ['message'],
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const input =
-        forgotPasswordSchema.parse(
-          request.body,
-        )
+    async (request, reply) => {
+      const input = forgotPasswordSchema.parse(request.body)
 
-      const result =
-        await requestPasswordReset(
-          input,
-        )
+      const result = await requestPasswordReset(input)
 
       if (result) {
-        const requestContext =
-          getRequestContext(
-            request,
-          )
+        const requestContext = getRequestContext(request)
 
         await createAuditLog({
-          userId:
-            result.userId,
+          userId: result.userId,
 
-          action:
-            'PASSWORD_RESET_REQUESTED',
+          action: 'PASSWORD_RESET_REQUESTED',
 
-          entity:
-            'AUTH',
+          entity: 'AUTH',
 
-          entityId:
-            result.userId,
+          entityId: result.userId,
 
           metadata: {
-            source:
-              'password-forgot',
+            source: 'password-forgot',
           },
 
-          ipAddress:
-            requestContext.ipAddress,
+          ipAddress: requestContext.ipAddress,
 
-          userAgent:
-            requestContext.userAgent,
+          userAgent: requestContext.userAgent,
         })
       }
 
-      return reply
-        .status(202)
-        .send({
-          message:
-            'Se o e-mail estiver cadastrado, enviaremos um código para redefinição da senha.',
-        })
+      return reply.status(202).send({
+        message: 'Se o e-mail estiver cadastrado, enviaremos um código para redefinição da senha.',
+      })
     },
   )
 
@@ -899,83 +615,54 @@ export async function authRoutes(
     '/auth/password/verify',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Validar código de recuperação de senha',
+        summary: 'Validar código de recuperação de senha',
 
         body: {
-          type:
-            'object',
+          type: 'object',
 
-          required: [
-            'email',
-            'code',
-          ],
+          required: ['email', 'code'],
 
           properties: {
             email: {
-              type:
-                'string',
+              type: 'string',
 
-              format:
-                'email',
+              format: 'email',
             },
 
             code: {
-              type:
-                'string',
+              type: 'string',
 
-              minLength:
-                6,
+              minLength: 6,
 
-              maxLength:
-                6,
+              maxLength: 6,
             },
           },
         },
 
         response: {
           200: {
-            type:
-              'object',
+            type: 'object',
 
             properties: {
               resetToken: {
-                type:
-                  'string',
+                type: 'string',
               },
             },
 
-            required: [
-              'resetToken',
-            ],
+            required: ['resetToken'],
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const input =
-        verifyPasswordResetSchema.parse(
-          request.body,
-        )
+    async (request, reply) => {
+      const input = verifyPasswordResetSchema.parse(request.body)
 
-      const result =
-        await verifyPasswordResetCode(
-          input,
-        )
+      const result = await verifyPasswordResetCode(input)
 
-      return reply
-        .status(200)
-        .send(
-          result,
-        )
+      return reply.status(200).send(result)
     },
   )
 
@@ -983,97 +670,64 @@ export async function authRoutes(
     '/auth/password/reset',
     {
       schema: {
-        tags: [
-          'Auth',
-        ],
+        tags: ['Auth'],
 
-        summary:
-          'Definir nova senha',
+        summary: 'Definir nova senha',
 
         body: {
-          type:
-            'object',
+          type: 'object',
 
-          required: [
-            'resetToken',
-            'newPassword',
-          ],
+          required: ['resetToken', 'newPassword'],
 
           properties: {
             resetToken: {
-              type:
-                'string',
+              type: 'string',
             },
 
             newPassword: {
-              type:
-                'string',
+              type: 'string',
 
-              minLength:
-                8,
+              minLength: 8,
 
-              maxLength:
-                128,
+              maxLength: 128,
             },
           },
         },
 
         response: {
           204: {
-            type:
-              'null',
+            type: 'null',
           },
         },
       },
     },
 
-    async (
-      request,
-      reply,
-    ) => {
-      const input =
-        resetPasswordSchema.parse(
-          request.body,
-        )
+    async (request, reply) => {
+      const input = resetPasswordSchema.parse(request.body)
 
-      const result =
-        await resetPassword(
-          input,
-        )
+      const result = await resetPassword(input)
 
-      const requestContext =
-        getRequestContext(
-          request,
-        )
+      const requestContext = getRequestContext(request)
 
       await createAuditLog({
-        userId:
-          result.userId,
+        userId: result.userId,
 
-        action:
-          'PASSWORD_RESET_COMPLETED',
+        action: 'PASSWORD_RESET_COMPLETED',
 
-        entity:
-          'AUTH',
+        entity: 'AUTH',
 
-        entityId:
-          result.userId,
+        entityId: result.userId,
 
         metadata: {
-          source:
-            'password-reset',
+          source: 'password-reset',
         },
 
-        ipAddress:
-          requestContext.ipAddress,
+        ipAddress: requestContext.ipAddress,
 
-        userAgent:
-          requestContext.userAgent,
+        userAgent: requestContext.userAgent,
       })
 
-      return reply
-        .status(204)
-        .send()
+      return reply.status(204).send()
     },
   )
 }

@@ -1,11 +1,6 @@
-import {
-  useEffect,
-} from 'react'
+import { useEffect } from 'react'
 
-import type {
-  AuditJsonValue,
-  AuditLog,
-} from '../../types/audit'
+import type { AuditJsonValue, AuditLog } from '../../types/audit'
 
 interface AuditDetailsModalProps {
   auditLog: AuditLog
@@ -15,529 +10,263 @@ interface AuditDetailsModalProps {
 interface ComparisonRow {
   key: string
   label: string
-  oldValue:
-    | AuditJsonValue
-    | undefined
-  newValue:
-    | AuditJsonValue
-    | undefined
+  oldValue: AuditJsonValue | undefined
+  newValue: AuditJsonValue | undefined
   changed: boolean
 }
 
-const actionLabels: Record<
-  string,
-  string
-> = {
-  CREATE:
-    'Criação',
+const actionLabels: Record<string, string> = {
+  CREATE: 'Criação',
 
-  UPDATE:
-    'Alteração',
+  UPDATE: 'Alteração',
 
-  STATUS_CHANGE:
-    'Alteração de status',
+  STATUS_CHANGE: 'Alteração de status',
 
-  DELETE:
-    'Exclusão',
+  DELETE: 'Exclusão',
 
-  LOGIN:
-    'Login',
+  LOGIN: 'Login',
 
-  LOGOUT:
-    'Logout',
+  LOGOUT: 'Logout',
 
-  PASSWORD_RESET_REQUESTED:
-    'Recuperação solicitada',
+  PASSWORD_RESET_REQUESTED: 'Recuperação solicitada',
 
-  PASSWORD_RESET_COMPLETED:
-    'Senha redefinida',
+  PASSWORD_RESET_COMPLETED: 'Senha redefinida',
 
-  PASSWORD_RESET_REQUESTED_BY_ADMIN:
-    'Reset solicitado por administrador',
+  PASSWORD_RESET_REQUESTED_BY_ADMIN: 'Reset solicitado por administrador',
 }
 
-const entityLabels: Record<
-  string,
-  string
-> = {
-  USER:
-    'Usuário',
+const entityLabels: Record<string, string> = {
+  USER: 'Usuário',
 
-  GYM:
-    'Academia',
+  GYM: 'Academia',
 
-  GYM_MEMBERSHIP:
-    'Membro',
+  GYM_MEMBERSHIP: 'Membro',
 
-  STUDENT:
-    'Aluno',
+  STUDENT: 'Aluno',
 
-  AUTH:
-    'Autenticação',
+  AUTH: 'Autenticação',
 
-  SYSTEM:
-    'Sistema',
+  SYSTEM: 'Sistema',
 }
 
-const roleLabels: Record<
-  string,
-  string
-> = {
-  OWNER:
-    'Proprietário',
+const roleLabels: Record<string, string> = {
+  OWNER: 'Proprietário',
 
-  ADMIN:
-    'Administrador',
+  ADMIN: 'Administrador',
 
-  RECEPTIONIST:
-    'Recepcionista',
+  RECEPTIONIST: 'Recepcionista',
 
-  PROFESSOR:
-    'Professor',
+  PROFESSOR: 'Professor',
 
-  STUDENT:
-    'Aluno',
+  STUDENT: 'Aluno',
 }
 
-const fieldLabels: Record<
-  string,
-  string
-> = {
-  id:
-    'ID',
+const fieldLabels: Record<string, string> = {
+  id: 'ID',
 
-  name:
-    'Nome',
+  name: 'Nome',
 
-  email:
-    'E-mail',
+  email: 'E-mail',
 
-  phone:
-    'Telefone',
+  phone: 'Telefone',
 
-  birthDate:
-    'Data de nascimento',
+  birthDate: 'Data de nascimento',
 
-  emergencyContact:
-    'Contato de emergência',
+  emergencyContact: 'Contato de emergência',
 
-  emergencyPhone:
-    'Telefone de emergência',
+  emergencyPhone: 'Telefone de emergência',
 
-  notes:
-    'Observações',
+  notes: 'Observações',
 
-  active:
-    'Status',
+  active: 'Status',
 
-  role:
-    'Função',
+  role: 'Função',
 
-  joinedAt:
-    'Data de entrada',
+  joinedAt: 'Data de entrada',
 
-  hireDate:
-    'Data de contratação',
+  hireDate: 'Data de contratação',
 
-  userId:
-    'Usuário',
+  userId: 'Usuário',
 
-  gymId:
-    'Academia',
+  gymId: 'Academia',
 
-  createdAt:
-    'Criado em',
+  createdAt: 'Criado em',
 
-  updatedAt:
-    'Atualizado em',
+  updatedAt: 'Atualizado em',
 
-  avatarUrl:
-    'Avatar',
+  avatarUrl: 'Avatar',
 
-  bio:
-    'Biografia',
+  bio: 'Biografia',
 }
 
-function getActionLabel(
-  action: string,
-) {
-  return (
-    actionLabels[action] ??
-    action
-  )
+function getActionLabel(action: string) {
+  return actionLabels[action] ?? action
 }
 
-function getEntityLabel(
-  entity: string,
-) {
-  return (
-    entityLabels[entity] ??
-    entity
-  )
+function getEntityLabel(entity: string) {
+  return entityLabels[entity] ?? entity
 }
 
-function getFieldLabel(
-  field: string,
-) {
-  return (
-    fieldLabels[field] ??
-    field
-  )
+function getFieldLabel(field: string) {
+  return fieldLabels[field] ?? field
 }
 
-function formatDateTime(
-  value: string,
-) {
-  const date =
-    new Date(value)
+function formatDateTime(value: string) {
+  const date = new Date(value)
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value
   }
 
-  return new Intl.DateTimeFormat(
-    'pt-BR',
-    {
-      dateStyle:
-        'short',
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
 
-      timeStyle:
-        'medium',
-    },
-  ).format(date)
+    timeStyle: 'medium',
+  }).format(date)
 }
 
-function isRecord(
-  value:
-    | AuditJsonValue
-    | null,
-): value is Record<
-  string,
-  AuditJsonValue
-> {
-  return (
-    value !== null &&
-    typeof value ===
-      'object' &&
-    !Array.isArray(
-      value,
-    )
-  )
+function isRecord(value: AuditJsonValue | null): value is Record<string, AuditJsonValue> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
-function areValuesEqual(
-  first:
-    | AuditJsonValue
-    | undefined,
-  second:
-    | AuditJsonValue
-    | undefined,
-) {
-  return (
-    JSON.stringify(first) ===
-    JSON.stringify(second)
-  )
+function areValuesEqual(first: AuditJsonValue | undefined, second: AuditJsonValue | undefined) {
+  return JSON.stringify(first) === JSON.stringify(second)
 }
 
-function getComparisonRows(
-  oldValues:
-    | AuditJsonValue
-    | null,
-  newValues:
-    | AuditJsonValue
-    | null,
-) {
-  const oldRecord =
-    isRecord(oldValues)
-      ? oldValues
-      : {}
+function getComparisonRows(oldValues: AuditJsonValue | null, newValues: AuditJsonValue | null) {
+  const oldRecord = isRecord(oldValues) ? oldValues : {}
 
-  const newRecord =
-    isRecord(newValues)
-      ? newValues
-      : {}
+  const newRecord = isRecord(newValues) ? newValues : {}
 
-  const keys =
-    Array.from(
-      new Set([
-        ...Object.keys(
-          oldRecord,
-        ),
+  const keys = Array.from(new Set([...Object.keys(oldRecord), ...Object.keys(newRecord)]))
 
-        ...Object.keys(
-          newRecord,
-        ),
-      ]),
-    )
+  return keys.map((key): ComparisonRow => {
+    const oldValue = oldRecord[key]
 
-  return keys.map(
-    (key): ComparisonRow => {
-      const oldValue =
-        oldRecord[key]
+    const newValue = newRecord[key]
 
-      const newValue =
-        newRecord[key]
+    return {
+      key,
 
-      return {
-        key,
+      label: getFieldLabel(key),
 
-        label:
-          getFieldLabel(
-            key,
-          ),
+      oldValue,
 
-        oldValue,
+      newValue,
 
-        newValue,
-
-        changed:
-          !areValuesEqual(
-            oldValue,
-            newValue,
-          ),
-      }
-    },
-  )
+      changed: !areValuesEqual(oldValue, newValue),
+    }
+  })
 }
 
-function formatBoolean(
-  field: string,
-  value: boolean,
-) {
-  if (
-    field === 'active'
-  ) {
-    return value
-      ? 'Ativo'
-      : 'Inativo'
+function formatBoolean(field: string, value: boolean) {
+  if (field === 'active') {
+    return value ? 'Ativo' : 'Inativo'
   }
 
-  return value
-    ? 'Sim'
-    : 'Não'
+  return value ? 'Sim' : 'Não'
 }
 
-function formatPossibleDate(
-  field: string,
-  value: string,
-) {
-  const dateFields = [
-    'birthDate',
-    'joinedAt',
-    'hireDate',
-    'createdAt',
-    'updatedAt',
-  ]
+function formatPossibleDate(field: string, value: string) {
+  const dateFields = ['birthDate', 'joinedAt', 'hireDate', 'createdAt', 'updatedAt']
 
-  if (
-    !dateFields.includes(
-      field,
-    )
-  ) {
+  if (!dateFields.includes(field)) {
     return value
   }
 
-  const date =
-    new Date(value)
+  const date = new Date(value)
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value
   }
 
-  if (
-    field ===
-    'birthDate'
-  ) {
-    return new Intl.DateTimeFormat(
-      'pt-BR',
-    ).format(date)
+  if (field === 'birthDate') {
+    return new Intl.DateTimeFormat('pt-BR').format(date)
   }
 
-  return new Intl.DateTimeFormat(
-    'pt-BR',
-    {
-      dateStyle:
-        'short',
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
 
-      timeStyle:
-        'short',
-    },
-  ).format(date)
+    timeStyle: 'short',
+  }).format(date)
 }
 
-function formatValue(
-  field: string,
-  value:
-    | AuditJsonValue
-    | undefined,
-) {
-  if (
-    value === undefined
-  ) {
+function formatValue(field: string, value: AuditJsonValue | undefined) {
+  if (value === undefined) {
     return '—'
   }
 
-  if (
-    value === null
-  ) {
+  if (value === null) {
     return 'Não informado'
   }
 
-  if (
-    typeof value ===
-    'boolean'
-  ) {
-    return formatBoolean(
-      field,
-      value,
-    )
+  if (typeof value === 'boolean') {
+    return formatBoolean(field, value)
   }
 
-  if (
-    typeof value ===
-    'number'
-  ) {
+  if (typeof value === 'number') {
     return String(value)
   }
 
-  if (
-    typeof value ===
-    'string'
-  ) {
-    if (
-      field === 'role'
-    ) {
-      return (
-        roleLabels[value] ??
-        value
-      )
+  if (typeof value === 'string') {
+    if (field === 'role') {
+      return roleLabels[value] ?? value
     }
 
-    return formatPossibleDate(
-      field,
-      value,
-    )
+    return formatPossibleDate(field, value)
   }
 
-  return JSON.stringify(
-    value,
-    null,
-    2,
-  )
+  return JSON.stringify(value, null, 2)
 }
 
-function formatJsonValue(
-  value:
-    | AuditJsonValue
-    | null,
-) {
-  if (
-    value === null
-  ) {
+function formatJsonValue(value: AuditJsonValue | null) {
+  if (value === null) {
     return null
   }
 
-  return JSON.stringify(
-    value,
-    null,
-    2,
-  )
+  return JSON.stringify(value, null, 2)
 }
 
-export function AuditDetailsModal({
-  auditLog,
-  onClose,
-}: AuditDetailsModalProps) {
+export function AuditDetailsModal({ auditLog, onClose }: AuditDetailsModalProps) {
   useEffect(() => {
-    function handleKeyDown(
-      event: KeyboardEvent,
-    ) {
-      if (
-        event.key ===
-        'Escape'
-      ) {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
         onClose()
       }
     }
 
-    document.addEventListener(
-      'keydown',
-      handleKeyDown,
-    )
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      document.removeEventListener(
-        'keydown',
-        handleKeyDown,
-      )
+      document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [
-    onClose,
-  ])
+  }, [onClose])
 
-  const comparisonRows =
-    getComparisonRows(
-      auditLog.oldValues,
-      auditLog.newValues,
-    )
+  const comparisonRows = getComparisonRows(auditLog.oldValues, auditLog.newValues)
 
-  const changedRows =
-    comparisonRows.filter(
-      (row) =>
-        row.changed,
-    )
+  const changedRows = comparisonRows.filter((row) => row.changed)
 
-  const rowsToDisplay =
-    changedRows.length > 0
-      ? changedRows
-      : comparisonRows
+  const rowsToDisplay = changedRows.length > 0 ? changedRows : comparisonRows
 
-  const hasComparison =
-    rowsToDisplay.length > 0
+  const hasComparison = rowsToDisplay.length > 0
 
-  const isCreate =
-    auditLog.action ===
-    'CREATE'
+  const isCreate = auditLog.action === 'CREATE'
 
-  const isDelete =
-    auditLog.action ===
-    'DELETE'
+  const isDelete = auditLog.action === 'DELETE'
 
-  const oldValues =
-    formatJsonValue(
-      auditLog.oldValues,
-    )
+  const oldValues = formatJsonValue(auditLog.oldValues)
 
-  const newValues =
-    formatJsonValue(
-      auditLog.newValues,
-    )
+  const newValues = formatJsonValue(auditLog.newValues)
 
-  const metadata =
-    formatJsonValue(
-      auditLog.metadata,
-    )
+  const metadata = formatJsonValue(auditLog.metadata)
 
   return (
     <div
       className="audit-modal-backdrop"
       data-testid="audit-details-modal-backdrop"
       role="presentation"
-      onMouseDown={(
-        event,
-      ) => {
-        if (
-          event.target ===
-          event.currentTarget
-        ) {
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
           onClose()
         }
       }}
@@ -551,21 +280,11 @@ export function AuditDetailsModal({
       >
         <header className="audit-modal-header">
           <div>
-            <span className="audit-eyebrow">
-              Registro de auditoria
-            </span>
+            <span className="audit-eyebrow">Registro de auditoria</span>
 
-            <h2
-              id="audit-details-title"
-            >
-              Detalhes da alteração
-            </h2>
+            <h2 id="audit-details-title">Detalhes da alteração</h2>
 
-            <p>
-              Consulte as informações
-              registradas para esta
-              ação.
-            </p>
+            <p>Consulte as informações registradas para esta ação.</p>
           </div>
 
           <button
@@ -573,9 +292,7 @@ export function AuditDetailsModal({
             className="audit-modal-close"
             aria-label="Fechar detalhes"
             data-testid="audit-details-close-button"
-            onClick={
-              onClose
-            }
+            onClick={onClose}
           >
             ×
           </button>
@@ -584,122 +301,66 @@ export function AuditDetailsModal({
         <div className="audit-modal-content">
           <div className="audit-detail-summary">
             <div className="audit-detail-summary-item">
-              <span>
-                Usuário
-              </span>
+              <span>Usuário</span>
 
-              <strong>
-                {auditLog.user
-                  ?.name ??
-                  'Sistema'}
-              </strong>
+              <strong>{auditLog.user?.name ?? 'Sistema'}</strong>
 
-              <small>
-                {auditLog.user
-                  ?.email ??
-                  'Ação automática'}
-              </small>
+              <small>{auditLog.user?.email ?? 'Ação automática'}</small>
             </div>
 
             <div className="audit-detail-summary-item">
-              <span>
-                Ação
-              </span>
+              <span>Ação</span>
 
-              <strong>
-                {getActionLabel(
-                  auditLog.action,
-                )}
-              </strong>
+              <strong>{getActionLabel(auditLog.action)}</strong>
             </div>
 
             <div className="audit-detail-summary-item">
-              <span>
-                Entidade
-              </span>
+              <span>Entidade</span>
 
-              <strong>
-                {getEntityLabel(
-                  auditLog.entity,
-                )}
-              </strong>
+              <strong>{getEntityLabel(auditLog.entity)}</strong>
             </div>
 
             <div className="audit-detail-summary-item">
-              <span>
-                Data e hora
-              </span>
+              <span>Data e hora</span>
 
-              <strong>
-                {formatDateTime(
-                  auditLog.createdAt,
-                )}
-              </strong>
+              <strong>{formatDateTime(auditLog.createdAt)}</strong>
             </div>
           </div>
 
           <div className="audit-technical-details">
             <div>
-              <span>
-                ID do registro
-              </span>
+              <span>ID do registro</span>
 
-              <strong>
-                {auditLog.id}
-              </strong>
+              <strong>{auditLog.id}</strong>
             </div>
 
             <div>
-              <span>
-                ID da entidade
-              </span>
+              <span>ID da entidade</span>
 
-              <strong>
-                {auditLog.entityId ??
-                  'Não informado'}
-              </strong>
+              <strong>{auditLog.entityId ?? 'Não informado'}</strong>
             </div>
 
             <div>
-              <span>
-                IP
-              </span>
+              <span>IP</span>
 
-              <strong>
-                {auditLog.ipAddress ??
-                  'Não informado'}
-              </strong>
+              <strong>{auditLog.ipAddress ?? 'Não informado'}</strong>
             </div>
 
             <div>
-              <span>
-                User-Agent
-              </span>
+              <span>User-Agent</span>
 
-              <strong>
-                {auditLog.userAgent ??
-                  'Não informado'}
-              </strong>
+              <strong>{auditLog.userAgent ?? 'Não informado'}</strong>
             </div>
           </div>
 
           {hasComparison ? (
-            <section
-              className="audit-comparison-section"
-              data-testid="audit-details-comparison"
-            >
+            <section className="audit-comparison-section" data-testid="audit-details-comparison">
               <div className="audit-comparison-heading">
                 <div>
-                  <span className="audit-eyebrow">
-                    Alterações
-                  </span>
+                  <span className="audit-eyebrow">Alterações</span>
 
                   <h3>
-                    {isCreate
-                      ? 'Dados criados'
-                      : isDelete
-                        ? 'Dados removidos'
-                        : 'Antes e depois'}
+                    {isCreate ? 'Dados criados' : isDelete ? 'Dados removidos' : 'Antes e depois'}
                   </h3>
 
                   <p>
@@ -711,197 +372,107 @@ export function AuditDetailsModal({
                   </p>
                 </div>
 
-                {!isCreate &&
-                !isDelete &&
-                changedRows.length >
-                  0 ? (
-                  <span
-                    className="audit-change-count"
-                    data-testid="audit-change-count"
-                  >
-                    {
-                      changedRows.length
-                    }{' '}
-                    {changedRows.length ===
-                    1
-                      ? 'campo alterado'
-                      : 'campos alterados'}
+                {!isCreate && !isDelete && changedRows.length > 0 ? (
+                  <span className="audit-change-count" data-testid="audit-change-count">
+                    {changedRows.length}{' '}
+                    {changedRows.length === 1 ? 'campo alterado' : 'campos alterados'}
                   </span>
                 ) : null}
               </div>
 
               <div className="audit-comparison-list">
-                {rowsToDisplay.map(
-                  (row) => (
-                    <div
-                      key={
-                        row.key
-                      }
-                      className={
-                        row.changed
-                          ? 'audit-comparison-row changed'
-                          : 'audit-comparison-row'
-                      }
-                      data-testid={`audit-comparison-field-${row.key}`}
-                    >
-                      <div className="audit-comparison-field">
-                        <span>
-                          Campo
-                        </span>
+                {rowsToDisplay.map((row) => (
+                  <div
+                    key={row.key}
+                    className={
+                      row.changed ? 'audit-comparison-row changed' : 'audit-comparison-row'
+                    }
+                    data-testid={`audit-comparison-field-${row.key}`}
+                  >
+                    <div className="audit-comparison-field">
+                      <span>Campo</span>
 
-                        <strong>
-                          {
-                            row.label
-                          }
-                        </strong>
-                      </div>
-
-                      {!isCreate ? (
-                        <div className="audit-comparison-value audit-comparison-old">
-                          <span>
-                            Antes
-                          </span>
-
-                          <strong>
-                            {formatValue(
-                              row.key,
-                              row.oldValue,
-                            )}
-                          </strong>
-                        </div>
-                      ) : null}
-
-                      {!isDelete ? (
-                        <div className="audit-comparison-value audit-comparison-new">
-                          <span>
-                            Depois
-                          </span>
-
-                          <strong>
-                            {formatValue(
-                              row.key,
-                              row.newValue,
-                            )}
-                          </strong>
-                        </div>
-                      ) : null}
+                      <strong>{row.label}</strong>
                     </div>
-                  ),
-                )}
+
+                    {!isCreate ? (
+                      <div className="audit-comparison-value audit-comparison-old">
+                        <span>Antes</span>
+
+                        <strong>{formatValue(row.key, row.oldValue)}</strong>
+                      </div>
+                    ) : null}
+
+                    {!isDelete ? (
+                      <div className="audit-comparison-value audit-comparison-new">
+                        <span>Depois</span>
+
+                        <strong>{formatValue(row.key, row.newValue)}</strong>
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
               </div>
             </section>
           ) : (
-            <section
-              className="audit-no-comparison"
-              data-testid="audit-details-no-comparison"
-            >
-              <strong>
-                Nenhuma alteração de
-                campos registrada
-              </strong>
+            <section className="audit-no-comparison" data-testid="audit-details-no-comparison">
+              <strong>Nenhuma alteração de campos registrada</strong>
 
-              <p>
-                Este evento não possui
-                valores anteriores ou
-                posteriores para
-                comparação.
-              </p>
+              <p>Este evento não possui valores anteriores ou posteriores para comparação.</p>
             </section>
           )}
 
-          <details
-            className="audit-raw-details"
-            data-testid="audit-details-raw-data"
-          >
-            <summary>
-              Dados técnicos
-            </summary>
+          <details className="audit-raw-details" data-testid="audit-details-raw-data">
+            <summary>Dados técnicos</summary>
 
             <div className="audit-raw-content">
               <div className="audit-change-grid">
                 <section className="audit-json-section">
                   <div className="audit-json-header">
                     <div>
-                      <strong>
-                        Valores anteriores
-                      </strong>
+                      <strong>Valores anteriores</strong>
 
-                      <p>
-                        Conteúdo bruto
-                        registrado antes
-                        da operação.
-                      </p>
+                      <p>Conteúdo bruto registrado antes da operação.</p>
                     </div>
                   </div>
 
                   {oldValues ? (
-                    <pre>
-                      {oldValues}
-                    </pre>
+                    <pre>{oldValues}</pre>
                   ) : (
-                    <div className="audit-json-empty">
-                      Nenhum valor
-                      anterior
-                      registrado.
-                    </div>
+                    <div className="audit-json-empty">Nenhum valor anterior registrado.</div>
                   )}
                 </section>
 
                 <section className="audit-json-section">
                   <div className="audit-json-header">
                     <div>
-                      <strong>
-                        Novos valores
-                      </strong>
+                      <strong>Novos valores</strong>
 
-                      <p>
-                        Conteúdo bruto
-                        registrado após
-                        a operação.
-                      </p>
+                      <p>Conteúdo bruto registrado após a operação.</p>
                     </div>
                   </div>
 
                   {newValues ? (
-                    <pre>
-                      {newValues}
-                    </pre>
+                    <pre>{newValues}</pre>
                   ) : (
-                    <div className="audit-json-empty">
-                      Nenhum novo valor
-                      registrado.
-                    </div>
+                    <div className="audit-json-empty">Nenhum novo valor registrado.</div>
                   )}
                 </section>
               </div>
 
-              <section
-                className="audit-json-section"
-                data-testid="audit-details-metadata"
-              >
+              <section className="audit-json-section" data-testid="audit-details-metadata">
                 <div className="audit-json-header">
                   <div>
-                    <strong>
-                      Metadata
-                    </strong>
+                    <strong>Metadata</strong>
 
-                    <p>
-                      Informações
-                      adicionais da
-                      operação.
-                    </p>
+                    <p>Informações adicionais da operação.</p>
                   </div>
                 </div>
 
                 {metadata ? (
-                  <pre>
-                    {metadata}
-                  </pre>
+                  <pre>{metadata}</pre>
                 ) : (
-                  <div className="audit-json-empty">
-                    Nenhuma metadata
-                    registrada.
-                  </div>
+                  <div className="audit-json-empty">Nenhuma metadata registrada.</div>
                 )}
               </section>
             </div>
@@ -913,9 +484,7 @@ export function AuditDetailsModal({
             type="button"
             className="audit-button audit-button-secondary"
             data-testid="audit-details-footer-close-button"
-            onClick={
-              onClose
-            }
+            onClick={onClose}
           >
             Fechar
           </button>

@@ -20,21 +20,16 @@ export type AuditEntity =
   | 'AUTH'
   | 'SYSTEM'
 
-export type AuditMetadata =
-  Record<string, unknown>
+export type AuditMetadata = Record<string, unknown>
 
 export interface CreateAuditLogInput {
   gymId?: string | null
 
   userId?: string | null
 
-  action:
-    | AuditAction
-    | string
+  action: AuditAction | string
 
-  entity:
-    | AuditEntity
-    | string
+  entity: AuditEntity | string
 
   entityId?: string | null
 
@@ -42,9 +37,7 @@ export interface CreateAuditLogInput {
 
   newValues?: unknown
 
-  metadata?:
-    | AuditMetadata
-    | null
+  metadata?: AuditMetadata | null
 
   ipAddress?: string | null
 

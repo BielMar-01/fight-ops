@@ -1,82 +1,62 @@
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 
-import type {
-  FastifyInstance,
-} from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
-export function registerSwagger(
-  app: FastifyInstance,
-) {
+export function registerSwagger(app: FastifyInstance) {
   app.register(swagger, {
     openapi: {
-      openapi:
-        '3.0.3',
+      openapi: '3.0.3',
 
       info: {
-        title:
-          'FightOps API',
+        title: 'FightOps API',
 
         description:
           'API REST da plataforma FightOps para gestão de academias e centros de treinamento.',
 
-        version:
-          '0.1.0',
+        version: '0.1.0',
       },
 
       tags: [
         {
-          name:
-            'Health',
+          name: 'Health',
 
-          description:
-            'Monitoramento e disponibilidade da API.',
+          description: 'Monitoramento e disponibilidade da API.',
         },
 
         {
-          name:
-            'Auth',
+          name: 'Auth',
 
-          description:
-            'Autenticação e gerenciamento de sessão.',
+          description: 'Autenticação e gerenciamento de sessão.',
         },
 
         {
-          name:
-            'Public Site',
+          name: 'Public Site',
 
-          description:
-            'Conteúdo, identidade visual e SEO das páginas públicas.',
+          description: 'Conteúdo, identidade visual e SEO das páginas públicas.',
         },
 
         {
-          name:
-            'Gyms',
+          name: 'Gyms',
 
-          description:
-            'Gestão de academias e membros.',
+          description: 'Gestão de academias e membros.',
         },
 
         {
-          name:
-            'Students',
+          name: 'Students',
 
-          description:
-            'Gestão de alunos das academias.',
+          description: 'Gestão de alunos das academias.',
         },
       ],
 
       components: {
         securitySchemes: {
           bearerAuth: {
-            type:
-              'http',
+            type: 'http',
 
-            scheme:
-              'bearer',
+            scheme: 'bearer',
 
-            bearerFormat:
-              'JWT',
+            bearerFormat: 'JWT',
           },
         },
       },
@@ -84,27 +64,22 @@ export function registerSwagger(
   })
 
   app.register(swaggerUi, {
-    routePrefix:
-      '/docs',
+    routePrefix: '/docs',
 
     uiConfig: {
-      docExpansion:
-        'list',
+      docExpansion: 'list',
 
-      deepLinking:
-        true,
+      deepLinking: true,
     },
 
-    staticCSP:
-      true,
+    staticCSP: true,
   })
 
   app.get(
     '/openapi.json',
     {
       schema: {
-        hide:
-          true,
+        hide: true,
       },
     },
 

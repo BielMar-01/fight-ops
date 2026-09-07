@@ -22,3 +22,4 @@ registro operacional do aluno
 GymMembership com role STUDENT
 =
 autorização de acesso ao CT
+```

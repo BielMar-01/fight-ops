@@ -15,82 +15,48 @@ const modalityDescriptionSchema = z
 const modalityColorSchema = z
   .string()
   .trim()
-  .regex(
-    /^#[0-9A-Fa-f]{6}$/,
-    'A cor deve estar no formato hexadecimal #RRGGBB.',
-  )
+  .regex(/^#[0-9A-Fa-f]{6}$/, 'A cor deve estar no formato hexadecimal #RRGGBB.')
   .optional()
 
 export const listModalitiesQuerySchema = z.object({
-  page: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .default(1),
+  page: z.coerce.number().int().min(1).default(1),
 
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(100)
-    .optional(),
+  search: z.string().trim().min(1).max(100).optional(),
 
   active: z
-    .enum([
-      'true',
-      'false',
-    ])
-    .transform(
-      (value) =>
-        value ===
-        'true',
-    )
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
     .optional(),
 })
 
 export const createModalityBodySchema = z.object({
-  name:
-    modalityNameSchema,
+  name: modalityNameSchema,
 
-  description:
-    modalityDescriptionSchema,
+  description: modalityDescriptionSchema,
 
-  color:
-    modalityColorSchema,
+  color: modalityColorSchema,
 })
 
 export const updateModalityBodySchema = z.object({
-  name:
-    modalityNameSchema,
+  name: modalityNameSchema,
 
-  description:
-    modalityDescriptionSchema,
+  description: modalityDescriptionSchema,
 
-  color:
-    modalityColorSchema,
+  color: modalityColorSchema,
 })
 
 export const updateModalityStatusBodySchema = z.object({
-  active:
-    z.boolean(),
+  active: z.boolean(),
 })
 
 export const modalityParamsSchema = z.object({
-  gymId:
-    z.string().uuid(),
+  gymId: z.string().uuid(),
 
-  modalityId:
-    z.string().uuid(),
+  modalityId: z.string().uuid(),
 })
 
 export const gymParamsSchema = z.object({
-  gymId:
-    z.string().uuid(),
+  gymId: z.string().uuid(),
 })

@@ -1,120 +1,67 @@
-import {
-  useState,
-} from 'react'
+import { useState } from 'react'
 
-import {
-  Link,
-  useNavigate,
-} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import {
-  useForgotPassword,
-} from '../hooks/useAuth'
+import { useForgotPassword } from '../hooks/useAuth'
 
-import {
-  ApiError,
-} from '../services/api'
+import { ApiError } from '../services/api'
 
 export function ForgotPasswordPage() {
-  const navigate =
-    useNavigate()
+  const navigate = useNavigate()
 
-  const forgotPasswordMutation =
-    useForgotPassword()
+  const forgotPasswordMutation = useForgotPassword()
 
-  const [
-    email,
-    setEmail,
-  ] =
-    useState('')
+  const [email, setEmail] = useState('')
 
-  const [
-    formError,
-    setFormError,
-  ] =
-    useState<
-      string | null
-    >(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
-  async function handleSubmit(
-    event:
-      React.FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     setFormError(null)
 
     try {
       await forgotPasswordMutation.mutateAsync({
-        email:
-          email.trim(),
+        email: email.trim(),
       })
 
-      navigate(
-        '/verify-reset-code',
-        {
-          state: {
-            email:
-              email.trim(),
-          },
+      navigate('/verify-reset-code', {
+        state: {
+          email: email.trim(),
         },
-      )
+      })
     } catch (error) {
-      if (
-        error instanceof ApiError
-      ) {
-        setFormError(
-          error.message,
-        )
+      if (error instanceof ApiError) {
+        setFormError(error.message)
 
         return
       }
 
-      setFormError(
-        'Não foi possível solicitar a recuperação de senha.',
-      )
+      setFormError('Não foi possível solicitar a recuperação de senha.')
     }
   }
 
   return (
-    <main
-      className="auth-page"
-      data-testid="forgot-password-page"
-    >
+    <main className="auth-page" data-testid="forgot-password-page">
       <div className="auth-shell">
         <section className="auth-brand-panel">
-          <Link
-            to="/"
-            className="brand"
-            data-testid="forgot-password-logo-link"
-          >
-            <span className="brand-mark">
-              FO
-            </span>
+          <Link to="/" className="brand" data-testid="forgot-password-logo-link">
+            <span className="brand-mark">FO</span>
 
-            <span className="brand-text">
-              FightOps
-            </span>
+            <span className="brand-text">FightOps</span>
           </Link>
 
           <div>
-            <span className="eyebrow">
-              Recuperação de acesso
-            </span>
+            <span className="eyebrow">Recuperação de acesso</span>
 
             <h1>
               Esqueceu sua senha?
-              <span>
-                {' '}
-                Vamos resolver.
-              </span>
+              <span> Vamos resolver.</span>
             </h1>
 
             <p>
-              Informe o e-mail
-              cadastrado na sua conta.
-              Enviaremos um código de
-              segurança para continuar.
+              Informe o e-mail cadastrado na sua conta. Enviaremos um código de segurança para
+              continuar.
             </p>
           </div>
         </section>
@@ -122,28 +69,14 @@ export function ForgotPasswordPage() {
         <section className="auth-form-panel">
           <div className="auth-form-container">
             <div className="auth-heading">
-              <h2
-                data-testid="forgot-password-title"
-              >
-                Recuperar senha
-              </h2>
+              <h2 data-testid="forgot-password-title">Recuperar senha</h2>
 
-              <p>
-                Informe seu e-mail para
-                receber o código.
-              </p>
+              <p>Informe seu e-mail para receber o código.</p>
             </div>
 
-            <form
-              onSubmit={
-                handleSubmit
-              }
-              data-testid="forgot-password-form"
-            >
+            <form onSubmit={handleSubmit} data-testid="forgot-password-form">
               <div className="form-field">
-                <label htmlFor="email">
-                  E-mail
-                </label>
+                <label htmlFor="email">E-mail</label>
 
                 <input
                   id="email"
@@ -153,26 +86,16 @@ export function ForgotPasswordPage() {
                   autoComplete="email"
                   required
                   value={email}
-                  disabled={
-                    forgotPasswordMutation.isPending
-                  }
+                  disabled={forgotPasswordMutation.isPending}
                   data-testid="forgot-password-email-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setEmail(
-                      event.target.value,
-                    )
+                  onChange={(event) => {
+                    setEmail(event.target.value)
                   }}
                 />
               </div>
 
               {formError ? (
-                <div
-                  className="form-error"
-                  role="alert"
-                  data-testid="forgot-password-error"
-                >
+                <div className="form-error" role="alert" data-testid="forgot-password-error">
                   {formError}
                 </div>
               ) : null}
@@ -180,14 +103,10 @@ export function ForgotPasswordPage() {
               <button
                 type="submit"
                 className="button button-primary auth-submit"
-                disabled={
-                  forgotPasswordMutation.isPending
-                }
+                disabled={forgotPasswordMutation.isPending}
                 data-testid="forgot-password-submit-button"
               >
-                {forgotPasswordMutation.isPending
-                  ? 'Enviando...'
-                  : 'Enviar código'}
+                {forgotPasswordMutation.isPending ? 'Enviando...' : 'Enviar código'}
               </button>
             </form>
 

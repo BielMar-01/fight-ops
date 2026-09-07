@@ -1,6 +1,7 @@
 # Status Atual
 
 ## Concluído
+
 - monorepo;
 - Fastify + React/Vite;
 - Prisma/Supabase;
@@ -17,6 +18,7 @@
 - gestão completa de membros.
 
 ## Próxima fase
+
 Alunos.
 
 Antes de começar, versionar esta documentação e adotar o novo workflow.

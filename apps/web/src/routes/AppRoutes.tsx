@@ -1,183 +1,77 @@
-import {
-  Route,
-  Routes,
-} from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 
-import {
-  GuestRoute,
-} from '../components/auth/GuestRoute'
+import { GuestRoute } from '../components/auth/GuestRoute'
 
-import {
-  GymRequired,
-} from '../components/auth/GymRequired'
+import { GymRequired } from '../components/auth/GymRequired'
 
-import {
-  ProtectedRoute,
-} from '../components/auth/ProtectedRoute'
+import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 
-import {
-  AppLayout,
-} from '../components/layout/AppLayout'
+import { AppLayout } from '../components/layout/AppLayout'
 
-import {
-  PublicLayout,
-} from '../components/layout/PublicLayout'
+import { PublicLayout } from '../components/layout/PublicLayout'
 
-import {
-  GymProvider,
-} from '../contexts/GymContext'
+import { GymProvider } from '../contexts/GymContext'
 
-import {
-  AuditPage,
-} from '../pages/AuditPage'
+import { AuditPage } from '../pages/AuditPage'
 
-import {
-  DashboardPage,
-} from '../pages/DashboardPage'
+import { DashboardPage } from '../pages/DashboardPage'
 
-import {
-  FaqPage,
-} from '../pages/FaqPage'
+import { FaqPage } from '../pages/FaqPage'
 
-import {
-  FeaturesPage,
-} from '../pages/FeaturesPage'
+import { FeaturesPage } from '../pages/FeaturesPage'
 
-import {
-  ForgotPasswordPage,
-} from '../pages/ForgotPasswordPage'
+import { ForgotPasswordPage } from '../pages/ForgotPasswordPage'
 
-import {
-  GraduationsPage,
-} from '../pages/GraduationsPage'
+import { GraduationsPage } from '../pages/GraduationsPage'
 
-import {
-  HomePage,
-} from '../pages/HomePage'
+import { HomePage } from '../pages/HomePage'
 
-import {
-  LoginPage,
-} from '../pages/LoginPage'
+import { LoginPage } from '../pages/LoginPage'
 
-import {
-  MembersPage,
-} from '../pages/MembersPage'
+import { MembersPage } from '../pages/MembersPage'
 
-import {
-  ModalitiesPage,
-} from '../pages/ModalitiesPage'
+import { ModalitiesPage } from '../pages/ModalitiesPage'
 
-import {
-  NotFoundPage,
-} from '../pages/NotFoundPage'
+import { NotFoundPage } from '../pages/NotFoundPage'
 
-import {
-  PricingPage,
-} from '../pages/PricingPage'
+import { PricingPage } from '../pages/PricingPage'
 
-import {
-  ProfessorsPage,
-} from '../pages/ProfessorsPage'
+import { ProfessorsPage } from '../pages/ProfessorsPage'
 
-import {
-  RegisterPage,
-} from '../pages/RegisterPage'
+import { RegisterPage } from '../pages/RegisterPage'
 
-import {
-  ResetPasswordPage,
-} from '../pages/ResetPasswordPage'
+import { ResetPasswordPage } from '../pages/ResetPasswordPage'
 
-import {
-  StudentsPage,
-} from '../pages/StudentsPage'
+import { StudentsPage } from '../pages/StudentsPage'
 
-import {
-  VerifyResetCodePage,
-} from '../pages/VerifyResetCodePage'
+import { VerifyResetCodePage } from '../pages/VerifyResetCodePage'
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route
-        element={
-          <PublicLayout />
-        }
-      >
-        <Route
-          path="/"
-          element={
-            <HomePage />
-          }
-        />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
 
-        <Route
-          path="/features"
-          element={
-            <FeaturesPage />
-          }
-        />
+        <Route path="/features" element={<FeaturesPage />} />
 
-        <Route
-          path="/pricing"
-          element={
-            <PricingPage />
-          }
-        />
+        <Route path="/pricing" element={<PricingPage />} />
 
-        <Route
-          path="/faq"
-          element={
-            <FaqPage />
-          }
-        />
+        <Route path="/faq" element={<FaqPage />} />
       </Route>
 
-      <Route
-        element={
-          <GuestRoute />
-        }
-      >
-        <Route
-          path="/login"
-          element={
-            <LoginPage />
-          }
-        />
+      <Route element={<GuestRoute />}>
+        <Route path="/login" element={<LoginPage />} />
 
-        <Route
-          path="/register"
-          element={
-            <RegisterPage />
-          }
-        />
+        <Route path="/register" element={<RegisterPage />} />
 
-        <Route
-          path="/forgot-password"
-          element={
-            <ForgotPasswordPage />
-          }
-        />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-        <Route
-          path="/verify-reset-code"
-          element={
-            <VerifyResetCodePage />
-          }
-        />
+        <Route path="/verify-reset-code" element={<VerifyResetCodePage />} />
 
-        <Route
-          path="/reset-password"
-          element={
-            <ResetPasswordPage />
-          }
-        />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Route>
 
-      <Route
-        element={
-          <ProtectedRoute />
-        }
-      >
+      <Route element={<ProtectedRoute />}>
         <Route
           element={
             <GymProvider>
@@ -187,63 +81,23 @@ export function AppRoutes() {
             </GymProvider>
           }
         >
-          <Route
-            path="/dashboard"
-            element={
-              <DashboardPage />
-            }
-          />
+          <Route path="/dashboard" element={<DashboardPage />} />
 
-          <Route
-            path="/members"
-            element={
-              <MembersPage />
-            }
-          />
+          <Route path="/members" element={<MembersPage />} />
 
-          <Route
-            path="/students"
-            element={
-              <StudentsPage />
-            }
-          />
+          <Route path="/students" element={<StudentsPage />} />
 
-          <Route
-            path="/professors"
-            element={
-              <ProfessorsPage />
-            }
-          />
+          <Route path="/professors" element={<ProfessorsPage />} />
 
-          <Route
-            path="/modalities"
-            element={
-              <ModalitiesPage />
-            }
-          />
+          <Route path="/modalities" element={<ModalitiesPage />} />
 
-          <Route
-            path="/graduations"
-            element={
-              <GraduationsPage />
-            }
-          />
+          <Route path="/graduations" element={<GraduationsPage />} />
 
-          <Route
-            path="/audit"
-            element={
-              <AuditPage />
-            }
-          />
+          <Route path="/audit" element={<AuditPage />} />
         </Route>
       </Route>
 
-      <Route
-        path="*"
-        element={
-          <NotFoundPage />
-        }
-      />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

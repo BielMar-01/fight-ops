@@ -45,11 +45,7 @@ export async function getPublicPage(slug: string) {
   })
 
   if (!page || !page.active) {
-    throw new AppError(
-      'PUBLIC_PAGE_NOT_FOUND',
-      404,
-      'Página pública não encontrada.',
-    )
+    throw new AppError('PUBLIC_PAGE_NOT_FOUND', 404, 'Página pública não encontrada.')
   }
 
   return page
@@ -68,11 +64,7 @@ export async function getPublicSeo(slug: string) {
   })
 
   if (!page || !page.active || !page.seo) {
-    throw new AppError(
-      'SEO_NOT_FOUND',
-      404,
-      'Configuração de SEO não encontrada.',
-    )
+    throw new AppError('SEO_NOT_FOUND', 404, 'Configuração de SEO não encontrada.')
   }
 
   return page.seo

@@ -1,14 +1,8 @@
-import type {
-  Prisma,
-} from '../../generated/prisma/client.js'
+import type { Prisma } from '../../generated/prisma/client.js'
 
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  AppError,
-} from '../../http/app-error.js'
+import { AppError } from '../../http/app-error.js'
 
 import type {
   CreateProfessorInput,
@@ -17,27 +11,18 @@ import type {
   UpdateProfessorStatusInput,
 } from './professors.types.js'
 
-function parseOptionalDate(
-  value?: string,
-) {
+function parseOptionalDate(value?: string) {
   if (!value) {
     return null
   }
 
-  return new Date(
-    `${value}T00:00:00.000Z`,
-  )
+  return new Date(`${value}T00:00:00.000Z`)
 }
 
-function normalizeOptionalText(
-  value?: string,
-) {
-  const normalized =
-    value?.trim()
+function normalizeOptionalText(value?: string) {
+  const normalized = value?.trim()
 
-  return normalized
-    ? normalized
-    : null
+  return normalized ? normalized : null
 }
 
 const professorSelect = {
@@ -60,97 +45,72 @@ const professorSelect = {
   updatedAt: true,
 } satisfies Prisma.ProfessorSelect
 
-export async function listProfessors(
-  gymId: string,
-  query: ListProfessorsQuery,
-) {
-  const {
-    page,
-    limit,
-    search,
-    active,
-  } = query
+export async function listProfessors(gymId: string, query: ListProfessorsQuery) {
+  const { page, limit, search, active } = query
 
-  const where: Prisma.ProfessorWhereInput =
-    {
-      gymId,
+  const where: Prisma.ProfessorWhereInput = {
+    gymId,
 
-      ...(active !==
-      undefined
-        ? {
-            active,
-          }
-        : {}),
+    ...(active !== undefined
+      ? {
+          active,
+        }
+      : {}),
 
-      ...(search
-        ? {
-            OR: [
-              {
-                name: {
-                  contains:
-                    search,
+    ...(search
+      ? {
+          OR: [
+            {
+              name: {
+                contains: search,
 
-                  mode:
-                    'insensitive',
-                },
+                mode: 'insensitive',
               },
+            },
 
-              {
-                email: {
-                  contains:
-                    search,
+            {
+              email: {
+                contains: search,
 
-                  mode:
-                    'insensitive',
-                },
+                mode: 'insensitive',
               },
+            },
 
-              {
-                phone: {
-                  contains:
-                    search,
-                },
+            {
+              phone: {
+                contains: search,
               },
-            ],
-          }
-        : {}),
-    }
+            },
+          ],
+        }
+      : {}),
+  }
 
-  const [
-    professors,
-    total,
-  ] =
-    await prisma.$transaction([
-      prisma.professor.findMany({
-        where,
+  const [professors, total] = await prisma.$transaction([
+    prisma.professor.findMany({
+      where,
 
-        orderBy: [
-          {
-            active:
-              'desc',
-          },
+      orderBy: [
+        {
+          active: 'desc',
+        },
 
-          {
-            name:
-              'asc',
-          },
-        ],
+        {
+          name: 'asc',
+        },
+      ],
 
-        skip:
-          (page - 1) *
-          limit,
+      skip: (page - 1) * limit,
 
-        take:
-          limit,
+      take: limit,
 
-        select:
-          professorSelect,
-      }),
+      select: professorSelect,
+    }),
 
-      prisma.professor.count({
-        where,
-      }),
-    ])
+    prisma.professor.count({
+      where,
+    }),
+  ])
 
   return {
     professors,
@@ -160,88 +120,51 @@ export async function listProfessors(
       limit,
       total,
 
-      totalPages:
-        Math.ceil(
-          total / limit,
-        ),
+      totalPages: Math.ceil(total / limit),
     },
   }
 }
 
-export async function getProfessorById(
-  gymId: string,
-  professorId: string,
-) {
-  const professor =
-    await prisma.professor.findFirst({
-      where: {
-        id:
-          professorId,
+export async function getProfessorById(gymId: string, professorId: string) {
+  const professor = await prisma.professor.findFirst({
+    where: {
+      id: professorId,
 
-        gymId,
-      },
+      gymId,
+    },
 
-      select:
-        professorSelect,
-    })
+    select: professorSelect,
+  })
 
   if (!professor) {
-    throw new AppError(
-      'PROFESSOR_NOT_FOUND',
-      404,
-      'Professor não encontrado.',
-    )
+    throw new AppError('PROFESSOR_NOT_FOUND', 404, 'Professor não encontrado.')
   }
 
   return professor
 }
 
-export async function createProfessor(
-  gymId: string,
-  input: CreateProfessorInput,
-) {
-  const professor =
-    await prisma.professor.create({
-      data: {
-        gymId,
+export async function createProfessor(gymId: string, input: CreateProfessorInput) {
+  const professor = await prisma.professor.create({
+    data: {
+      gymId,
 
-        name:
-          input.name.trim(),
+      name: input.name.trim(),
 
-        email:
-          normalizeOptionalText(
-            input.email,
-          ),
+      email: normalizeOptionalText(input.email),
 
-        phone:
-          normalizeOptionalText(
-            input.phone,
-          ),
+      phone: normalizeOptionalText(input.phone),
 
-        birthDate:
-          parseOptionalDate(
-            input.birthDate,
-          ),
+      birthDate: parseOptionalDate(input.birthDate),
 
-        bio:
-          normalizeOptionalText(
-            input.bio,
-          ),
+      bio: normalizeOptionalText(input.bio),
 
-        notes:
-          normalizeOptionalText(
-            input.notes,
-          ),
+      notes: normalizeOptionalText(input.notes),
 
-        hireDate:
-          parseOptionalDate(
-            input.hireDate,
-          ),
-      },
+      hireDate: parseOptionalDate(input.hireDate),
+    },
 
-      select:
-        professorSelect,
-    })
+    select: professorSelect,
+  })
 
   return professor
 }
@@ -251,56 +174,31 @@ export async function updateProfessor(
   professorId: string,
   input: UpdateProfessorInput,
 ) {
-  await getProfessorById(
-    gymId,
-    professorId,
-  )
+  await getProfessorById(gymId, professorId)
 
-  const professor =
-    await prisma.professor.update({
-      where: {
-        id:
-          professorId,
-      },
+  const professor = await prisma.professor.update({
+    where: {
+      id: professorId,
+    },
 
-      data: {
-        name:
-          input.name.trim(),
+    data: {
+      name: input.name.trim(),
 
-        email:
-          normalizeOptionalText(
-            input.email,
-          ),
+      email: normalizeOptionalText(input.email),
 
-        phone:
-          normalizeOptionalText(
-            input.phone,
-          ),
+      phone: normalizeOptionalText(input.phone),
 
-        birthDate:
-          parseOptionalDate(
-            input.birthDate,
-          ),
+      birthDate: parseOptionalDate(input.birthDate),
 
-        bio:
-          normalizeOptionalText(
-            input.bio,
-          ),
+      bio: normalizeOptionalText(input.bio),
 
-        notes:
-          normalizeOptionalText(
-            input.notes,
-          ),
+      notes: normalizeOptionalText(input.notes),
 
-        hireDate:
-          parseOptionalDate(
-            input.hireDate,
-          ),
-      },
+      hireDate: parseOptionalDate(input.hireDate),
+    },
 
-      select:
-        professorSelect,
-    })
+    select: professorSelect,
+  })
 
   return professor
 }
@@ -310,26 +208,19 @@ export async function updateProfessorStatus(
   professorId: string,
   input: UpdateProfessorStatusInput,
 ) {
-  await getProfessorById(
-    gymId,
-    professorId,
-  )
+  await getProfessorById(gymId, professorId)
 
-  const professor =
-    await prisma.professor.update({
-      where: {
-        id:
-          professorId,
-      },
+  const professor = await prisma.professor.update({
+    where: {
+      id: professorId,
+    },
 
-      data: {
-        active:
-          input.active,
-      },
+    data: {
+      active: input.active,
+    },
 
-      select:
-        professorSelect,
-    })
+    select: professorSelect,
+  })
 
   return professor
 }

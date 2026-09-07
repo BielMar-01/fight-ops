@@ -1,9 +1,4 @@
-export type GymRole =
-  | 'OWNER'
-  | 'ADMIN'
-  | 'RECEPTIONIST'
-  | 'PROFESSOR'
-  | 'STUDENT'
+export type GymRole = 'OWNER' | 'ADMIN' | 'RECEPTIONIST' | 'PROFESSOR' | 'STUDENT'
 
 export interface CreateGymInput {
   name: string
@@ -25,17 +20,13 @@ export interface GymResponse {
   updatedAt: Date
 }
 
-export interface UserGymResponse
-  extends GymResponse {
+export interface UserGymResponse extends GymResponse {
   role: GymRole
 }
 
 export interface AddGymMemberInput {
   email: string
-  role: Exclude<
-    GymRole,
-    'OWNER'
-  >
+  role: Exclude<GymRole, 'OWNER'>
 }
 
 export interface UpdateGymMemberRoleInput {

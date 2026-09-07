@@ -119,11 +119,7 @@ export async function seedPublicSite() {
       secondaryButtonUrl: '/features',
 
       metadata: {
-        benefits: [
-          'Sem cartão de crédito',
-          'Configuração rápida',
-          'Gestão em qualquer lugar',
-        ],
+        benefits: ['Sem cartão de crédito', 'Configuração rápida', 'Gestão em qualquer lugar'],
       },
 
       sortOrder: 10,
@@ -251,8 +247,7 @@ export async function seedPublicSite() {
 
       title: 'Sua operação merece mais controle.',
 
-      content:
-        'Crie sua conta e prepare sua academia para uma gestão mais simples e profissional.',
+      content: 'Crie sua conta e prepare sua academia para uma gestão mais simples e profissional.',
 
       buttonText: 'Criar minha conta',
       buttonUrl: '/register',
@@ -311,8 +306,7 @@ export async function seedPublicSite() {
           },
           {
             title: 'Professores',
-            description:
-              'Organização da equipe, funções, permissões e vínculo com turmas.',
+            description: 'Organização da equipe, funções, permissões e vínculo com turmas.',
           },
           {
             title: 'Turmas',
@@ -321,13 +315,11 @@ export async function seedPublicSite() {
           },
           {
             title: 'Planos',
-            description:
-              'Estruturação de planos, mensalidades, regras e vínculos com alunos.',
+            description: 'Estruturação de planos, mensalidades, regras e vínculos com alunos.',
           },
           {
             title: 'Financeiro',
-            description:
-              'Acompanhamento de cobranças, pagamentos, inadimplência e indicadores.',
+            description: 'Acompanhamento de cobranças, pagamentos, inadimplência e indicadores.',
           },
           {
             title: 'Permissões',
@@ -336,13 +328,11 @@ export async function seedPublicSite() {
           },
           {
             title: 'Multiacademia',
-            description:
-              'Gerencie mais de uma unidade com separação de dados e permissões.',
+            description: 'Gerencie mais de uma unidade com separação de dados e permissões.',
           },
           {
             title: 'Dashboard',
-            description:
-              'Indicadores rápidos para acompanhar a saúde e evolução da operação.',
+            description: 'Indicadores rápidos para acompanhar a saúde e evolução da operação.',
           },
         ],
       },
@@ -370,8 +360,7 @@ export async function seedPublicSite() {
 
       title: 'Um plano para cada fase da sua academia.',
 
-      content:
-        'Escolha a estrutura que mais combina com o momento da sua operação.',
+      content: 'Escolha a estrutura que mais combina com o momento da sua operação.',
 
       sortOrder: 10,
       active: true,
@@ -399,23 +388,16 @@ export async function seedPublicSite() {
             name: 'Starter',
             title: 'Para começar',
             price: 'Em breve',
-            description:
-              'Para academias que estão começando a organizar sua operação.',
+            description: 'Para academias que estão começando a organizar sua operação.',
             featured: false,
-            features: [
-              'Gestão de alunos',
-              'Gestão de turmas',
-              'Professores',
-              'Dashboard básico',
-            ],
+            features: ['Gestão de alunos', 'Gestão de turmas', 'Professores', 'Dashboard básico'],
           },
           {
             key: 'pro',
             name: 'Pro',
             title: 'Para crescer',
             price: 'Em breve',
-            description:
-              'Para academias que precisam de mais controle e gestão.',
+            description: 'Para academias que precisam de mais controle e gestão.',
             featured: true,
             features: [
               'Tudo do Starter',
@@ -429,8 +411,7 @@ export async function seedPublicSite() {
             name: 'Multi',
             title: 'Para redes',
             price: 'Sob consulta',
-            description:
-              'Para equipes e grupos que administram múltiplas unidades.',
+            description: 'Para equipes e grupos que administram múltiplas unidades.',
             featured: false,
             features: [
               'Múltiplas academias',
@@ -465,8 +446,7 @@ export async function seedPublicSite() {
 
       title: 'Perguntas frequentes.',
 
-      content:
-        'Algumas respostas sobre a plataforma, funcionamento e próximos passos.',
+      content: 'Algumas respostas sobre a plataforma, funcionamento e próximos passos.',
 
       sortOrder: 10,
       active: true,
@@ -545,15 +525,13 @@ export async function seedPublicSite() {
     {
       pageId: pricing.id,
       title: 'Planos | FightOps',
-      description:
-        'Conheça os planos do FightOps para academias e centros de treinamento.',
+      description: 'Conheça os planos do FightOps para academias e centros de treinamento.',
     },
 
     {
       pageId: faq.id,
       title: 'FAQ | FightOps',
-      description:
-        'Confira as principais dúvidas sobre o FightOps.',
+      description: 'Confira as principais dúvidas sobre o FightOps.',
     },
   ]
 

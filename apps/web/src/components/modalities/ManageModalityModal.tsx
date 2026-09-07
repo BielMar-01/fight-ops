@@ -1,13 +1,6 @@
-import {
-  type FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
 
-import {
-  ApiError,
-} from '../../services/api'
+import { ApiError } from '../../services/api'
 
 import {
   getModalityById,
@@ -15,10 +8,7 @@ import {
   updateModalityStatus,
 } from '../../services/modality.service'
 
-import type {
-  Modality,
-  UpdateModalityInput,
-} from '../../types/modality'
+import type { Modality, UpdateModalityInput } from '../../types/modality'
 
 interface ManageModalityModalProps {
   gymId: string
@@ -28,37 +18,21 @@ interface ManageModalityModalProps {
   onUpdated: () => Promise<void>
 }
 
-function normalizeOptionalValue(
-  value: string,
-) {
-  const normalized =
-    value.trim()
+function normalizeOptionalValue(value: string) {
+  const normalized = value.trim()
 
-  return normalized.length > 0
-    ? normalized
-    : undefined
+  return normalized.length > 0 ? normalized : undefined
 }
 
-function isValidHexColor(
-  value: string,
-) {
-  return /^#[0-9A-Fa-f]{6}$/.test(
-    value,
-  )
+function isValidHexColor(value: string) {
+  return /^#[0-9A-Fa-f]{6}$/.test(value)
 }
 
-function formatDateTime(
-  value: string,
-) {
-  return new Intl.DateTimeFormat(
-    'pt-BR',
-    {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    },
-  ).format(
-    new Date(value),
-  )
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(value))
 }
 
 export function ManageModalityModal({
@@ -68,159 +42,74 @@ export function ManageModalityModal({
   onClose,
   onUpdated,
 }: ManageModalityModalProps) {
-  const [
-    modality,
-    setModality,
-  ] = useState<Modality | null>(
-    null,
-  )
+  const [modality, setModality] = useState<Modality | null>(null)
 
-  const [
-    name,
-    setName,
-  ] = useState('')
+  const [name, setName] = useState('')
 
-  const [
-    description,
-    setDescription,
-  ] = useState('')
+  const [description, setDescription] = useState('')
 
-  const [
-    color,
-    setColor,
-  ] = useState('')
+  const [color, setColor] = useState('')
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true)
+  const [loading, setLoading] = useState(true)
 
-  const [
-    isEditing,
-    setIsEditing,
-  ] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
-  const [
-    isSubmitting,
-    setIsSubmitting,
-  ] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [
-    isChangingStatus,
-    setIsChangingStatus,
-  ] = useState(false)
+  const [isChangingStatus, setIsChangingStatus] = useState(false)
 
-  const [
-    isStatusConfirmationOpen,
-    setIsStatusConfirmationOpen,
-  ] = useState(false)
+  const [isStatusConfirmationOpen, setIsStatusConfirmationOpen] = useState(false)
 
-  const [
-    error,
-    setError,
-  ] = useState<string | null>(
-    null,
-  )
+  const [error, setError] = useState<string | null>(null)
 
-  const populateForm =
-    useCallback(
-      (
-        currentModality:
-          Modality,
-      ) => {
-        setName(
-          currentModality.name,
-        )
+  const populateForm = useCallback((currentModality: Modality) => {
+    setName(currentModality.name)
 
-        setDescription(
-          currentModality.description ??
-            '',
-        )
+    setDescription(currentModality.description ?? '')
 
-        setColor(
-          currentModality.color ??
-            '',
-        )
-      },
-      [],
-    )
+    setColor(currentModality.color ?? '')
+  }, [])
 
-  const loadModality =
-    useCallback(
-      async () => {
-        try {
-          setLoading(true)
+  const loadModality = useCallback(async () => {
+    try {
+      setLoading(true)
 
-          setError(null)
+      setError(null)
 
-          const response =
-            await getModalityById(
-              gymId,
-              modalityId,
-            )
+      const response = await getModalityById(gymId, modalityId)
 
-          setModality(
-            response.modality,
-          )
+      setModality(response.modality)
 
-          populateForm(
-            response.modality,
-          )
-        } catch (caughtError) {
-          if (
-            caughtError instanceof
-            ApiError
-          ) {
-            setError(
-              caughtError.message,
-            )
+      populateForm(response.modality)
+    } catch (caughtError) {
+      if (caughtError instanceof ApiError) {
+        setError(caughtError.message)
 
-            return
-          }
+        return
+      }
 
-          setError(
-            'Não foi possível carregar a modalidade.',
-          )
-        } finally {
-          setLoading(false)
-        }
-      },
-      [
-        gymId,
-        modalityId,
-        populateForm,
-      ],
-    )
+      setError('Não foi possível carregar a modalidade.')
+    } finally {
+      setLoading(false)
+    }
+  }, [gymId, modalityId, populateForm])
 
   useEffect(() => {
     void loadModality()
-  }, [
-    loadModality,
-  ])
+  }, [loadModality])
 
   useEffect(() => {
-    function handleKeyDown(
-      event: KeyboardEvent,
-    ) {
-      if (
-        event.key !== 'Escape'
-      ) {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') {
         return
       }
 
-      if (
-        isSubmitting ||
-        isChangingStatus
-      ) {
+      if (isSubmitting || isChangingStatus) {
         return
       }
 
-      if (
-        isStatusConfirmationOpen
-      ) {
-        setIsStatusConfirmationOpen(
-          false,
-        )
+      if (isStatusConfirmationOpen) {
+        setIsStatusConfirmationOpen(false)
 
         return
       }
@@ -228,35 +117,19 @@ export function ManageModalityModal({
       onClose()
     }
 
-    window.addEventListener(
-      'keydown',
-      handleKeyDown,
-    )
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      window.removeEventListener(
-        'keydown',
-        handleKeyDown,
-      )
+      window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [
-    isSubmitting,
-    isChangingStatus,
-    isStatusConfirmationOpen,
-    onClose,
-  ])
+  }, [isSubmitting, isChangingStatus, isStatusConfirmationOpen, onClose])
 
   function handleStartEditing() {
-    if (
-      !canEdit ||
-      !modality
-    ) {
+    if (!canEdit || !modality) {
       return
     }
 
-    populateForm(
-      modality,
-    )
+    populateForm(modality)
 
     setError(null)
 
@@ -268,9 +141,7 @@ export function ManageModalityModal({
       return
     }
 
-    populateForm(
-      modality,
-    )
+    populateForm(modality)
 
     setError(null)
 
@@ -278,19 +149,13 @@ export function ManageModalityModal({
   }
 
   function handleOpenStatusConfirmation() {
-    if (
-      !canEdit ||
-      !modality ||
-      isEditing
-    ) {
+    if (!canEdit || !modality || isEditing) {
       return
     }
 
     setError(null)
 
-    setIsStatusConfirmationOpen(
-      true,
-    )
+    setIsStatusConfirmationOpen(true)
   }
 
   function handleCloseStatusConfirmation() {
@@ -298,60 +163,35 @@ export function ManageModalityModal({
       return
     }
 
-    setIsStatusConfirmationOpen(
-      false,
-    )
+    setIsStatusConfirmationOpen(false)
   }
 
   async function handleStatusChange() {
-    if (
-      !canEdit ||
-      !modality
-    ) {
+    if (!canEdit || !modality) {
       return
     }
 
-    const nextActiveStatus =
-      !modality.active
+    const nextActiveStatus = !modality.active
 
     setError(null)
 
-    setIsChangingStatus(
-      true,
-    )
+    setIsChangingStatus(true)
 
     try {
-      const response =
-        await updateModalityStatus(
-          gymId,
-          modalityId,
-          {
-            active:
-              nextActiveStatus,
-          },
-        )
+      const response = await updateModalityStatus(gymId, modalityId, {
+        active: nextActiveStatus,
+      })
 
-      setModality(
-        response.modality,
-      )
+      setModality(response.modality)
 
-      populateForm(
-        response.modality,
-      )
+      populateForm(response.modality)
 
-      setIsStatusConfirmationOpen(
-        false,
-      )
+      setIsStatusConfirmationOpen(false)
 
       await onUpdated()
     } catch (caughtError) {
-      if (
-        caughtError instanceof
-        ApiError
-      ) {
-        setError(
-          caughtError.message,
-        )
+      if (caughtError instanceof ApiError) {
+        setError(caughtError.message)
 
         return
       }
@@ -362,197 +202,113 @@ export function ManageModalityModal({
           : 'Não foi possível inativar a modalidade.',
       )
     } finally {
-      setIsChangingStatus(
-        false,
-      )
+      setIsChangingStatus(false)
     }
   }
 
-  async function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (
-      !canEdit ||
-      !modality
-    ) {
+    if (!canEdit || !modality) {
       return
     }
 
     setError(null)
 
-    const normalizedName =
-      name.trim()
+    const normalizedName = name.trim()
 
-    const normalizedDescription =
-      normalizeOptionalValue(
-        description,
-      )
+    const normalizedDescription = normalizeOptionalValue(description)
 
-    const normalizedColor =
-      normalizeOptionalValue(
-        color,
-      )
+    const normalizedColor = normalizeOptionalValue(color)
 
-    if (
-      normalizedName.length <
-      2
-    ) {
-      setError(
-        'Informe o nome da modalidade com pelo menos 2 caracteres.',
-      )
+    if (normalizedName.length < 2) {
+      setError('Informe o nome da modalidade com pelo menos 2 caracteres.')
 
       return
     }
 
-    if (
-      normalizedName.length >
-      100
-    ) {
-      setError(
-        'O nome da modalidade deve ter no máximo 100 caracteres.',
-      )
+    if (normalizedName.length > 100) {
+      setError('O nome da modalidade deve ter no máximo 100 caracteres.')
 
       return
     }
 
-    if (
-      normalizedDescription &&
-      normalizedDescription.length >
-        1000
-    ) {
-      setError(
-        'A descrição deve ter no máximo 1000 caracteres.',
-      )
+    if (normalizedDescription && normalizedDescription.length > 1000) {
+      setError('A descrição deve ter no máximo 1000 caracteres.')
 
       return
     }
 
-    if (
-      normalizedColor &&
-      !isValidHexColor(
-        normalizedColor,
-      )
-    ) {
-      setError(
-        'Informe uma cor hexadecimal válida no formato #RRGGBB.',
-      )
+    if (normalizedColor && !isValidHexColor(normalizedColor)) {
+      setError('Informe uma cor hexadecimal válida no formato #RRGGBB.')
 
       return
     }
 
-    const input:
-      UpdateModalityInput = {
-        name:
-          normalizedName,
+    const input: UpdateModalityInput = {
+      name: normalizedName,
 
-        description:
-          normalizedDescription,
+      description: normalizedDescription,
 
-        color:
-          normalizedColor,
-      }
+      color: normalizedColor,
+    }
 
     setIsSubmitting(true)
 
     try {
-      const response =
-        await updateModality(
-          gymId,
-          modalityId,
-          input,
-        )
+      const response = await updateModality(gymId, modalityId, input)
 
-      setModality(
-        response.modality,
-      )
+      setModality(response.modality)
 
-      populateForm(
-        response.modality,
-      )
+      populateForm(response.modality)
 
       setIsEditing(false)
 
       await onUpdated()
     } catch (caughtError) {
-      if (
-        caughtError instanceof
-        ApiError
-      ) {
-        if (
-          caughtError.code ===
-          'MODALITY_ALREADY_EXISTS'
-        ) {
-          setError(
-            'Já existe uma modalidade com este nome nesta academia.',
-          )
+      if (caughtError instanceof ApiError) {
+        if (caughtError.code === 'MODALITY_ALREADY_EXISTS') {
+          setError('Já existe uma modalidade com este nome nesta academia.')
 
           return
         }
 
-        setError(
-          caughtError.message,
-        )
+        setError(caughtError.message)
 
         return
       }
 
-      setError(
-        'Não foi possível atualizar a modalidade.',
-      )
+      setError('Não foi possível atualizar a modalidade.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const normalizedName =
-    name.trim()
+  const normalizedName = name.trim()
 
-  const normalizedDescription =
-    description.trim()
+  const normalizedDescription = description.trim()
 
-  const normalizedColor =
-    color.trim().toUpperCase()
+  const normalizedColor = color.trim().toUpperCase()
 
-  const originalDescription =
-    modality?.description ??
-    ''
+  const originalDescription = modality?.description ?? ''
 
-  const originalColor =
-    modality?.color?.toUpperCase() ??
-    ''
+  const originalColor = modality?.color?.toUpperCase() ?? ''
 
   const hasChanges =
     Boolean(modality) &&
-    (
-      normalizedName !==
-        modality?.name ||
-      normalizedDescription !==
-        originalDescription ||
-      normalizedColor !==
-        originalColor
-    )
+    (normalizedName !== modality?.name ||
+      normalizedDescription !== originalDescription ||
+      normalizedColor !== originalColor)
 
-  const isBusy =
-    isSubmitting ||
-    isChangingStatus
+  const isBusy = isSubmitting || isChangingStatus
 
   return (
     <div
       className="modality-modal-backdrop"
       role="presentation"
       data-testid="modality-manage-modal-backdrop"
-      onMouseDown={(
-        event,
-      ) => {
-        if (
-          event.target ===
-            event.currentTarget &&
-          !isBusy &&
-          !isStatusConfirmationOpen
-        ) {
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !isBusy && !isStatusConfirmationOpen) {
           onClose()
         }
       }}
@@ -566,59 +322,36 @@ export function ManageModalityModal({
       >
         <header className="modality-modal-header">
           <div>
-            <span className="modalities-eyebrow">
-              Gestão acadêmica
-            </span>
+            <span className="modalities-eyebrow">Gestão acadêmica</span>
 
-            <h2
-              id="modality-manage-modal-title"
-            >
-              Detalhes da modalidade
-            </h2>
+            <h2 id="modality-manage-modal-title">Detalhes da modalidade</h2>
 
-            <p>
-              Consulte as informações
-              da modalidade selecionada.
-            </p>
+            <p>Consulte as informações da modalidade selecionada.</p>
           </div>
 
           <button
             type="button"
             className="modality-modal-close"
             aria-label="Fechar"
-            disabled={
-              isBusy
-            }
+            disabled={isBusy}
             data-testid="modality-manage-close-button"
-            onClick={
-              onClose
-            }
+            onClick={onClose}
           >
             ×
           </button>
         </header>
 
         {loading ? (
-          <div
-            className="modality-modal-state"
-            data-testid="modality-manage-loading"
-          >
-            <div
-              className="modalities-loading-spinner"
-              aria-hidden="true"
-            />
-
+          <div className="modality-modal-state" data-testid="modality-manage-loading">
+            <div className="modalities-loading-spinner" aria-hidden="true" />
             Carregando modalidade...
           </div>
-        ) : error &&
-          !modality ? (
+        ) : error && !modality ? (
           <div
             className="modality-modal-state modality-modal-state-error"
             data-testid="modality-manage-load-error"
           >
-            <strong>
-              {error}
-            </strong>
+            <strong>{error}</strong>
 
             <button
               type="button"
@@ -635,12 +368,8 @@ export function ManageModalityModal({
           <form
             className="modality-modal-form"
             data-testid="modality-manage-form"
-            onSubmit={(
-              event,
-            ) => {
-              void handleSubmit(
-                event,
-              )
+            onSubmit={(event) => {
+              void handleSubmit(event)
             }}
           >
             <div className="modality-detail-summary">
@@ -650,23 +379,16 @@ export function ManageModalityModal({
                 style={
                   modality.color
                     ? {
-                        backgroundColor:
-                          modality.color,
+                        backgroundColor: modality.color,
                       }
                     : undefined
                 }
               >
-                {!modality.color
-                  ? modality.name
-                      .charAt(0)
-                      .toUpperCase()
-                  : null}
+                {!modality.color ? modality.name.charAt(0).toUpperCase() : null}
               </div>
 
               <div>
-                <strong>
-                  {modality.name}
-                </strong>
+                <strong>{modality.name}</strong>
 
                 <span
                   className={
@@ -676,18 +398,14 @@ export function ManageModalityModal({
                   }
                   data-testid="modality-manage-status"
                 >
-                  {modality.active
-                    ? 'Ativa'
-                    : 'Inativa'}
+                  {modality.active ? 'Ativa' : 'Inativa'}
                 </span>
               </div>
             </div>
 
             <div className="modality-form-grid">
               <label className="modality-form-field modality-form-field-full">
-                <span>
-                  Nome *
-                </span>
+                <span>Nome *</span>
 
                 <input
                   type="text"
@@ -695,53 +413,31 @@ export function ManageModalityModal({
                   required
                   minLength={2}
                   maxLength={100}
-                  disabled={
-                    !isEditing ||
-                    isBusy
-                  }
+                  disabled={!isEditing || isBusy}
                   data-testid="modality-manage-name-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setName(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setName(event.target.value)
                   }}
                 />
               </label>
 
               <label className="modality-form-field modality-form-field-full">
-                <span>
-                  Descrição
-                </span>
+                <span>Descrição</span>
 
                 <textarea
-                  value={
-                    description
-                  }
+                  value={description}
                   maxLength={1000}
                   rows={4}
-                  disabled={
-                    !isEditing ||
-                    isBusy
-                  }
+                  disabled={!isEditing || isBusy}
                   data-testid="modality-manage-description-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setDescription(
-                      event.target
-                        .value,
-                    )
+                  onChange={(event) => {
+                    setDescription(event.target.value)
                   }}
                 />
 
                 {isEditing ? (
                   <small className="modality-form-counter">
-                    {
-                      description.length
-                    }
+                    {description.length}
                     /1000
                   </small>
                 ) : null}
@@ -749,34 +445,17 @@ export function ManageModalityModal({
 
               <div className="modality-color-section">
                 <div className="modality-form-field">
-                  <span>
-                    Cor
-                  </span>
+                  <span>Cor</span>
 
                   <div className="modality-color-input-row">
                     <input
                       type="color"
-                      value={
-                        isValidHexColor(
-                          color,
-                        )
-                          ? color
-                          : '#27272A'
-                      }
-                      disabled={
-                        !isEditing ||
-                        isBusy
-                      }
+                      value={isValidHexColor(color) ? color : '#27272A'}
+                      disabled={!isEditing || isBusy}
                       aria-label="Selecionar cor da modalidade"
                       data-testid="modality-manage-color-picker"
-                      onChange={(
-                        event,
-                      ) => {
-                        setColor(
-                          event.target
-                            .value
-                            .toUpperCase(),
-                        )
+                      onChange={(event) => {
+                        setColor(event.target.value.toUpperCase())
                       }}
                     />
 
@@ -784,20 +463,11 @@ export function ManageModalityModal({
                       type="text"
                       value={color}
                       maxLength={7}
-                      disabled={
-                        !isEditing ||
-                        isBusy
-                      }
+                      disabled={!isEditing || isBusy}
                       placeholder="#EF4444"
                       data-testid="modality-manage-color-input"
-                      onChange={(
-                        event,
-                      ) => {
-                        setColor(
-                          event.target
-                            .value
-                            .toUpperCase(),
-                        )
+                      onChange={(event) => {
+                        setColor(event.target.value.toUpperCase())
                       }}
                     />
                   </div>
@@ -807,79 +477,43 @@ export function ManageModalityModal({
                   <div
                     className="modality-color-preview-swatch"
                     style={{
-                      backgroundColor:
-                        isValidHexColor(
-                          color,
-                        )
-                          ? color
-                          : '#27272A',
+                      backgroundColor: isValidHexColor(color) ? color : '#27272A',
                     }}
                   />
 
                   <div>
-                    <span>
-                      Pré-visualização
-                    </span>
+                    <span>Pré-visualização</span>
 
-                    <strong>
-                      {name.trim() ||
-                        'Modalidade'}
-                    </strong>
+                    <strong>{name.trim() || 'Modalidade'}</strong>
 
-                    <small>
-                      {color ||
-                        'Sem cor'}
-                    </small>
+                    <small>{color || 'Sem cor'}</small>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div
-              className="modality-detail-metadata"
-              data-testid="modality-manage-metadata"
-            >
+            <div className="modality-detail-metadata" data-testid="modality-manage-metadata">
               <div>
-                <span>
-                  ID
-                </span>
+                <span>ID</span>
 
-                <strong>
-                  {modality.id}
-                </strong>
+                <strong>{modality.id}</strong>
               </div>
 
               <div>
-                <span>
-                  Criada em
-                </span>
+                <span>Criada em</span>
 
-                <strong>
-                  {formatDateTime(
-                    modality.createdAt,
-                  )}
-                </strong>
+                <strong>{formatDateTime(modality.createdAt)}</strong>
               </div>
 
               <div>
-                <span>
-                  Atualizada em
-                </span>
+                <span>Atualizada em</span>
 
-                <strong>
-                  {formatDateTime(
-                    modality.updatedAt,
-                  )}
-                </strong>
+                <strong>{formatDateTime(modality.updatedAt)}</strong>
               </div>
             </div>
 
             {error ? (
-              <div
-                className="modality-form-error"
-                role="alert"
-                data-testid="modality-manage-error"
-              >
+              <div className="modality-form-error" role="alert" data-testid="modality-manage-error">
                 {error}
               </div>
             ) : null}
@@ -891,9 +525,7 @@ export function ManageModalityModal({
               >
                 <div className="modality-status-confirmation-content">
                   <strong>
-                    {modality.active
-                      ? 'Inativar modalidade?'
-                      : 'Reativar modalidade?'}
+                    {modality.active ? 'Inativar modalidade?' : 'Reativar modalidade?'}
                   </strong>
 
                   <p>
@@ -907,13 +539,9 @@ export function ManageModalityModal({
                   <button
                     type="button"
                     className="modalities-button modalities-button-secondary"
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="modality-status-cancel-button"
-                    onClick={
-                      handleCloseStatusConfirmation
-                    }
+                    onClick={handleCloseStatusConfirmation}
                   >
                     Cancelar
                   </button>
@@ -925,9 +553,7 @@ export function ManageModalityModal({
                         ? 'modalities-button modality-status-action-danger'
                         : 'modalities-button modality-status-action-success'
                     }
-                    disabled={
-                      isChangingStatus
-                    }
+                    disabled={isChangingStatus}
                     data-testid="modality-status-confirm-button"
                     onClick={() => {
                       void handleStatusChange()
@@ -951,13 +577,9 @@ export function ManageModalityModal({
                   <button
                     type="button"
                     className="modalities-button modalities-button-secondary"
-                    disabled={
-                      isBusy
-                    }
+                    disabled={isBusy}
                     data-testid="modality-manage-cancel-edit-button"
-                    onClick={
-                      handleCancelEditing
-                    }
+                    onClick={handleCancelEditing}
                   >
                     Cancelar edição
                   </button>
@@ -965,15 +587,10 @@ export function ManageModalityModal({
                   <button
                     type="submit"
                     className="modalities-button modalities-button-primary"
-                    disabled={
-                      isBusy ||
-                      !hasChanges
-                    }
+                    disabled={isBusy || !hasChanges}
                     data-testid="modality-manage-save-button"
                   >
-                    {isSubmitting
-                      ? 'Salvando...'
-                      : 'Salvar alterações'}
+                    {isSubmitting ? 'Salvando...' : 'Salvar alterações'}
                   </button>
                 </>
               ) : (
@@ -981,19 +598,14 @@ export function ManageModalityModal({
                   <button
                     type="button"
                     className="modalities-button modalities-button-secondary"
-                    disabled={
-                      isBusy
-                    }
+                    disabled={isBusy}
                     data-testid="modality-manage-close-footer-button"
-                    onClick={
-                      onClose
-                    }
+                    onClick={onClose}
                   >
                     Fechar
                   </button>
 
-                  {canEdit &&
-                  !isStatusConfirmationOpen ? (
+                  {canEdit && !isStatusConfirmationOpen ? (
                     <>
                       <button
                         type="button"
@@ -1002,33 +614,23 @@ export function ManageModalityModal({
                             ? 'modalities-button modality-status-action-danger'
                             : 'modalities-button modality-status-action-success'
                         }
-                        disabled={
-                          isBusy
-                        }
+                        disabled={isBusy}
                         data-testid={
                           modality.active
                             ? 'modality-manage-inactivate-button'
                             : 'modality-manage-reactivate-button'
                         }
-                        onClick={
-                          handleOpenStatusConfirmation
-                        }
+                        onClick={handleOpenStatusConfirmation}
                       >
-                        {modality.active
-                          ? 'Inativar modalidade'
-                          : 'Reativar modalidade'}
+                        {modality.active ? 'Inativar modalidade' : 'Reativar modalidade'}
                       </button>
 
                       <button
                         type="button"
                         className="modalities-button modalities-button-primary"
-                        disabled={
-                          isBusy
-                        }
+                        disabled={isBusy}
                         data-testid="modality-manage-edit-button"
-                        onClick={
-                          handleStartEditing
-                        }
+                        onClick={handleStartEditing}
                       >
                         Editar modalidade
                       </button>

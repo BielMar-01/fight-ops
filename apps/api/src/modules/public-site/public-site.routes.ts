@@ -1,10 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 
-import {
-  getPublicPage,
-  getPublicSeo,
-  getSiteSettings,
-} from './public-site.service.js'
+import { getPublicPage, getPublicSeo, getSiteSettings } from './public-site.service.js'
 
 export async function publicSiteRoutes(app: FastifyInstance) {
   app.get(

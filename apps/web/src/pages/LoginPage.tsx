@@ -1,28 +1,14 @@
-import {
-  useState,
-} from 'react'
+import { useState } from 'react'
 
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import type {
-  Location,
-} from 'react-router-dom'
+import type { Location } from 'react-router-dom'
 
-import {
-  PasswordInput,
-} from '../components/auth/PasswordInput'
+import { PasswordInput } from '../components/auth/PasswordInput'
 
-import {
-  useLogin,
-} from '../hooks/useAuth'
+import { useLogin } from '../hooks/useAuth'
 
-import {
-  ApiError,
-} from '../services/api'
+import { ApiError } from '../services/api'
 
 interface LoginLocationState {
   from?: Location
@@ -31,131 +17,71 @@ interface LoginLocationState {
 }
 
 export function LoginPage() {
-  const navigate =
-    useNavigate()
+  const navigate = useNavigate()
 
-  const location =
-    useLocation()
+  const location = useLocation()
 
-  const loginMutation =
-    useLogin()
+  const loginMutation = useLogin()
 
-  const state =
-    location.state as
-      | LoginLocationState
-      | null
+  const state = location.state as LoginLocationState | null
 
-  const accountCreated =
-    Boolean(
-      state?.accountCreated,
-    )
+  const accountCreated = Boolean(state?.accountCreated)
 
-  const passwordReset =
-    Boolean(
-      state?.passwordReset,
-    )
+  const passwordReset = Boolean(state?.passwordReset)
 
-  const [
-    email,
-    setEmail,
-  ] =
-    useState('')
+  const [email, setEmail] = useState('')
 
-  const [
-    password,
-    setPassword,
-  ] =
-    useState('')
+  const [password, setPassword] = useState('')
 
-  const [
-    formError,
-    setFormError,
-  ] =
-    useState<
-      string | null
-    >(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
-  async function handleSubmit(
-    event:
-      React.FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     setFormError(null)
 
     try {
       await loginMutation.mutateAsync({
-        email:
-          email.trim(),
+        email: email.trim(),
         password,
       })
 
-      const destination =
-        state?.from?.pathname ??
-        '/dashboard'
+      const destination = state?.from?.pathname ?? '/dashboard'
 
-      navigate(
-        destination,
-        {
-          replace: true,
-        },
-      )
+      navigate(destination, {
+        replace: true,
+      })
     } catch (error) {
-      if (
-        error instanceof ApiError
-      ) {
-        setFormError(
-          error.message,
-        )
+      if (error instanceof ApiError) {
+        setFormError(error.message)
 
         return
       }
 
-      setFormError(
-        'Não foi possível entrar. Tente novamente.',
-      )
+      setFormError('Não foi possível entrar. Tente novamente.')
     }
   }
 
   return (
-    <main
-      className="auth-page"
-      data-testid="login-page"
-    >
+    <main className="auth-page" data-testid="login-page">
       <div className="auth-shell">
         <section className="auth-brand-panel">
-          <Link
-            to="/"
-            className="brand"
-            data-testid="login-logo-link"
-          >
-            <span className="brand-mark">
-              FO
-            </span>
+          <Link to="/" className="brand" data-testid="login-logo-link">
+            <span className="brand-mark">FO</span>
 
-            <span className="brand-text">
-              FightOps
-            </span>
+            <span className="brand-text">FightOps</span>
           </Link>
 
           <div>
-            <span className="eyebrow">
-              Bem-vindo de volta
-            </span>
+            <span className="eyebrow">Bem-vindo de volta</span>
 
             <h1>
               Sua academia.
-              <span>
-                {' '}
-                Sob controle.
-              </span>
+              <span> Sob controle.</span>
             </h1>
 
             <p>
-              Acesse sua conta para
-              acompanhar alunos,
-              turmas e toda a operação
-              do seu centro de
+              Acesse sua conta para acompanhar alunos, turmas e toda a operação do seu centro de
               treinamento.
             </p>
           </div>
@@ -164,17 +90,9 @@ export function LoginPage() {
         <section className="auth-form-panel">
           <div className="auth-form-container">
             <div className="auth-heading">
-              <h2
-                data-testid="login-title"
-              >
-                Entrar
-              </h2>
+              <h2 data-testid="login-title">Entrar</h2>
 
-              <p>
-                Informe seus dados
-                para acessar o
-                FightOps.
-              </p>
+              <p>Informe seus dados para acessar o FightOps.</p>
             </div>
 
             {accountCreated ? (
@@ -183,9 +101,7 @@ export function LoginPage() {
                 role="status"
                 data-testid="login-account-created-success"
               >
-                Conta criada com
-                sucesso. Agora faça
-                login para continuar.
+                Conta criada com sucesso. Agora faça login para continuar.
               </div>
             ) : null}
 
@@ -195,22 +111,13 @@ export function LoginPage() {
                 role="status"
                 data-testid="login-password-reset-success"
               >
-                Senha alterada com
-                sucesso. Entre com sua
-                nova senha.
+                Senha alterada com sucesso. Entre com sua nova senha.
               </div>
             ) : null}
 
-            <form
-              onSubmit={
-                handleSubmit
-              }
-              data-testid="login-form"
-            >
+            <form onSubmit={handleSubmit} data-testid="login-form">
               <div className="form-field">
-                <label htmlFor="email">
-                  E-mail
-                </label>
+                <label htmlFor="email">E-mail</label>
 
                 <input
                   id="email"
@@ -220,30 +127,19 @@ export function LoginPage() {
                   autoComplete="email"
                   required
                   value={email}
-                  disabled={
-                    loginMutation.isPending
-                  }
+                  disabled={loginMutation.isPending}
                   data-testid="login-email-input"
-                  onChange={(
-                    event,
-                  ) => {
-                    setEmail(
-                      event.target.value,
-                    )
+                  onChange={(event) => {
+                    setEmail(event.target.value)
                   }}
                 />
               </div>
 
               <div className="form-field">
                 <div className="field-heading">
-                  <label htmlFor="password">
-                    Senha
-                  </label>
+                  <label htmlFor="password">Senha</label>
 
-                  <Link
-                    to="/forgot-password"
-                    data-testid="login-forgot-password-link"
-                  >
+                  <Link to="/forgot-password" data-testid="login-forgot-password-link">
                     Esqueci minha senha
                   </Link>
                 </div>
@@ -255,9 +151,7 @@ export function LoginPage() {
                   autoComplete="current-password"
                   required
                   value={password}
-                  disabled={
-                    loginMutation.isPending
-                  }
+                  disabled={loginMutation.isPending}
                   inputTestId="login-password-input"
                   toggleTestId="login-password-toggle"
                   onChange={setPassword}
@@ -265,11 +159,7 @@ export function LoginPage() {
               </div>
 
               {formError ? (
-                <div
-                  className="form-error"
-                  role="alert"
-                  data-testid="login-error"
-                >
+                <div className="form-error" role="alert" data-testid="login-error">
                   {formError}
                 </div>
               ) : null}
@@ -277,33 +167,21 @@ export function LoginPage() {
               <button
                 type="submit"
                 className="button button-primary auth-submit"
-                disabled={
-                  loginMutation.isPending
-                }
+                disabled={loginMutation.isPending}
                 data-testid="login-submit-button"
               >
-                {loginMutation.isPending
-                  ? 'Entrando...'
-                  : 'Entrar'}
+                {loginMutation.isPending ? 'Entrando...' : 'Entrar'}
               </button>
             </form>
 
             <p className="auth-footer-text">
               Ainda não possui conta?{' '}
-
-              <Link
-                to="/register"
-                data-testid="login-register-link"
-              >
+              <Link to="/register" data-testid="login-register-link">
                 Criar conta
               </Link>
             </p>
 
-            <Link
-              to="/"
-              className="auth-back-link"
-              data-testid="login-back-home-link"
-            >
+            <Link to="/" className="auth-back-link" data-testid="login-back-home-link">
               Voltar para o início
             </Link>
           </div>

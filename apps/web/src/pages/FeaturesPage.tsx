@@ -10,21 +10,13 @@ interface FeaturesMetadata {
 }
 
 export function FeaturesPage() {
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = usePublicPage('features')
+  const { data, isLoading, isError, refetch } = usePublicPage('features')
 
   if (isLoading) {
     return <PublicPageLoading />
   }
 
-  if (
-    isError ||
-    !data?.page
-  ) {
+  if (isError || !data?.page) {
     return (
       <PublicPageError
         onRetry={() => {
@@ -36,22 +28,11 @@ export function FeaturesPage() {
 
   const page = data.page
 
-  const hero =
-    page.sections.find(
-      (section) =>
-        section.key === 'hero',
-    )
+  const hero = page.sections.find((section) => section.key === 'hero')
 
-  const items =
-    page.sections.find(
-      (section) =>
-        section.key === 'items',
-    )
+  const items = page.sections.find((section) => section.key === 'items')
 
-  const metadata =
-    items?.metadata as
-      | FeaturesMetadata
-      | null
+  const metadata = items?.metadata as FeaturesMetadata | null
 
   return (
     <main>
@@ -60,60 +41,26 @@ export function FeaturesPage() {
       {hero ? (
         <section className="page-hero">
           <div className="site-container">
-            {hero.eyebrow ? (
-              <span className="eyebrow">
-                {hero.eyebrow}
-              </span>
-            ) : null}
+            {hero.eyebrow ? <span className="eyebrow">{hero.eyebrow}</span> : null}
 
-            {hero.title ? (
-              <h1>{hero.title}</h1>
-            ) : null}
+            {hero.title ? <h1>{hero.title}</h1> : null}
 
-            {hero.content ? (
-              <p>
-                {hero.content}
-              </p>
-            ) : null}
+            {hero.content ? <p>{hero.content}</p> : null}
           </div>
         </section>
       ) : null}
 
       <section className="section">
         <div className="site-container feature-grid">
-          {metadata?.items?.map(
-            (
-              feature,
-              index,
-            ) => (
-              <article
-                className="feature-card"
-                key={
-                  feature.key ??
-                  feature.title
-                }
-              >
-                <div className="feature-icon">
-                  {String(
-                    index + 1,
-                  ).padStart(
-                    2,
-                    '0',
-                  )}
-                </div>
+          {metadata?.items?.map((feature, index) => (
+            <article className="feature-card" key={feature.key ?? feature.title}>
+              <div className="feature-icon">{String(index + 1).padStart(2, '0')}</div>
 
-                <h3>
-                  {feature.title}
-                </h3>
+              <h3>{feature.title}</h3>
 
-                <p>
-                  {
-                    feature.description
-                  }
-                </p>
-              </article>
-            ),
-          )}
+              <p>{feature.description}</p>
+            </article>
+          ))}
         </div>
       </section>
     </main>

@@ -1,295 +1,196 @@
-import type {
-  Prisma,
-} from '../../generated/prisma/client.js'
+import type { Prisma } from '../../generated/prisma/client.js'
 
-import {
-  prisma,
-} from '../../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 
-import {
-  sanitizeAuditData,
-} from './audit.sanitizer.js'
+import { sanitizeAuditData } from './audit.sanitizer.js'
 
-import type {
-  AuditJsonValue,
-} from './audit.sanitizer.js'
+import type { AuditJsonValue } from './audit.sanitizer.js'
 
-import type {
-  CreateAuditLogInput,
-  ListAuditLogsInput,
-} from './audit.types.js'
+import type { CreateAuditLogInput, ListAuditLogsInput } from './audit.types.js'
 
-function toPrismaJson(
-  value:
-    | AuditJsonValue
-    | undefined,
-):
-  | Prisma.InputJsonValue
-  | undefined {
-  if (
-    value === undefined
-  ) {
+function toPrismaJson(value: AuditJsonValue | undefined): Prisma.InputJsonValue | undefined {
+  if (value === undefined) {
     return undefined
   }
 
   return value as Prisma.InputJsonValue
 }
 
-function parseStartDate(
-  value?: string,
-) {
+function parseStartDate(value?: string) {
   if (!value) {
     return undefined
   }
 
-  return new Date(
-    `${value}T00:00:00.000Z`,
-  )
+  return new Date(`${value}T00:00:00.000Z`)
 }
 
-function parseEndDate(
-  value?: string,
-) {
+function parseEndDate(value?: string) {
   if (!value) {
     return undefined
   }
 
-  return new Date(
-    `${value}T23:59:59.999Z`,
-  )
+  return new Date(`${value}T23:59:59.999Z`)
 }
 
-export async function createAuditLog(
-  input: CreateAuditLogInput,
-) {
+export async function createAuditLog(input: CreateAuditLogInput) {
   try {
-    const oldValues =
-      toPrismaJson(
-        sanitizeAuditData(
-          input.oldValues,
-        ),
-      )
+    const oldValues = toPrismaJson(sanitizeAuditData(input.oldValues))
 
-    const newValues =
-      toPrismaJson(
-        sanitizeAuditData(
-          input.newValues,
-        ),
-      )
+    const newValues = toPrismaJson(sanitizeAuditData(input.newValues))
 
-    const metadata =
-      toPrismaJson(
-        sanitizeAuditData(
-          input.metadata,
-        ),
-      )
+    const metadata = toPrismaJson(sanitizeAuditData(input.metadata))
 
-    const auditLog =
-      await prisma.auditLog.create({
-        data: {
-          gymId:
-            input.gymId ??
-            null,
+    const auditLog = await prisma.auditLog.create({
+      data: {
+        gymId: input.gymId ?? null,
 
-          userId:
-            input.userId ??
-            null,
+        userId: input.userId ?? null,
 
-          action:
-            input.action,
+        action: input.action,
 
-          entity:
-            input.entity,
+        entity: input.entity,
 
-          entityId:
-            input.entityId ??
-            null,
+        entityId: input.entityId ?? null,
 
-          ...(oldValues !==
-            undefined
-            ? {
-                oldValues,
-              }
-            : {}),
+        ...(oldValues !== undefined
+          ? {
+              oldValues,
+            }
+          : {}),
 
-          ...(newValues !==
-            undefined
-            ? {
-                newValues,
-              }
-            : {}),
+        ...(newValues !== undefined
+          ? {
+              newValues,
+            }
+          : {}),
 
-          ...(metadata !==
-            undefined
-            ? {
-                metadata,
-              }
-            : {}),
+        ...(metadata !== undefined
+          ? {
+              metadata,
+            }
+          : {}),
 
-          ipAddress:
-            input.ipAddress ??
-            null,
+        ipAddress: input.ipAddress ?? null,
 
-          userAgent:
-            input.userAgent ??
-            null,
-        },
-      })
+        userAgent: input.userAgent ?? null,
+      },
+    })
 
     return auditLog
   } catch (error) {
-    console.error(
-      'Failed to create audit log.',
-      {
-        action:
-          input.action,
+    console.error('Failed to create audit log.', {
+      action: input.action,
 
-        entity:
-          input.entity,
+      entity: input.entity,
 
-        entityId:
-          input.entityId ??
-          null,
+      entityId: input.entityId ?? null,
 
-        error,
-      },
-    )
+      error,
+    })
 
     return null
   }
 }
 
-export async function listAuditLogs(
-  gymId: string,
-  input: ListAuditLogsInput,
-) {
-  const skip =
-    (input.page - 1) *
-    input.limit
+export async function listAuditLogs(gymId: string, input: ListAuditLogsInput) {
+  const skip = (input.page - 1) * input.limit
 
-  const startDate =
-    parseStartDate(
-      input.startDate,
-    )
+  const startDate = parseStartDate(input.startDate)
 
-  const endDate =
-    parseEndDate(
-      input.endDate,
-    )
+  const endDate = parseEndDate(input.endDate)
 
-  const where: Prisma.AuditLogWhereInput =
-    {
-      gymId,
+  const where: Prisma.AuditLogWhereInput = {
+    gymId,
 
-      ...(input.action
-        ? {
-            action:
-              input.action,
-          }
-        : {}),
+    ...(input.action
+      ? {
+          action: input.action,
+        }
+      : {}),
 
-      ...(input.entity
-        ? {
-            entity:
-              input.entity,
-          }
-        : {}),
+    ...(input.entity
+      ? {
+          entity: input.entity,
+        }
+      : {}),
 
-      ...(input.userId
-        ? {
-            userId:
-              input.userId,
-          }
-        : {}),
+    ...(input.userId
+      ? {
+          userId: input.userId,
+        }
+      : {}),
 
-      ...(
-        startDate ||
-        endDate
-          ? {
-              createdAt: {
-                ...(startDate
-                  ? {
-                      gte:
-                        startDate,
-                    }
-                  : {}),
+    ...(startDate || endDate
+      ? {
+          createdAt: {
+            ...(startDate
+              ? {
+                  gte: startDate,
+                }
+              : {}),
 
-                ...(endDate
-                  ? {
-                      lte:
-                        endDate,
-                    }
-                  : {}),
-              },
-            }
-          : {}
-      ),
-    }
+            ...(endDate
+              ? {
+                  lte: endDate,
+                }
+              : {}),
+          },
+        }
+      : {}),
+  }
 
-  const [
-    auditLogs,
-    total,
-  ] =
-    await prisma.$transaction([
-      prisma.auditLog.findMany({
-        where,
+  const [auditLogs, total] = await prisma.$transaction([
+    prisma.auditLog.findMany({
+      where,
 
-        orderBy: {
-          createdAt:
-            'desc',
-        },
+      orderBy: {
+        createdAt: 'desc',
+      },
 
-        skip,
+      skip,
 
-        take:
-          input.limit,
+      take: input.limit,
 
-        select: {
-          id: true,
-          gymId: true,
-          userId: true,
-          action: true,
-          entity: true,
-          entityId: true,
-          oldValues: true,
-          newValues: true,
-          metadata: true,
-          ipAddress: true,
-          userAgent: true,
-          createdAt: true,
+      select: {
+        id: true,
+        gymId: true,
+        userId: true,
+        action: true,
+        entity: true,
+        entityId: true,
+        oldValues: true,
+        newValues: true,
+        metadata: true,
+        ipAddress: true,
+        userAgent: true,
+        createdAt: true,
 
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
-      }),
+      },
+    }),
 
-      prisma.auditLog.count({
-        where,
-      }),
-    ])
+    prisma.auditLog.count({
+      where,
+    }),
+  ])
 
   return {
     auditLogs,
 
     pagination: {
-      page:
-        input.page,
+      page: input.page,
 
-      limit:
-        input.limit,
+      limit: input.limit,
 
       total,
 
-      totalPages:
-        Math.ceil(
-          total /
-            input.limit,
-        ),
+      totalPages: Math.ceil(total / input.limit),
     },
   }
 }

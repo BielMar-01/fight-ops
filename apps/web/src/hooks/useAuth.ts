@@ -1,14 +1,8 @@
-import {
-  useContext,
-} from 'react'
+import { useContext } from 'react'
 
-import {
-  useMutation,
-} from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
-import {
-  AuthContext,
-} from '../auth/AuthContext'
+import { AuthContext } from '../auth/AuthContext'
 
 import {
   login,
@@ -27,79 +21,47 @@ import type {
 } from '../types/auth'
 
 export function useAuth() {
-  const context =
-    useContext(
-      AuthContext,
-    )
+  const context = useContext(AuthContext)
 
   if (!context) {
-    throw new Error(
-      'useAuth must be used inside AuthProvider.',
-    )
+    throw new Error('useAuth must be used inside AuthProvider.')
   }
 
   return context
 }
 
 export function useLogin() {
-  const {
-    setAuthenticatedSession,
-  } =
-    useAuth()
+  const { setAuthenticatedSession } = useAuth()
 
   return useMutation({
-    mutationFn: (
-      input: LoginInput,
-    ) =>
-      login(input),
+    mutationFn: (input: LoginInput) => login(input),
 
     onSuccess(data) {
-      setAuthenticatedSession(
-        data.accessToken,
-        data.user,
-      )
+      setAuthenticatedSession(data.accessToken, data.user)
     },
   })
 }
 
 export function useRegister() {
   return useMutation({
-    mutationFn: (
-      input: RegisterInput,
-    ) =>
-      register(input),
+    mutationFn: (input: RegisterInput) => register(input),
   })
 }
 
 export function useForgotPassword() {
   return useMutation({
-    mutationFn: (
-      input: ForgotPasswordInput,
-    ) =>
-      requestPasswordReset(
-        input,
-      ),
+    mutationFn: (input: ForgotPasswordInput) => requestPasswordReset(input),
   })
 }
 
 export function useVerifyPasswordReset() {
   return useMutation({
-    mutationFn: (
-      input: VerifyPasswordResetInput,
-    ) =>
-      verifyPasswordReset(
-        input,
-      ),
+    mutationFn: (input: VerifyPasswordResetInput) => verifyPasswordReset(input),
   })
 }
 
 export function useResetPassword() {
   return useMutation({
-    mutationFn: (
-      input: ResetPasswordInput,
-    ) =>
-      resetPassword(
-        input,
-      ),
+    mutationFn: (input: ResetPasswordInput) => resetPassword(input),
   })
 }

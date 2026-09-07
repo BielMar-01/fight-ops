@@ -16,9 +16,7 @@ function getAccessTokenSecret() {
     )
   }
 
-  return textEncoder.encode(
-    env.JWT_ACCESS_SECRET,
-  )
+  return textEncoder.encode(env.JWT_ACCESS_SECRET)
 }
 
 interface AccessTokenPayload {
@@ -27,9 +25,7 @@ interface AccessTokenPayload {
   globalRole: GlobalRole
 }
 
-export async function signAccessToken(
-  payload: AccessTokenPayload,
-) {
+export async function signAccessToken(payload: AccessTokenPayload) {
   return new SignJWT({
     email: payload.email,
     globalRole: payload.globalRole,
@@ -40,29 +36,16 @@ export async function signAccessToken(
     })
     .setSubject(payload.userId)
     .setIssuedAt()
-    .setExpirationTime(
-      env.JWT_ACCESS_EXPIRATION,
-    )
-    .sign(
-      getAccessTokenSecret(),
-    )
+    .setExpirationTime(env.JWT_ACCESS_EXPIRATION)
+    .sign(getAccessTokenSecret())
 }
 
-export async function verifyAccessToken(
-  token: string,
-) {
+export async function verifyAccessToken(token: string) {
   try {
-    const { payload } = await jwtVerify(
-      token,
-      getAccessTokenSecret(),
-    )
+    const { payload } = await jwtVerify(token, getAccessTokenSecret())
 
     return payload
   } catch {
-    throw new AppError(
-      'INVALID_ACCESS_TOKEN',
-      401,
-      'Token de acesso inválido ou expirado.',
-    )
+    throw new AppError('INVALID_ACCESS_TOKEN', 401, 'Token de acesso inválido ou expirado.')
   }
 }

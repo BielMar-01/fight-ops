@@ -18,9 +18,7 @@ const envSchema = z.object({
 
   API_PORT: z.coerce.number().int().positive().max(65535).default(3333),
 
-  LOG_LEVEL: z
-    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
-    .default('info'),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
 
@@ -40,11 +38,7 @@ const envSchema = z.object({
 
   JWT_REFRESH_EXPIRATION_DAYS: z.coerce.number().int().positive().default(7),
 
-  PASSWORD_RESET_CODE_EXPIRATION_MINUTES: z.coerce
-    .number()
-    .int()
-    .positive()
-    .default(10),
+  PASSWORD_RESET_CODE_EXPIRATION_MINUTES: z.coerce.number().int().positive().default(10),
 
   PASSWORD_RESET_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 

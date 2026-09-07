@@ -1,12 +1,14 @@
 # Stack e Versões
 
 ## Base
+
 - Node.js 24.x
 - pnpm 11.x
 - TurboRepo 2.x
 - TypeScript
 
 ## API
+
 - Fastify 5
 - Zod
 - Prisma 7
@@ -22,6 +24,7 @@
 - Swagger / Swagger UI
 
 ## Web
+
 - React 19
 - Vite 8
 - React Router
@@ -30,6 +33,7 @@
 - CSS por contexto/página
 
 ## Infra
+
 - Supabase
 - Vercel API
 - Vercel Web
