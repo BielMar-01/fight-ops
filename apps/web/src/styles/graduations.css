@@ -1356,3 +1356,129 @@
     height: 46px;
   }
 }
+
+/* =========================================================
+   GRADUATION STATUS MANAGEMENT
+   ========================================================= */
+
+.graduation-status-confirmation {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #3f3f46;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.graduation-status-confirmation > div:first-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graduation-status-confirmation strong {
+  color: #fafafa;
+  font-size: 0.95rem;
+}
+
+.graduation-status-confirmation p {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.graduation-status-confirmation-danger {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.graduation-status-confirmation-success {
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.graduation-status-confirmation-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+}
+
+.graduation-status-confirmation-actions .graduations-button {
+  width: 100%;
+}
+
+/* =========================================================
+   STATUS BUTTONS
+   ========================================================= */
+
+.graduation-button-danger {
+  border-color: #ef4444;
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.graduation-button-danger:hover:not(:disabled) {
+  border-color: #dc2626;
+  background: #dc2626;
+}
+
+.graduation-button-danger-secondary {
+  border-color: rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+}
+
+.graduation-button-danger-secondary:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.16);
+}
+
+.graduation-button-success {
+  border-color: #22c55e;
+  background: #22c55e;
+  color: #052e16;
+}
+
+.graduation-button-success:hover:not(:disabled) {
+  border-color: #16a34a;
+  background: #16a34a;
+}
+
+.graduation-button-success-secondary {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.08);
+  color: #86efac;
+}
+
+.graduation-button-success-secondary:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.16);
+}
+
+.graduation-manage-actions {
+  flex-wrap: wrap;
+}
+
+@media (min-width: 701px) {
+  .graduation-status-confirmation-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .graduation-status-confirmation-actions .graduations-button {
+    width: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .graduation-manage-actions {
+    flex-direction: column-reverse;
+  }
+
+  .graduation-manage-actions .graduations-button {
+    width: 100%;
+  }
+}

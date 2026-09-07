@@ -2,7 +2,11 @@ import { type FormEvent, useEffect, useState } from 'react'
 
 import { ApiError } from '../../services/api'
 
-import { getGraduationById, updateGraduation } from '../../services/graduation.service'
+import {
+  getGraduationById,
+  updateGraduation,
+  updateGraduationStatus,
+} from '../../services/graduation.service'
 
 import type { Graduation, UpdateGraduationInput } from '../../types/graduation'
 
@@ -56,9 +60,13 @@ export function ManageGraduationModal({
 
   const [isEditing, setIsEditing] = useState(false)
 
+  const [isStatusConfirmationOpen, setIsStatusConfirmationOpen] = useState(false)
+
   const [loading, setLoading] = useState(true)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
 
@@ -104,7 +112,25 @@ export function ManageGraduationModal({
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && !isSubmitting) {
+      if (event.key === 'Escape' && !isSubmitting && !isUpdatingStatus) {
+        if (isStatusConfirmationOpen) {
+          setIsStatusConfirmationOpen(false)
+
+          return
+        }
+
+        if (isEditing) {
+          setIsEditing(false)
+
+          if (graduation) {
+            fillForm(graduation)
+          }
+
+          setError(null)
+
+          return
+        }
+
         onClose()
       }
     }
@@ -114,7 +140,7 @@ export function ManageGraduationModal({
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isSubmitting, onClose])
+  }, [graduation, isEditing, isStatusConfirmationOpen, isSubmitting, isUpdatingStatus, onClose])
 
   function handleStartEditing() {
     if (!graduation || !canEdit) {
@@ -124,6 +150,8 @@ export function ManageGraduationModal({
     fillForm(graduation)
 
     setError(null)
+
+    setIsStatusConfirmationOpen(false)
 
     setIsEditing(true)
   }
@@ -136,6 +164,26 @@ export function ManageGraduationModal({
     setError(null)
 
     setIsEditing(false)
+  }
+
+  function handleOpenStatusConfirmation() {
+    if (!graduation || !canEdit) {
+      return
+    }
+
+    setError(null)
+
+    setIsStatusConfirmationOpen(true)
+  }
+
+  function handleCancelStatusConfirmation() {
+    if (isUpdatingStatus) {
+      return
+    }
+
+    setError(null)
+
+    setIsStatusConfirmationOpen(false)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -195,13 +243,9 @@ export function ManageGraduationModal({
 
     const input: UpdateGraduationInput = {
       name: normalizedName,
-
       description: normalizedDescription,
-
       color: normalizedColor?.toUpperCase(),
-
       textColor: normalizedTextColor?.toUpperCase(),
-
       order: parsedOrder,
     }
 
@@ -242,9 +286,51 @@ export function ManageGraduationModal({
     }
   }
 
+  async function handleUpdateStatus() {
+    if (!graduation || !canEdit) {
+      return
+    }
+
+    const newStatus = !graduation.active
+
+    setError(null)
+
+    setIsUpdatingStatus(true)
+
+    try {
+      const response = await updateGraduationStatus(gymId, modalityId, graduationId, {
+        active: newStatus,
+      })
+
+      setGraduation(response.graduation)
+
+      fillForm(response.graduation)
+
+      setIsStatusConfirmationOpen(false)
+
+      await onUpdated()
+    } catch (caughtError) {
+      if (caughtError instanceof ApiError) {
+        setError(caughtError.message)
+
+        return
+      }
+
+      setError(
+        graduation.active
+          ? 'Não foi possível inativar a graduação.'
+          : 'Não foi possível ativar a graduação.',
+      )
+    } finally {
+      setIsUpdatingStatus(false)
+    }
+  }
+
   const previewBackground = isValidHexColor(color) ? color : '#27272A'
 
   const previewTextColor = isValidHexColor(textColor) ? textColor : '#FAFAFA'
+
+  const isBusy = isSubmitting || isUpdatingStatus
 
   return (
     <div
@@ -252,7 +338,7 @@ export function ManageGraduationModal({
       role="presentation"
       data-testid="graduation-manage-modal-backdrop"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !isSubmitting) {
+        if (event.target === event.currentTarget && !isBusy) {
           onClose()
         }
       }}
@@ -281,7 +367,7 @@ export function ManageGraduationModal({
             type="button"
             className="graduation-modal-close"
             aria-label="Fechar"
-            disabled={isSubmitting}
+            disabled={isBusy}
             data-testid="graduation-manage-close-button"
             onClick={onClose}
           >
@@ -457,7 +543,6 @@ export function ManageGraduationModal({
                     className="graduation-preview-belt"
                     style={{
                       backgroundColor: previewBackground,
-
                       color: previewTextColor,
                     }}
                   >
@@ -511,7 +596,6 @@ export function ManageGraduationModal({
                 className="graduation-detail-belt"
                 style={{
                   backgroundColor: graduation.color ?? '#27272A',
-
                   color: graduation.textColor ?? '#FAFAFA',
                 }}
                 data-testid="graduation-detail-color"
@@ -579,6 +663,59 @@ export function ManageGraduationModal({
               </div>
             </div>
 
+            {isStatusConfirmationOpen ? (
+              <div
+                className={
+                  graduation.active
+                    ? 'graduation-status-confirmation graduation-status-confirmation-danger'
+                    : 'graduation-status-confirmation graduation-status-confirmation-success'
+                }
+                data-testid="graduation-status-confirmation"
+              >
+                <div>
+                  <strong>{graduation.active ? 'Inativar graduação?' : 'Ativar graduação?'}</strong>
+
+                  <p>
+                    {graduation.active
+                      ? 'A graduação continuará preservada no histórico, mas não deverá ser utilizada em novas atribuições.'
+                      : 'A graduação voltará a ficar disponível para utilização na academia.'}
+                  </p>
+                </div>
+
+                <div className="graduation-status-confirmation-actions">
+                  <button
+                    type="button"
+                    className="graduations-button graduations-button-secondary"
+                    disabled={isUpdatingStatus}
+                    data-testid="graduation-status-cancel-button"
+                    onClick={handleCancelStatusConfirmation}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      graduation.active
+                        ? 'graduations-button graduation-button-danger'
+                        : 'graduations-button graduation-button-success'
+                    }
+                    disabled={isUpdatingStatus}
+                    data-testid="graduation-status-confirm-button"
+                    onClick={() => {
+                      void handleUpdateStatus()
+                    }}
+                  >
+                    {isUpdatingStatus
+                      ? 'Atualizando...'
+                      : graduation.active
+                        ? 'Confirmar inativação'
+                        : 'Confirmar ativação'}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             {error ? (
               <div
                 className="graduation-form-error"
@@ -589,10 +726,11 @@ export function ManageGraduationModal({
               </div>
             ) : null}
 
-            <div className="graduation-modal-actions">
+            <div className="graduation-modal-actions graduation-manage-actions">
               <button
                 type="button"
                 className="graduations-button graduations-button-secondary"
+                disabled={isUpdatingStatus}
                 data-testid="graduation-details-close-button"
                 onClick={onClose}
               >
@@ -600,14 +738,31 @@ export function ManageGraduationModal({
               </button>
 
               {canEdit ? (
-                <button
-                  type="button"
-                  className="graduations-button graduations-button-primary"
-                  data-testid="graduation-edit-button"
-                  onClick={handleStartEditing}
-                >
-                  Editar graduação
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className={
+                      graduation.active
+                        ? 'graduations-button graduation-button-danger-secondary'
+                        : 'graduations-button graduation-button-success-secondary'
+                    }
+                    disabled={isUpdatingStatus || isStatusConfirmationOpen}
+                    data-testid="graduation-status-button"
+                    onClick={handleOpenStatusConfirmation}
+                  >
+                    {graduation.active ? 'Inativar graduação' : 'Ativar graduação'}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="graduations-button graduations-button-primary"
+                    disabled={isUpdatingStatus || isStatusConfirmationOpen}
+                    data-testid="graduation-edit-button"
+                    onClick={handleStartEditing}
+                  >
+                    Editar graduação
+                  </button>
+                </>
               ) : null}
             </div>
           </div>
