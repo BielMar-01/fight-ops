@@ -784,3 +784,401 @@
     padding: 18px;
   }
 }
+
+/* =========================================================
+   HEADER ACTIONS
+   ========================================================= */
+
+.graduations-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* =========================================================
+   GRADUATION MODAL
+   ========================================================= */
+
+.graduation-modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.graduation-modal {
+  width: 100%;
+  min-width: 0;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  border: 1px solid #27272a;
+  border-radius: 18px 18px 0 0;
+  background: #111113;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.45);
+  overscroll-behavior: contain;
+}
+
+.graduation-modal-header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border-bottom: 1px solid #27272a;
+  background: #111113;
+}
+
+.graduation-modal-header > div:first-child {
+  min-width: 0;
+}
+
+.graduation-modal-header h2 {
+  margin: 4px 0 6px;
+  color: #fafafa;
+  font-size: 1.4rem;
+  overflow-wrap: anywhere;
+}
+
+.graduation-modal-header p {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.graduation-modal-header p strong {
+  color: #e4e4e7;
+}
+
+.graduation-modal-close {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid #3f3f46;
+  border-radius: 9px;
+  cursor: pointer;
+  background: #18181b;
+  color: #fafafa;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.graduation-modal-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.graduation-modal-form {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.graduation-form-grid {
+  display: grid;
+  min-width: 0;
+  gap: 16px;
+}
+
+.graduation-form-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graduation-form-field > span {
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.graduation-form-field input,
+.graduation-form-field textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #3f3f46;
+  border-radius: 9px;
+  outline: none;
+  background: #09090b;
+  color: #fafafa;
+  font: inherit;
+}
+
+.graduation-form-field input {
+  min-height: 42px;
+}
+
+.graduation-form-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.graduation-form-field input:focus,
+.graduation-form-field textarea:focus {
+  border-color: #ef4444;
+}
+
+.graduation-form-field input:disabled,
+.graduation-form-field textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.graduation-form-counter {
+  align-self: flex-end;
+  color: #71717a;
+  font-size: 0.75rem;
+}
+
+.graduation-color-section {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+
+.graduation-color-input-row {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.graduation-color-input-row input[type='color'] {
+  width: 52px;
+  min-height: 42px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.graduation-preview {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.graduation-preview > span {
+  color: #71717a;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.graduation-preview-content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.graduation-preview-content > div:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.graduation-preview-content strong {
+  color: #fafafa;
+  overflow-wrap: anywhere;
+}
+
+.graduation-preview-content small {
+  color: #71717a;
+}
+
+.graduation-preview-belt {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid #52525b;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.graduation-form-error {
+  padding: 12px 14px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 9px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.graduation-modal-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  margin: 0 -20px -20px;
+  padding: 14px 20px 20px;
+  border-top: 1px solid #27272a;
+  background: #111113;
+}
+
+.graduation-modal-actions .graduations-button {
+  width: 100%;
+}
+
+/* =========================================================
+   TABLET / DESKTOP
+   ========================================================= */
+
+@media (min-width: 701px) {
+  .graduations-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .graduations-header-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .graduation-modal-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .graduation-modal {
+    max-width: 720px;
+    max-height: 90vh;
+    border-radius: 18px;
+  }
+
+  .graduation-modal-header {
+    position: static;
+    padding: 24px;
+  }
+
+  .graduation-modal-form {
+    padding: 24px;
+  }
+
+  .graduation-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .graduation-form-field-full,
+  .graduation-color-section,
+  .graduation-preview {
+    grid-column: 1 / -1;
+  }
+
+  .graduation-color-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .graduation-modal-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 4px 0 0;
+    border-top: 0;
+    background: transparent;
+  }
+
+  .graduation-modal-actions .graduations-button {
+    width: auto;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .graduations-header-actions {
+    width: 100%;
+  }
+
+  .graduations-header-actions .graduations-button {
+    width: 100%;
+  }
+
+  .graduation-modal {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .graduation-modal-form {
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 20px;
+  }
+
+  .graduation-color-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+  .graduation-modal {
+    max-height: calc(100dvh - 8px);
+    border-radius: 14px 14px 0 0;
+  }
+
+  .graduation-modal-header {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .graduation-modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .graduation-modal-header p {
+    font-size: 0.825rem;
+  }
+
+  .graduation-modal-close {
+    width: 34px;
+    height: 34px;
+  }
+
+  .graduation-modal-form {
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .graduation-color-input-row {
+    grid-template-columns:
+      48px
+      minmax(0, 1fr);
+  }
+
+  .graduation-color-input-row input[type='color'] {
+    width: 48px;
+  }
+
+  .graduation-modal-actions {
+    margin: 0 -16px -16px;
+    padding: 12px 16px 16px;
+  }
+}

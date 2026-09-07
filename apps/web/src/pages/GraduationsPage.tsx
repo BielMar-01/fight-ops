@@ -1,5 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
 
+import { AddGraduationModal } from '../components/graduations/AddGraduationModal'
+
 import { useGym } from '../contexts/GymContext'
 
 import { listGraduations } from '../services/graduation.service'
@@ -80,11 +82,15 @@ export function GraduationsPage() {
 
   const [error, setError] = useState<string | null>(null)
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
   const canViewGraduations =
     activeGym?.role === 'OWNER' ||
     activeGym?.role === 'ADMIN' ||
     activeGym?.role === 'RECEPTIONIST' ||
     activeGym?.role === 'PROFESSOR'
+
+  const canManageGraduations = activeGym?.role === 'OWNER' || activeGym?.role === 'ADMIN'
 
   const selectedModality = modalities.find((modality) => modality.id === selectedModalityId) ?? null
 
@@ -271,6 +277,8 @@ export function GraduationsPage() {
     setStatusFilter('all')
 
     setError(null)
+
+    setIsAddModalOpen(false)
   }, [activeGym?.id])
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
@@ -309,6 +317,8 @@ export function GraduationsPage() {
     setPage(1)
 
     setError(null)
+
+    setIsAddModalOpen(false)
   }
 
   function handlePreviousPage() {
@@ -317,6 +327,24 @@ export function GraduationsPage() {
 
   function handleNextPage() {
     setPage((currentPage) => Math.min(pagination.totalPages, currentPage + 1))
+  }
+
+  async function handleGraduationCreated() {
+    setPage(1)
+
+    setSearchInput('')
+
+    setAppliedSearch('')
+
+    setStatusFilter('all')
+
+    if (page === 1) {
+      await Promise.all([loadGraduations(), loadSummary()])
+
+      return
+    }
+
+    await loadSummary()
   }
 
   const hasFilters = appliedSearch.length > 0 || statusFilter !== 'all'
@@ -342,333 +370,365 @@ export function GraduationsPage() {
   }
 
   return (
-    <section className="graduations-page" data-testid="graduations-page">
-      <header className="graduations-header">
-        <div>
-          <span className="graduations-eyebrow">Gestão acadêmica</span>
+    <>
+      <section className="graduations-page" data-testid="graduations-page">
+        <header className="graduations-header">
+          <div>
+            <span className="graduations-eyebrow">Gestão acadêmica</span>
 
-          <h1>Graduações</h1>
+            <h1>Graduações</h1>
 
-          <p>Consulte as faixas e graduações configuradas para cada modalidade da academia.</p>
-        </div>
-      </header>
+            <p>
+              Consulte e gerencie as faixas e graduações configuradas para cada modalidade da
+              academia.
+            </p>
+          </div>
 
-      {modalitiesLoading ? (
-        <div className="graduations-state" data-testid="graduations-modalities-loading">
-          <div className="graduations-loading-spinner" aria-hidden="true" />
-
-          <span>Carregando modalidades...</span>
-        </div>
-      ) : modalitiesError ? (
-        <div
-          className="graduations-state graduations-state-error"
-          data-testid="graduations-modalities-error"
-        >
-          <strong>Não foi possível carregar as modalidades</strong>
-
-          <span>{modalitiesError}</span>
-
-          <button
-            type="button"
-            className="graduations-button graduations-button-secondary"
-            data-testid="graduations-modalities-retry-button"
-            onClick={() => {
-              void loadModalities()
-            }}
-          >
-            Tentar novamente
-          </button>
-        </div>
-      ) : modalities.length === 0 ? (
-        <div className="graduations-empty" data-testid="graduations-no-modalities">
-          <h2>Nenhuma modalidade cadastrada</h2>
-
-          <p>Cadastre uma modalidade antes de configurar suas graduações.</p>
-        </div>
-      ) : (
-        <>
-          <div className="graduations-modality-panel" data-testid="graduations-modality-panel">
-            <div className="graduations-field">
-              <label htmlFor="graduations-modality">Modalidade</label>
-
-              <select
-                id="graduations-modality"
-                value={selectedModalityId}
-                data-testid="graduations-modality-select"
-                onChange={(event) => {
-                  handleModalityChange(event.target.value)
+          {canManageGraduations && selectedModality ? (
+            <div className="graduations-header-actions">
+              <button
+                type="button"
+                className="graduations-button graduations-button-primary"
+                data-testid="graduations-add-button"
+                onClick={() => {
+                  setIsAddModalOpen(true)
                 }}
               >
-                {modalities.map((modality) => (
-                  <option key={modality.id} value={modality.id}>
-                    {modality.name}
-                    {!modality.active ? ' — Inativa' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {selectedModality ? (
-              <div
-                className="graduations-selected-modality"
-                data-testid="graduations-selected-modality"
-              >
-                <div
-                  className="graduations-modality-color"
-                  style={
-                    selectedModality.color
-                      ? {
-                          backgroundColor: selectedModality.color,
-                        }
-                      : undefined
-                  }
-                  data-testid="graduations-selected-modality-color"
-                >
-                  {!selectedModality.color ? selectedModality.name.charAt(0).toUpperCase() : null}
-                </div>
-
-                <div>
-                  <span>Modalidade selecionada</span>
-
-                  <strong>{selectedModality.name}</strong>
-
-                  <small>{selectedModality.active ? 'Ativa' : 'Inativa'}</small>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
-          <div className="graduations-summary" data-testid="graduations-summary">
-            <div className="graduations-summary-card" data-testid="graduations-summary-total">
-              <span>Total</span>
-
-              <strong>{summary.total}</strong>
-
-              <small>Graduações cadastradas</small>
-            </div>
-
-            <div className="graduations-summary-card" data-testid="graduations-summary-active">
-              <span>Ativas</span>
-
-              <strong>{summary.active}</strong>
-
-              <small>Graduações ativas</small>
-            </div>
-
-            <div className="graduations-summary-card" data-testid="graduations-summary-inactive">
-              <span>Inativas</span>
-
-              <strong>{summary.inactive}</strong>
-
-              <small>Graduações inativas</small>
-            </div>
-          </div>
-
-          <div className="graduations-filters" data-testid="graduations-filters">
-            <form className="graduations-search-form" onSubmit={handleSearch}>
-              <div className="graduations-field">
-                <label htmlFor="graduations-search">Buscar graduação</label>
-
-                <input
-                  id="graduations-search"
-                  type="search"
-                  value={searchInput}
-                  placeholder="Nome da graduação"
-                  data-testid="graduations-search-input"
-                  onChange={(event) => {
-                    setSearchInput(event.target.value)
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="graduations-button graduations-button-primary"
-                data-testid="graduations-search-button"
-              >
-                Buscar
+                Nova graduação
               </button>
-            </form>
+            </div>
+          ) : null}
+        </header>
 
-            <div className="graduations-filter-actions">
+        {modalitiesLoading ? (
+          <div className="graduations-state" data-testid="graduations-modalities-loading">
+            <div className="graduations-loading-spinner" aria-hidden="true" />
+
+            <span>Carregando modalidades...</span>
+          </div>
+        ) : modalitiesError ? (
+          <div
+            className="graduations-state graduations-state-error"
+            data-testid="graduations-modalities-error"
+          >
+            <strong>Não foi possível carregar as modalidades</strong>
+
+            <span>{modalitiesError}</span>
+
+            <button
+              type="button"
+              className="graduations-button graduations-button-secondary"
+              data-testid="graduations-modalities-retry-button"
+              onClick={() => {
+                void loadModalities()
+              }}
+            >
+              Tentar novamente
+            </button>
+          </div>
+        ) : modalities.length === 0 ? (
+          <div className="graduations-empty" data-testid="graduations-no-modalities">
+            <h2>Nenhuma modalidade cadastrada</h2>
+
+            <p>Cadastre uma modalidade antes de configurar suas graduações.</p>
+          </div>
+        ) : (
+          <>
+            <div className="graduations-modality-panel" data-testid="graduations-modality-panel">
               <div className="graduations-field">
-                <label htmlFor="graduations-status">Status</label>
+                <label htmlFor="graduations-modality">Modalidade</label>
 
                 <select
-                  id="graduations-status"
-                  value={statusFilter}
-                  data-testid="graduations-status-filter"
+                  id="graduations-modality"
+                  value={selectedModalityId}
+                  data-testid="graduations-modality-select"
                   onChange={(event) => {
-                    setStatusFilter(event.target.value as StatusFilter)
-
-                    setPage(1)
+                    handleModalityChange(event.target.value)
                   }}
                 >
-                  <option value="all">Todas</option>
-
-                  <option value="active">Ativas</option>
-
-                  <option value="inactive">Inativas</option>
+                  {modalities.map((modality) => (
+                    <option key={modality.id} value={modality.id}>
+                      {modality.name}
+                      {!modality.active ? ' — Inativa' : ''}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {hasFilters ? (
-                <button
-                  type="button"
-                  className="graduations-button graduations-button-secondary"
-                  data-testid="graduations-clear-filters-button"
-                  onClick={handleClearFilters}
+              {selectedModality ? (
+                <div
+                  className="graduations-selected-modality"
+                  data-testid="graduations-selected-modality"
                 >
-                  Limpar filtros
-                </button>
+                  <div
+                    className="graduations-modality-color"
+                    style={
+                      selectedModality.color
+                        ? {
+                            backgroundColor: selectedModality.color,
+                          }
+                        : undefined
+                    }
+                    data-testid="graduations-selected-modality-color"
+                  >
+                    {!selectedModality.color ? selectedModality.name.charAt(0).toUpperCase() : null}
+                  </div>
+
+                  <div>
+                    <span>Modalidade selecionada</span>
+
+                    <strong>{selectedModality.name}</strong>
+
+                    <small>{selectedModality.active ? 'Ativa' : 'Inativa'}</small>
+                  </div>
+                </div>
               ) : null}
             </div>
-          </div>
 
-          {loading ? (
-            <div className="graduations-state" data-testid="graduations-loading">
-              <div className="graduations-loading-spinner" aria-hidden="true" />
+            <div className="graduations-summary" data-testid="graduations-summary">
+              <div className="graduations-summary-card" data-testid="graduations-summary-total">
+                <span>Total</span>
 
-              <span>Carregando graduações...</span>
+                <strong>{summary.total}</strong>
+
+                <small>Graduações cadastradas</small>
+              </div>
+
+              <div className="graduations-summary-card" data-testid="graduations-summary-active">
+                <span>Ativas</span>
+
+                <strong>{summary.active}</strong>
+
+                <small>Graduações ativas</small>
+              </div>
+
+              <div className="graduations-summary-card" data-testid="graduations-summary-inactive">
+                <span>Inativas</span>
+
+                <strong>{summary.inactive}</strong>
+
+                <small>Graduações inativas</small>
+              </div>
             </div>
-          ) : error ? (
-            <div
-              className="graduations-state graduations-state-error"
-              data-testid="graduations-error"
-            >
-              <strong>Não foi possível carregar as graduações</strong>
 
-              <span>{error}</span>
+            <div className="graduations-filters" data-testid="graduations-filters">
+              <form className="graduations-search-form" onSubmit={handleSearch}>
+                <div className="graduations-field">
+                  <label htmlFor="graduations-search">Buscar graduação</label>
 
-              <button
-                type="button"
-                className="graduations-button graduations-button-secondary"
-                data-testid="graduations-retry-button"
-                onClick={() => {
-                  void loadGraduations()
-                  void loadSummary()
-                }}
-              >
-                Tentar novamente
-              </button>
-            </div>
-          ) : graduations.length === 0 ? (
-            <div className="graduations-empty" data-testid="graduations-empty">
-              <h2>Nenhuma graduação encontrada</h2>
+                  <input
+                    id="graduations-search"
+                    type="search"
+                    value={searchInput}
+                    placeholder="Nome da graduação"
+                    data-testid="graduations-search-input"
+                    onChange={(event) => {
+                      setSearchInput(event.target.value)
+                    }}
+                  />
+                </div>
 
-              <p>
-                {hasFilters
-                  ? 'Nenhuma graduação corresponde aos filtros informados.'
-                  : 'Ainda não existem graduações cadastradas para esta modalidade.'}
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="graduations-list" data-testid="graduations-list">
-                {graduations.map((graduation) => (
-                  <article
-                    key={graduation.id}
-                    className="graduation-card"
-                    data-testid={`graduation-card-${graduation.id}`}
+                <button
+                  type="submit"
+                  className="graduations-button graduations-button-primary"
+                  data-testid="graduations-search-button"
+                >
+                  Buscar
+                </button>
+              </form>
+
+              <div className="graduations-filter-actions">
+                <div className="graduations-field">
+                  <label htmlFor="graduations-status">Status</label>
+
+                  <select
+                    id="graduations-status"
+                    value={statusFilter}
+                    data-testid="graduations-status-filter"
+                    onChange={(event) => {
+                      setStatusFilter(event.target.value as StatusFilter)
+
+                      setPage(1)
+                    }}
                   >
-                    <div className="graduation-card-main">
-                      <div
-                        className="graduation-order"
-                        data-testid={`graduation-order-${graduation.id}`}
-                      >
-                        <span>Ordem</span>
+                    <option value="all">Todas</option>
 
-                        <strong>{graduation.order}</strong>
-                      </div>
+                    <option value="active">Ativas</option>
 
-                      <div
-                        className="graduation-color"
-                        data-testid={`graduation-color-${graduation.id}`}
-                        style={{
-                          backgroundColor: graduation.color ?? '#27272a',
+                    <option value="inactive">Inativas</option>
+                  </select>
+                </div>
 
-                          color: graduation.textColor ?? '#fafafa',
-                        }}
-                      >
-                        {!graduation.color
-                          ? getGraduationInitial(graduation.name)
-                          : graduation.order}
-                      </div>
-
-                      <div className="graduation-info">
-                        <div className="graduation-name-row">
-                          <h2>{graduation.name}</h2>
-
-                          <span
-                            className={
-                              graduation.active
-                                ? 'graduation-status graduation-status-active'
-                                : 'graduation-status graduation-status-inactive'
-                            }
-                            data-testid={`graduation-status-${graduation.id}`}
-                          >
-                            {graduation.active ? 'Ativa' : 'Inativa'}
-                          </span>
-                        </div>
-
-                        <p className="graduation-description">
-                          {graduation.description ?? 'Descrição não informada.'}
-                        </p>
-
-                        <div className="graduation-meta">
-                          {graduation.color ? (
-                            <span>
-                              Cor: <strong>{graduation.color}</strong>
-                            </span>
-                          ) : (
-                            <span>Cor não informada</span>
-                          )}
-
-                          {graduation.textColor ? (
-                            <span>
-                              Texto: <strong>{graduation.textColor}</strong>
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                ))}
+                {hasFilters ? (
+                  <button
+                    type="button"
+                    className="graduations-button graduations-button-secondary"
+                    data-testid="graduations-clear-filters-button"
+                    onClick={handleClearFilters}
+                  >
+                    Limpar filtros
+                  </button>
+                ) : null}
               </div>
+            </div>
 
-              <div className="graduations-pagination" data-testid="graduations-pagination">
-                <button
-                  type="button"
-                  className="graduations-button graduations-button-secondary"
-                  disabled={!hasPreviousPage}
-                  data-testid="graduations-pagination-previous"
-                  onClick={handlePreviousPage}
-                >
-                  Anterior
-                </button>
+            {loading ? (
+              <div className="graduations-state" data-testid="graduations-loading">
+                <div className="graduations-loading-spinner" aria-hidden="true" />
 
-                <span
-                  className="graduations-pagination-info"
-                  data-testid="graduations-pagination-info"
-                >
-                  Página <strong>{pagination.page}</strong> de{' '}
-                  <strong>{pagination.totalPages}</strong>
-                </span>
+                <span>Carregando graduações...</span>
+              </div>
+            ) : error ? (
+              <div
+                className="graduations-state graduations-state-error"
+                data-testid="graduations-error"
+              >
+                <strong>Não foi possível carregar as graduações</strong>
+
+                <span>{error}</span>
 
                 <button
                   type="button"
                   className="graduations-button graduations-button-secondary"
-                  disabled={!hasNextPage}
-                  data-testid="graduations-pagination-next"
-                  onClick={handleNextPage}
+                  data-testid="graduations-retry-button"
+                  onClick={() => {
+                    void loadGraduations()
+                    void loadSummary()
+                  }}
                 >
-                  Próxima
+                  Tentar novamente
                 </button>
               </div>
-            </>
-          )}
-        </>
-      )}
-    </section>
+            ) : graduations.length === 0 ? (
+              <div className="graduations-empty" data-testid="graduations-empty">
+                <h2>Nenhuma graduação encontrada</h2>
+
+                <p>
+                  {hasFilters
+                    ? 'Nenhuma graduação corresponde aos filtros informados.'
+                    : 'Ainda não existem graduações cadastradas para esta modalidade.'}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="graduations-list" data-testid="graduations-list">
+                  {graduations.map((graduation) => (
+                    <article
+                      key={graduation.id}
+                      className="graduation-card"
+                      data-testid={`graduation-card-${graduation.id}`}
+                    >
+                      <div className="graduation-card-main">
+                        <div
+                          className="graduation-order"
+                          data-testid={`graduation-order-${graduation.id}`}
+                        >
+                          <span>Ordem</span>
+
+                          <strong>{graduation.order}</strong>
+                        </div>
+
+                        <div
+                          className="graduation-color"
+                          data-testid={`graduation-color-${graduation.id}`}
+                          style={{
+                            backgroundColor: graduation.color ?? '#27272a',
+
+                            color: graduation.textColor ?? '#fafafa',
+                          }}
+                        >
+                          {!graduation.color
+                            ? getGraduationInitial(graduation.name)
+                            : graduation.order}
+                        </div>
+
+                        <div className="graduation-info">
+                          <div className="graduation-name-row">
+                            <h2>{graduation.name}</h2>
+
+                            <span
+                              className={
+                                graduation.active
+                                  ? 'graduation-status graduation-status-active'
+                                  : 'graduation-status graduation-status-inactive'
+                              }
+                              data-testid={`graduation-status-${graduation.id}`}
+                            >
+                              {graduation.active ? 'Ativa' : 'Inativa'}
+                            </span>
+                          </div>
+
+                          <p className="graduation-description">
+                            {graduation.description ?? 'Descrição não informada.'}
+                          </p>
+
+                          <div className="graduation-meta">
+                            {graduation.color ? (
+                              <span>
+                                Cor: <strong>{graduation.color}</strong>
+                              </span>
+                            ) : (
+                              <span>Cor não informada</span>
+                            )}
+
+                            {graduation.textColor ? (
+                              <span>
+                                Texto: <strong>{graduation.textColor}</strong>
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <div className="graduations-pagination" data-testid="graduations-pagination">
+                  <button
+                    type="button"
+                    className="graduations-button graduations-button-secondary"
+                    disabled={!hasPreviousPage}
+                    data-testid="graduations-pagination-previous"
+                    onClick={handlePreviousPage}
+                  >
+                    Anterior
+                  </button>
+
+                  <span
+                    className="graduations-pagination-info"
+                    data-testid="graduations-pagination-info"
+                  >
+                    Página <strong>{pagination.page}</strong> de{' '}
+                    <strong>{pagination.totalPages}</strong>
+                  </span>
+
+                  <button
+                    type="button"
+                    className="graduations-button graduations-button-secondary"
+                    disabled={!hasNextPage}
+                    data-testid="graduations-pagination-next"
+                    onClick={handleNextPage}
+                  >
+                    Próxima
+                  </button>
+                </div>
+              </>
+            )}
+          </>
+        )}
+      </section>
+
+      {isAddModalOpen && activeGym && selectedModality && canManageGraduations ? (
+        <AddGraduationModal
+          gymId={activeGym.id}
+          modalityId={selectedModality.id}
+          modalityName={selectedModality.name}
+          onClose={() => {
+            setIsAddModalOpen(false)
+          }}
+          onCreated={handleGraduationCreated}
+        />
+      ) : null}
+    </>
   )
 }
