@@ -1182,3 +1182,177 @@
     padding: 12px 16px 16px;
   }
 }
+
+/* =========================================================
+   GRADUATION CARD ACTIONS
+   ========================================================= */
+
+.graduation-card-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.graduation-card-actions .graduations-button {
+  width: 100%;
+}
+
+/* =========================================================
+   GRADUATION DETAILS
+   ========================================================= */
+
+.graduation-detail-summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.graduation-detail-summary > div:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.graduation-detail-summary strong {
+  color: #fafafa;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.graduation-detail-belt {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  box-sizing: border-box;
+  border: 1px solid #52525b;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.graduation-detail-description {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #09090b;
+}
+
+.graduation-detail-description > span {
+  color: #71717a;
+  font-size: 0.75rem;
+}
+
+.graduation-detail-description p {
+  margin: 0;
+  color: #d4d4d8;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.graduation-detail-metadata {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #09090b;
+}
+
+.graduation-detail-metadata > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.graduation-detail-metadata span {
+  color: #71717a;
+  font-size: 0.75rem;
+}
+
+.graduation-detail-metadata strong {
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.graduation-modal-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 24px;
+  color: #a1a1aa;
+  text-align: center;
+}
+
+.graduation-modal-state-error {
+  color: #fca5a5;
+}
+
+@media (min-width: 701px) {
+  .graduation-card-main {
+    grid-template-columns:
+      auto
+      auto
+      minmax(0, 1fr)
+      auto;
+  }
+
+  .graduation-card-actions {
+    grid-column: auto;
+    width: auto;
+    margin-top: 0;
+  }
+
+  .graduation-card-actions .graduations-button {
+    width: auto;
+  }
+
+  .graduation-detail-metadata {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .graduation-card-actions {
+    grid-column: 1 / -1;
+  }
+
+  .graduation-detail-metadata {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .graduation-detail-summary,
+  .graduation-detail-description,
+  .graduation-detail-metadata {
+    padding: 12px;
+  }
+
+  .graduation-detail-belt {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+  }
+}

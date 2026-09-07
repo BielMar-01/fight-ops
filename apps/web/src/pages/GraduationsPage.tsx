@@ -1,6 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
 
 import { AddGraduationModal } from '../components/graduations/AddGraduationModal'
+import { ManageGraduationModal } from '../components/graduations/ManageGraduationModal'
 
 import { useGym } from '../contexts/GymContext'
 
@@ -83,6 +84,8 @@ export function GraduationsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
+  const [selectedGraduationId, setSelectedGraduationId] = useState<string | null>(null)
 
   const canViewGraduations =
     activeGym?.role === 'OWNER' ||
@@ -181,9 +184,7 @@ export function GraduationsPage() {
 
       setSummary({
         total: activeTotal + inactiveTotal,
-
         active: activeTotal,
-
         inactive: inactiveTotal,
       })
     } catch {
@@ -225,11 +226,8 @@ export function GraduationsPage() {
 
       const response = await listGraduations(activeGym.id, selectedModalityId, {
         page,
-
         limit: PAGE_LIMIT,
-
         search: appliedSearch || undefined,
-
         active,
       })
 
@@ -279,6 +277,8 @@ export function GraduationsPage() {
     setError(null)
 
     setIsAddModalOpen(false)
+
+    setSelectedGraduationId(null)
   }, [activeGym?.id])
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
@@ -319,6 +319,8 @@ export function GraduationsPage() {
     setError(null)
 
     setIsAddModalOpen(false)
+
+    setSelectedGraduationId(null)
   }
 
   function handlePreviousPage() {
@@ -345,6 +347,10 @@ export function GraduationsPage() {
     }
 
     await loadSummary()
+  }
+
+  async function handleGraduationUpdated() {
+    await Promise.all([loadGraduations(), loadSummary()])
   }
 
   const hasFilters = appliedSearch.length > 0 || statusFilter !== 'all'
@@ -633,7 +639,6 @@ export function GraduationsPage() {
                           data-testid={`graduation-color-${graduation.id}`}
                           style={{
                             backgroundColor: graduation.color ?? '#27272a',
-
                             color: graduation.textColor ?? '#fafafa',
                           }}
                         >
@@ -677,6 +682,19 @@ export function GraduationsPage() {
                               </span>
                             ) : null}
                           </div>
+                        </div>
+
+                        <div className="graduation-card-actions">
+                          <button
+                            type="button"
+                            className="graduations-button graduations-button-secondary"
+                            data-testid={`graduation-view-button-${graduation.id}`}
+                            onClick={() => {
+                              setSelectedGraduationId(graduation.id)
+                            }}
+                          >
+                            Ver detalhes
+                          </button>
                         </div>
                       </div>
                     </article>
@@ -727,6 +745,20 @@ export function GraduationsPage() {
             setIsAddModalOpen(false)
           }}
           onCreated={handleGraduationCreated}
+        />
+      ) : null}
+
+      {selectedGraduationId && activeGym && selectedModality && canViewGraduations ? (
+        <ManageGraduationModal
+          gymId={activeGym.id}
+          modalityId={selectedModality.id}
+          modalityName={selectedModality.name}
+          graduationId={selectedGraduationId}
+          canEdit={canManageGraduations}
+          onClose={() => {
+            setSelectedGraduationId(null)
+          }}
+          onUpdated={handleGraduationUpdated}
         />
       ) : null}
     </>
