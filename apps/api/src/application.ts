@@ -21,6 +21,10 @@ import {
 } from './modules/auth/auth.routes.js'
 
 import {
+  graduationRoutes,
+} from './modules/graduations/graduations.routes.js'
+
+import {
   gymRoutes,
 } from './modules/gyms/gyms.routes.js'
 
@@ -145,6 +149,10 @@ export function configureApp(
 
   app.register(
     modalityRoutes,
+  )
+
+  app.register(
+    graduationRoutes,
   )
 
   app.register(
