@@ -388,22 +388,28 @@ export function AppLayout() {
   </span>
 </NavLink>
 
-              <div
-                className="app-nav-link disabled"
-                data-testid="nav-graduations-disabled"
-              >
-                <span className="app-nav-icon">
-                  ◆
-                </span>
+              <NavLink
+  to="/graduations"
+  className={({
+    isActive,
+  }) =>
+    isActive
+      ? 'app-nav-link active'
+      : 'app-nav-link'
+  }
+  onClick={
+    closeSidebar
+  }
+  data-testid="nav-graduations-link"
+>
+  <span className="app-nav-icon">
+    ◆
+  </span>
 
-                <span>
-                  Graduações
-                </span>
-
-                <small>
-                  Em breve
-                </small>
-              </div>
+  <span>
+    Graduações
+  </span>
+</NavLink>
 
               <span className="app-navigation-group-title">
                 Academia

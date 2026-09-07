@@ -48,6 +48,10 @@ import {
 } from '../pages/ForgotPasswordPage'
 
 import {
+  GraduationsPage,
+} from '../pages/GraduationsPage'
+
+import {
   HomePage,
 } from '../pages/HomePage'
 
@@ -215,6 +219,13 @@ export function AppRoutes() {
             path="/modalities"
             element={
               <ModalitiesPage />
+            }
+          />
+
+          <Route
+            path="/graduations"
+            element={
+              <GraduationsPage />
             }
           />
 
