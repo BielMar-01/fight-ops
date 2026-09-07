@@ -101,6 +101,7 @@ model Gym {
   auditLogs   AuditLog[]
   professors  Professor[]
   modalities  Modality[]
+  graduations Graduation[]
 
   @@index([active])
   @@index([createdAt])
@@ -308,11 +309,38 @@ model Modality {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  gym Gym @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  gym         Gym          @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  graduations Graduation[]
 
   @@unique([gymId, name], map: "uk_modalities_gym_name")
   @@index([gymId])
   @@index([gymId, active])
   @@index([gymId, name])
   @@map("modalities")
+}
+
+model Graduation {
+  id          String   @id @default(uuid()) @db.Uuid
+  gymId       String   @map("gym_id") @db.Uuid
+  modalityId  String   @map("modality_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  color       String?  @db.VarChar(7)
+  textColor   String?  @map("text_color") @db.VarChar(7)
+  order       Int
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  gym      Gym      @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  modality Modality @relation(fields: [modalityId], references: [id], onDelete: Restrict)
+
+  @@unique([gymId, modalityId, name], map: "uk_graduations_gym_modality_name")
+  @@unique([gymId, modalityId, order], map: "uk_graduations_gym_modality_order")
+  @@index([gymId])
+  @@index([modalityId])
+  @@index([gymId, modalityId])
+  @@index([gymId, modalityId, active])
+  @@index([gymId, modalityId, order])
+  @@map("graduations")
 }
