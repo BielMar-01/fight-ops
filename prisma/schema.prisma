@@ -20,6 +20,18 @@ enum GymRole {
   STUDENT
 }
 
+enum ClassGroupLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  MIXED
+}
+
+enum ClassGroupProfessorRole {
+  PRIMARY
+  ASSISTANT
+}
+
 model User {
   id              String     @id @default(uuid()) @db.Uuid
   name            String     @db.VarChar(150)
@@ -96,13 +108,15 @@ model Gym {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  memberships         GymMembership[]
-  students            Student[]
-  auditLogs           AuditLog[]
-  professors          Professor[]
-  modalities          Modality[]
-  graduations         Graduation[]
-  professorModalities ProfessorModality[]
+  memberships          GymMembership[]
+  students             Student[]
+  auditLogs            AuditLog[]
+  professors           Professor[]
+  modalities           Modality[]
+  graduations          Graduation[]
+  professorModalities  ProfessorModality[]
+  classGroups          ClassGroup[]
+  classGroupProfessors ClassGroupProfessor[]
 
   @@index([active])
   @@index([createdAt])
@@ -294,7 +308,8 @@ model Professor {
   gym  Gym   @relation(fields: [gymId], references: [id], onDelete: Cascade)
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  modalities ProfessorModality[]
+  modalities  ProfessorModality[]
+  classGroups ClassGroupProfessor[]
 
   @@index([gymId])
   @@index([gymId, active])
@@ -315,6 +330,7 @@ model Modality {
   gym         Gym                 @relation(fields: [gymId], references: [id], onDelete: Restrict)
   graduations Graduation[]
   professors  ProfessorModality[]
+  classGroups ClassGroup[]
 
   @@unique([gymId, name], map: "uk_modalities_gym_name")
   @@index([gymId])
@@ -367,4 +383,57 @@ model ProfessorModality {
   @@index([gymId, professorId])
   @@index([gymId, modalityId])
   @@map("professor_modalities")
+}
+
+model ClassGroup {
+  id              String          @id @default(uuid()) @db.Uuid
+  gymId           String          @map("gym_id") @db.Uuid
+  modalityId      String          @map("modality_id") @db.Uuid
+  name            String          @db.VarChar(150)
+  description     String?         @db.Text
+  level           ClassGroupLevel @default(MIXED)
+  minimumAge      Int?            @map("minimum_age")
+  maximumAge      Int?            @map("maximum_age")
+  maxStudents     Int?            @map("max_students")
+  durationMinutes Int             @default(60) @map("duration_minutes")
+  active          Boolean         @default(true)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  gym        Gym                   @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  modality   Modality              @relation(fields: [modalityId], references: [id], onDelete: Restrict)
+  professors ClassGroupProfessor[]
+
+  @@unique([gymId, name], map: "uk_class_groups_gym_name")
+  @@index([gymId])
+  @@index([modalityId])
+  @@index([gymId, active])
+  @@index([gymId, modalityId])
+  @@index([gymId, modalityId, active])
+  @@index([gymId, level])
+  @@index([gymId, name])
+  @@map("class_groups")
+}
+
+model ClassGroupProfessor {
+  id           String                  @id @default(uuid()) @db.Uuid
+  gymId        String                  @map("gym_id") @db.Uuid
+  classGroupId String                  @map("class_group_id") @db.Uuid
+  professorId  String                  @map("professor_id") @db.Uuid
+  role         ClassGroupProfessorRole
+  createdAt    DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  gym        Gym        @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  professor  Professor  @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@unique([classGroupId, professorId], map: "uk_class_group_professors_group_professor")
+  @@index([gymId])
+  @@index([classGroupId])
+  @@index([professorId])
+  @@index([gymId, classGroupId])
+  @@index([gymId, professorId])
+  @@index([classGroupId, role])
+  @@map("class_group_professors")
 }
