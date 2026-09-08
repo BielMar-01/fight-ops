@@ -1301,3 +1301,67 @@
     width: 100%;
   }
 }
+
+.professor-modalities-section,
+.professor-modalities-list,
+.professor-modality-item,
+.professor-modality-card,
+.professor-modality-info {
+  min-width: 0;
+}
+
+.professor-modalities-section {
+  overflow: hidden;
+}
+
+.professor-modality-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.professor-modality-info strong,
+.professor-modality-info span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .professor-modalities-header {
+    align-items: flex-start;
+  }
+
+  .professor-modalities-add {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .professor-modality-card {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr);
+    gap: 10px 12px;
+  }
+
+  .professor-modality-color {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .professor-modality-info {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .professor-modality-status {
+    grid-column: 2;
+    grid-row: 2;
+    width: fit-content;
+    margin-left: 0;
+  }
+
+  .professor-modality-remove-button {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    margin-left: 0;
+  }
+}
