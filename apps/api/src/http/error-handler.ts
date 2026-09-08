@@ -1,5 +1,7 @@
 import type { FastifyError, FastifyInstance } from 'fastify'
 
+import { ZodError } from 'zod'
+
 import { AppError } from './app-error.js'
 
 function isFastifyError(error: unknown): error is FastifyError {
@@ -26,6 +28,23 @@ export function registerErrorHandlers(app: FastifyInstance) {
   })
 
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof ZodError) {
+      request.log.warn(
+        {
+          issues: error.issues,
+          requestId: request.id,
+        },
+        'Request validation failed',
+      )
+
+      return reply.status(400).send({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Dados da requisição inválidos.',
+        },
+      })
+    }
+
     if (error instanceof AppError) {
       request.log.warn(
         {

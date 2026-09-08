@@ -16,6 +16,8 @@ import { gymRoutes } from './modules/gyms/gyms.routes.js'
 
 import { modalityRoutes } from './modules/modalities/modalities.routes.js'
 
+import { professorModalityRoutes } from './modules/professor-modalities/professor-modalities.routes.js'
+
 import { professorRoutes } from './modules/professors/professors.routes.js'
 
 import { publicSiteRoutes } from './modules/public-site/public-site.routes.js'
@@ -78,6 +80,8 @@ export function configureApp(app: FastifyInstance) {
   app.register(studentRoutes)
 
   app.register(professorRoutes)
+
+  app.register(professorModalityRoutes)
 
   app.register(modalityRoutes)
 
