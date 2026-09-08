@@ -1302,6 +1302,10 @@
   }
 }
 
+.professor-modal-form > * {
+  flex-shrink: 0;
+}
+
 .professor-modalities-section,
 .professor-modalities-list,
 .professor-modality-item,
@@ -1311,7 +1315,13 @@
 }
 
 .professor-modalities-section {
-  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.professor-modalities-list {
+  width: 100%;
 }
 
 .professor-modality-card {
@@ -1323,27 +1333,109 @@
 .professor-modality-info span {
   max-width: 100%;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @media (max-width: 767px) {
+  .professor-modal {
+    display: block;
+    max-height: 95vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .professor-modal-form {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: max-content;
+    overflow: visible;
+  }
+
+  .professor-modalities-section {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    padding: 14px;
+    overflow: visible;
+  }
+
   .professor-modalities-header {
+    display: flex;
     align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .professor-modalities-header > div {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .professor-modalities-header h3 {
+    overflow-wrap: anywhere;
+  }
+
+  .professor-modalities-count {
+    flex: 0 0 auto;
   }
 
   .professor-modalities-add {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
     width: 100%;
+    height: auto;
     box-sizing: border-box;
+  }
+
+  .professor-modalities-select-field {
+    width: 100%;
+  }
+
+  .professor-modalities-select-field select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .professor-modalities-add .professors-button {
+    width: 100%;
+  }
+
+  .professor-modalities-list {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+  }
+
+  .professor-modality-item {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
   }
 
   .professor-modality-card {
     display: grid;
     grid-template-columns: 10px minmax(0, 1fr);
     gap: 10px 12px;
+    width: 100%;
+    height: auto;
+    padding: 12px;
   }
 
   .professor-modality-color {
     grid-column: 1;
     grid-row: 1;
+    width: 10px;
+    height: 38px;
   }
 
   .professor-modality-info {
@@ -1363,5 +1455,27 @@
     grid-row: 3;
     width: 100%;
     margin-left: 0;
+  }
+
+  .professor-modality-removal-confirmation {
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+  }
+
+  .professor-modality-removal-actions {
+    width: 100%;
+  }
+
+  .professor-modality-removal-actions .professors-button {
+    width: 100%;
+  }
+
+  .professor-detail-metadata {
+    flex: 0 0 auto;
+  }
+
+  .professor-modal-actions {
+    flex-shrink: 0;
   }
 }
