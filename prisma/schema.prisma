@@ -96,12 +96,13 @@ model Gym {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  memberships GymMembership[]
-  students    Student[]
-  auditLogs   AuditLog[]
-  professors  Professor[]
-  modalities  Modality[]
-  graduations Graduation[]
+  memberships         GymMembership[]
+  students            Student[]
+  auditLogs           AuditLog[]
+  professors          Professor[]
+  modalities          Modality[]
+  graduations         Graduation[]
+  professorModalities ProfessorModality[]
 
   @@index([active])
   @@index([createdAt])
@@ -293,6 +294,8 @@ model Professor {
   gym  Gym   @relation(fields: [gymId], references: [id], onDelete: Cascade)
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  modalities ProfessorModality[]
+
   @@index([gymId])
   @@index([gymId, active])
   @@index([gymId, name])
@@ -309,8 +312,9 @@ model Modality {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  gym         Gym          @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  gym         Gym                 @relation(fields: [gymId], references: [id], onDelete: Restrict)
   graduations Graduation[]
+  professors  ProfessorModality[]
 
   @@unique([gymId, name], map: "uk_modalities_gym_name")
   @@index([gymId])
@@ -343,4 +347,24 @@ model Graduation {
   @@index([gymId, modalityId, active])
   @@index([gymId, modalityId, order])
   @@map("graduations")
+}
+
+model ProfessorModality {
+  id          String   @id @default(uuid()) @db.Uuid
+  gymId       String   @map("gym_id") @db.Uuid
+  professorId String   @map("professor_id") @db.Uuid
+  modalityId  String   @map("modality_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  gym       Gym       @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  professor Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+  modality  Modality  @relation(fields: [modalityId], references: [id], onDelete: Cascade)
+
+  @@unique([professorId, modalityId], map: "uk_professor_modalities_professor_modality")
+  @@index([gymId])
+  @@index([professorId])
+  @@index([modalityId])
+  @@index([gymId, professorId])
+  @@index([gymId, modalityId])
+  @@map("professor_modalities")
 }
