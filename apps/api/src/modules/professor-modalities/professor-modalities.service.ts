@@ -118,7 +118,7 @@ export async function createProfessorModality(
     )
   }
 
-  return prisma.professorModality.create({
+  const professorModality = await prisma.professorModality.create({
     data: {
       gymId,
       professorId,
@@ -127,6 +127,8 @@ export async function createProfessorModality(
 
     select: professorModalitySelect,
   })
+
+  return professorModality
 }
 
 export async function deleteProfessorModality(
@@ -145,9 +147,7 @@ export async function deleteProfessorModality(
       modalityId,
     },
 
-    select: {
-      id: true,
-    },
+    select: professorModalitySelect,
   })
 
   if (!professorModality) {
@@ -163,4 +163,6 @@ export async function deleteProfessorModality(
       id: professorModality.id,
     },
   })
+
+  return professorModality
 }
