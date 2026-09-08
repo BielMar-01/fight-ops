@@ -27,7 +27,7 @@ export function registerSwagger(app: FastifyInstance) {
         {
           name: 'Auth',
 
-          description: 'Autenticação e gerenciamento de sessão.',
+          description: 'Autenticação, recuperação de senha e gerenciamento de sessões.',
         },
 
         {
@@ -39,13 +39,49 @@ export function registerSwagger(app: FastifyInstance) {
         {
           name: 'Gyms',
 
-          description: 'Gestão de academias e membros.',
+          description: 'Cadastro, consulta e administração de academias.',
+        },
+
+        {
+          name: 'Gym Members',
+
+          description: 'Gestão dos usuários, perfis e permissões vinculados às academias.',
         },
 
         {
           name: 'Students',
 
-          description: 'Gestão de alunos das academias.',
+          description: 'Cadastro e gestão de alunos das academias.',
+        },
+
+        {
+          name: 'Professors',
+
+          description: 'Cadastro e gestão de professores das academias.',
+        },
+
+        {
+          name: 'Professor Modalities',
+
+          description: 'Gestão das modalidades ministradas por cada professor.',
+        },
+
+        {
+          name: 'Modalities',
+
+          description: 'Cadastro e gestão das modalidades oferecidas pelas academias.',
+        },
+
+        {
+          name: 'Graduations',
+
+          description: 'Gestão das graduações e faixas de cada modalidade.',
+        },
+
+        {
+          name: 'Audit',
+
+          description: 'Consulta dos registros de auditoria das academias.',
         },
       ],
 
@@ -57,6 +93,8 @@ export function registerSwagger(app: FastifyInstance) {
             scheme: 'bearer',
 
             bearerFormat: 'JWT',
+
+            description: 'Access token JWT retornado pelo endpoint de login.',
           },
         },
       },
@@ -70,6 +108,12 @@ export function registerSwagger(app: FastifyInstance) {
       docExpansion: 'list',
 
       deepLinking: true,
+
+      filter: true,
+
+      displayRequestDuration: true,
+
+      tryItOutEnabled: true,
     },
 
     staticCSP: true,
