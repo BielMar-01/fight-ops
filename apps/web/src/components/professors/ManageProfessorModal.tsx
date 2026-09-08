@@ -522,6 +522,7 @@ export function ManageProfessorModal({
             <ProfessorModalitiesSection
               gymId={gymId}
               professorId={professorId}
+              canEdit={canEdit}
             />
 
             <div className="professor-detail-metadata">

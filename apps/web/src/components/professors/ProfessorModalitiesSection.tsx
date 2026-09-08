@@ -1,27 +1,56 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ApiError } from '../../services/api'
 
-import { listProfessorModalities } from '../../services/professor-modality.service'
+import { getModalities } from '../../services/modality.service'
+
+import {
+  createProfessorModality,
+  listProfessorModalities,
+} from '../../services/professor-modality.service'
+
+import type { Modality } from '../../types/modality'
 
 import type { ProfessorModality } from '../../types/professor-modality'
 
 interface ProfessorModalitiesSectionProps {
   gymId: string
   professorId: string
+  canEdit: boolean
 }
 
 export function ProfessorModalitiesSection({
   gymId,
   professorId,
+  canEdit,
 }: ProfessorModalitiesSectionProps) {
   const [professorModalities, setProfessorModalities] = useState<
     ProfessorModality[]
   >([])
 
+  const [activeModalities, setActiveModalities] = useState<Modality[]>([])
+
+  const [selectedModalityId, setSelectedModalityId] = useState('')
+
   const [isLoading, setIsLoading] = useState(true)
 
+  const [isAdding, setIsAdding] = useState(false)
+
   const [error, setError] = useState<string | null>(null)
+
+  const [actionError, setActionError] = useState<string | null>(null)
+
+  const availableModalities = useMemo(() => {
+    const linkedModalityIds = new Set(
+      professorModalities.map(
+        (professorModality) => professorModality.modalityId,
+      ),
+    )
+
+    return activeModalities.filter(
+      (modality) => !linkedModalityIds.has(modality.id),
+    )
+  }, [activeModalities, professorModalities])
 
   const loadProfessorModalities = useCallback(async () => {
     try {
@@ -29,11 +58,44 @@ export function ProfessorModalitiesSection({
 
       setError(null)
 
-      const response = await listProfessorModalities(gymId, professorId)
+      const requests = [
+        listProfessorModalities(gymId, professorId),
+      ] as const
 
-      setProfessorModalities(response.professorModalities)
+      if (canEdit) {
+        const [professorModalitiesResponse, modalitiesResponse] =
+          await Promise.all([
+            requests[0],
+
+            getModalities(gymId, {
+              page: 1,
+
+              limit: 100,
+
+              active: true,
+            }),
+          ])
+
+        setProfessorModalities(
+          professorModalitiesResponse.professorModalities,
+        )
+
+        setActiveModalities(modalitiesResponse.modalities)
+
+        return
+      }
+
+      const professorModalitiesResponse = await requests[0]
+
+      setProfessorModalities(
+        professorModalitiesResponse.professorModalities,
+      )
+
+      setActiveModalities([])
     } catch (caughtError) {
       setProfessorModalities([])
+
+      setActiveModalities([])
 
       if (caughtError instanceof ApiError) {
         setError(caughtError.message)
@@ -45,11 +107,72 @@ export function ProfessorModalitiesSection({
     } finally {
       setIsLoading(false)
     }
-  }, [gymId, professorId])
+  }, [gymId, professorId, canEdit])
 
   useEffect(() => {
+    setSelectedModalityId('')
+
+    setActionError(null)
+
     void loadProfessorModalities()
   }, [loadProfessorModalities])
+
+  useEffect(() => {
+    if (
+      selectedModalityId &&
+      !availableModalities.some(
+        (modality) => modality.id === selectedModalityId,
+      )
+    ) {
+      setSelectedModalityId('')
+    }
+  }, [availableModalities, selectedModalityId])
+
+  async function handleAddModality() {
+    if (
+      !canEdit ||
+      !selectedModalityId ||
+      isAdding
+    ) {
+      return
+    }
+
+    setIsAdding(true)
+
+    setActionError(null)
+
+    try {
+      const response = await createProfessorModality(
+        gymId,
+        professorId,
+        {
+          modalityId: selectedModalityId,
+        },
+      )
+
+      setProfessorModalities((currentProfessorModalities) =>
+        [...currentProfessorModalities, response.professorModality].sort(
+          (firstProfessorModality, secondProfessorModality) =>
+            firstProfessorModality.modality.name.localeCompare(
+              secondProfessorModality.modality.name,
+              'pt-BR',
+            ),
+        ),
+      )
+
+      setSelectedModalityId('')
+    } catch (caughtError) {
+      if (caughtError instanceof ApiError) {
+        setActionError(caughtError.message)
+
+        return
+      }
+
+      setActionError('Não foi possível vincular a modalidade.')
+    } finally {
+      setIsAdding(false)
+    }
+  }
 
   return (
     <section
@@ -61,7 +184,9 @@ export function ProfessorModalitiesSection({
         <div>
           <span className="professors-eyebrow">Atuação</span>
 
-          <h3 id="professor-modalities-title">Modalidades ministradas</h3>
+          <h3 id="professor-modalities-title">
+            Modalidades ministradas
+          </h3>
 
           <p>
             Modalidades atualmente vinculadas a este professor.
@@ -72,6 +197,7 @@ export function ProfessorModalitiesSection({
           <span
             className="professor-modalities-count"
             data-testid="professor-modalities-count"
+            aria-label={`${professorModalities.length} modalidades vinculadas`}
           >
             {professorModalities.length}
           </span>
@@ -108,59 +234,133 @@ export function ProfessorModalitiesSection({
             Tentar novamente
           </button>
         </div>
-      ) : professorModalities.length === 0 ? (
-        <div
-          className="professor-modalities-empty"
-          data-testid="professor-modalities-empty"
-        >
-          <strong>Nenhuma modalidade vinculada</strong>
-
-          <span>
-            Este professor ainda não possui modalidades cadastradas.
-          </span>
-        </div>
       ) : (
-        <div
-          className="professor-modalities-list"
-          data-testid="professor-modalities-list"
-        >
-          {professorModalities.map((professorModality) => (
-            <article
-              key={professorModality.id}
-              className="professor-modality-card"
-              data-testid={`professor-modality-${professorModality.modalityId}`}
+        <>
+          {canEdit ? (
+            <div
+              className="professor-modalities-add"
+              data-testid="professor-modalities-add"
             >
-              <span
-                className="professor-modality-color"
-                style={{
-                  backgroundColor:
-                    professorModality.modality.color ?? '#71717a',
-                }}
-                aria-hidden="true"
-              />
-
-              <div className="professor-modality-info">
-                <strong>{professorModality.modality.name}</strong>
-
-                {professorModality.modality.description ? (
-                  <span>{professorModality.modality.description}</span>
-                ) : (
-                  <span>Sem descrição cadastrada.</span>
-                )}
-              </div>
-
-              <span
-                className={
-                  professorModality.modality.active
-                    ? 'professor-modality-status professor-modality-status-active'
-                    : 'professor-modality-status professor-modality-status-inactive'
-                }
+              <label
+                className="professor-modalities-select-field"
+                htmlFor="professor-modality-select"
               >
-                {professorModality.modality.active ? 'Ativa' : 'Inativa'}
+                <span>Adicionar modalidade</span>
+
+                <select
+                  id="professor-modality-select"
+                  value={selectedModalityId}
+                  disabled={
+                    isAdding || availableModalities.length === 0
+                  }
+                  data-testid="professor-modality-select"
+                  onChange={(event) => {
+                    setSelectedModalityId(event.target.value)
+
+                    setActionError(null)
+                  }}
+                >
+                  <option value="">
+                    {availableModalities.length === 0
+                      ? 'Nenhuma modalidade disponível'
+                      : 'Selecione uma modalidade'}
+                  </option>
+
+                  {availableModalities.map((modality) => (
+                    <option key={modality.id} value={modality.id}>
+                      {modality.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <button
+                type="button"
+                className="professors-button professors-button-primary"
+                disabled={!selectedModalityId || isAdding}
+                data-testid="professor-modality-add-button"
+                onClick={() => {
+                  void handleAddModality()
+                }}
+              >
+                {isAdding ? 'Adicionando...' : 'Adicionar'}
+              </button>
+            </div>
+          ) : null}
+
+          {actionError ? (
+            <div
+              className="professor-modalities-action-error"
+              role="alert"
+              data-testid="professor-modalities-action-error"
+            >
+              {actionError}
+            </div>
+          ) : null}
+
+          {professorModalities.length === 0 ? (
+            <div
+              className="professor-modalities-empty"
+              data-testid="professor-modalities-empty"
+            >
+              <strong>Nenhuma modalidade vinculada</strong>
+
+              <span>
+                {canEdit
+                  ? 'Selecione uma modalidade acima para criar o primeiro vínculo.'
+                  : 'Este professor ainda não possui modalidades cadastradas.'}
               </span>
-            </article>
-          ))}
-        </div>
+            </div>
+          ) : (
+            <div
+              className="professor-modalities-list"
+              data-testid="professor-modalities-list"
+            >
+              {professorModalities.map((professorModality) => (
+                <article
+                  key={professorModality.id}
+                  className="professor-modality-card"
+                  data-testid={`professor-modality-${professorModality.modalityId}`}
+                >
+                  <span
+                    className="professor-modality-color"
+                    style={{
+                      backgroundColor:
+                        professorModality.modality.color ?? '#71717a',
+                    }}
+                    aria-hidden="true"
+                  />
+
+                  <div className="professor-modality-info">
+                    <strong>
+                      {professorModality.modality.name}
+                    </strong>
+
+                    {professorModality.modality.description ? (
+                      <span>
+                        {professorModality.modality.description}
+                      </span>
+                    ) : (
+                      <span>Sem descrição cadastrada.</span>
+                    )}
+                  </div>
+
+                  <span
+                    className={
+                      professorModality.modality.active
+                        ? 'professor-modality-status professor-modality-status-active'
+                        : 'professor-modality-status professor-modality-status-inactive'
+                    }
+                  >
+                    {professorModality.modality.active
+                      ? 'Ativa'
+                      : 'Inativa'}
+                  </span>
+                </article>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </section>
   )
