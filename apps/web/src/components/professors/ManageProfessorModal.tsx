@@ -10,6 +10,8 @@ import {
 
 import type { Professor, UpdateProfessorInput } from '../../types/professor'
 
+import { ProfessorModalitiesSection } from './ProfessorModalitiesSection'
+
 interface ManageProfessorModalProps {
   gymId: string
   professorId: string
@@ -167,7 +169,14 @@ export function ManageProfessorModal({
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isSubmitting, isChangingStatus, isConfirmingStatus, mode, professor, onClose])
+  }, [
+    isSubmitting,
+    isChangingStatus,
+    isConfirmingStatus,
+    mode,
+    professor,
+    onClose,
+  ])
 
   const hasChanges = useMemo(() => {
     if (!professor) {
@@ -318,7 +327,11 @@ export function ManageProfessorModal({
       role="presentation"
       data-testid="professor-manage-modal-backdrop"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !isSubmitting && !isChangingStatus) {
+        if (
+          event.target === event.currentTarget &&
+          !isSubmitting &&
+          !isChangingStatus
+        ) {
           onClose()
         }
       }}
@@ -358,7 +371,10 @@ export function ManageProfessorModal({
         </header>
 
         {isLoading ? (
-          <div className="professor-modal-state" data-testid="professor-manage-loading">
+          <div
+            className="professor-modal-state"
+            data-testid="professor-manage-loading"
+          >
             Carregando dados do professor...
           </div>
         ) : !professor ? (
@@ -503,6 +519,11 @@ export function ManageProfessorModal({
               </label>
             </div>
 
+            <ProfessorModalitiesSection
+              gymId={gymId}
+              professorId={professorId}
+            />
+
             <div className="professor-detail-metadata">
               <div>
                 <span>ID do professor</span>
@@ -513,13 +534,17 @@ export function ManageProfessorModal({
               <div>
                 <span>Criado em</span>
 
-                <strong>{new Date(professor.createdAt).toLocaleString('pt-BR')}</strong>
+                <strong>
+                  {new Date(professor.createdAt).toLocaleString('pt-BR')}
+                </strong>
               </div>
 
               <div>
                 <span>Última atualização</span>
 
-                <strong>{new Date(professor.updatedAt).toLocaleString('pt-BR')}</strong>
+                <strong>
+                  {new Date(professor.updatedAt).toLocaleString('pt-BR')}
+                </strong>
               </div>
             </div>
 
@@ -529,7 +554,11 @@ export function ManageProfessorModal({
                 data-testid="professor-status-confirmation"
               >
                 <div>
-                  <strong>{professor.active ? 'Inativar professor?' : 'Ativar professor?'}</strong>
+                  <strong>
+                    {professor.active
+                      ? 'Inativar professor?'
+                      : 'Ativar professor?'}
+                  </strong>
 
                   <p>
                     {professor.active
@@ -635,7 +664,9 @@ export function ManageProfessorModal({
                           setIsConfirmingStatus(true)
                         }}
                       >
-                        {professor.active ? 'Inativar professor' : 'Ativar professor'}
+                        {professor.active
+                          ? 'Inativar professor'
+                          : 'Ativar professor'}
                       </button>
 
                       <button

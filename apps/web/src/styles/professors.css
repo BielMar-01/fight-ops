@@ -951,3 +951,182 @@
     width: 100%;
   }
 }
+
+.professor-modalities-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  background: #18181b;
+}
+
+.professor-modalities-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.professor-modalities-header h3 {
+  margin: 4px 0 5px;
+  color: #fafafa;
+  font-size: 1rem;
+}
+
+.professor-modalities-header p {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.professor-modalities-count {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #3f3f46;
+  border-radius: 999px;
+  background: #09090b;
+  color: #d4d4d8;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.professor-modalities-list {
+  display: grid;
+  gap: 10px;
+}
+
+.professor-modality-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  background: #111113;
+}
+
+.professor-modality-color {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.professor-modality-info {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.professor-modality-info strong {
+  color: #f4f4f5;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.professor-modality-info > span {
+  color: #71717a;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.professor-modality-status {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.professor-modality-status-active {
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.professor-modality-status-inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+.professor-modalities-state,
+.professor-modalities-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 16px;
+  border: 1px dashed #3f3f46;
+  border-radius: 10px;
+  color: #a1a1aa;
+  text-align: center;
+}
+
+.professor-modalities-empty strong {
+  color: #d4d4d8;
+  font-size: 0.9rem;
+}
+
+.professor-modalities-empty span,
+.professor-modalities-state > span {
+  color: #71717a;
+  font-size: 0.8rem;
+}
+
+.professor-modalities-state-error {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.professor-modalities-state-error > span {
+  color: #fca5a5;
+}
+
+.professor-modalities-state-error .professors-button {
+  margin-top: 4px;
+}
+
+.professor-modalities-loading-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #3f3f46;
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: professors-spin 0.8s linear infinite;
+}
+
+@media (max-width: 767px) {
+  .professor-modalities-section {
+    padding: 14px;
+  }
+
+  .professor-modality-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .professor-modality-color {
+    height: 38px;
+  }
+
+  .professor-modality-status {
+    margin-left: 22px;
+  }
+
+  .professor-modalities-state-error .professors-button {
+    width: 100%;
+  }
+}
