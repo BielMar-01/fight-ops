@@ -10,6 +10,8 @@ import { auditRoutes } from './modules/audit/audit.routes.js'
 
 import { authRoutes } from './modules/auth/auth.routes.js'
 
+import { classGroupRoutes } from './modules/class-groups/class-groups.routes.js'
+
 import { graduationRoutes } from './modules/graduations/graduations.routes.js'
 
 import { gymRoutes } from './modules/gyms/gyms.routes.js'
@@ -40,7 +42,11 @@ export function getFastifyOptions() {
       level: env.LOG_LEVEL,
 
       redact: {
-        paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers.set-cookie'],
+        paths: [
+          'req.headers.authorization',
+          'req.headers.cookie',
+          'res.headers.set-cookie',
+        ],
 
         censor: '[REDACTED]',
       },
@@ -86,6 +92,8 @@ export function configureApp(app: FastifyInstance) {
   app.register(modalityRoutes)
 
   app.register(graduationRoutes)
+
+  app.register(classGroupRoutes)
 
   app.register(auditRoutes)
 
