@@ -6,6 +6,7 @@ import { getModalities } from '../../services/modality.service'
 
 import {
   createProfessorModality,
+  deleteProfessorModality,
   listProfessorModalities,
 } from '../../services/professor-modality.service'
 
@@ -32,9 +33,14 @@ export function ProfessorModalitiesSection({
 
   const [selectedModalityId, setSelectedModalityId] = useState('')
 
+  const [pendingRemoval, setPendingRemoval] =
+    useState<ProfessorModality | null>(null)
+
   const [isLoading, setIsLoading] = useState(true)
 
   const [isAdding, setIsAdding] = useState(false)
+
+  const [isRemoving, setIsRemoving] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
 
@@ -58,14 +64,14 @@ export function ProfessorModalitiesSection({
 
       setError(null)
 
-      const requests = [
-        listProfessorModalities(gymId, professorId),
-      ] as const
+      setActionError(null)
+
+      setPendingRemoval(null)
 
       if (canEdit) {
         const [professorModalitiesResponse, modalitiesResponse] =
           await Promise.all([
-            requests[0],
+            listProfessorModalities(gymId, professorId),
 
             getModalities(gymId, {
               page: 1,
@@ -85,7 +91,8 @@ export function ProfessorModalitiesSection({
         return
       }
 
-      const professorModalitiesResponse = await requests[0]
+      const professorModalitiesResponse =
+        await listProfessorModalities(gymId, professorId)
 
       setProfessorModalities(
         professorModalitiesResponse.professorModalities,
@@ -112,8 +119,6 @@ export function ProfessorModalitiesSection({
   useEffect(() => {
     setSelectedModalityId('')
 
-    setActionError(null)
-
     void loadProfessorModalities()
   }, [loadProfessorModalities])
 
@@ -132,7 +137,8 @@ export function ProfessorModalitiesSection({
     if (
       !canEdit ||
       !selectedModalityId ||
-      isAdding
+      isAdding ||
+      isRemoving
     ) {
       return
     }
@@ -140,6 +146,8 @@ export function ProfessorModalitiesSection({
     setIsAdding(true)
 
     setActionError(null)
+
+    setPendingRemoval(null)
 
     try {
       const response = await createProfessorModality(
@@ -171,6 +179,70 @@ export function ProfessorModalitiesSection({
       setActionError('Não foi possível vincular a modalidade.')
     } finally {
       setIsAdding(false)
+    }
+  }
+
+  function handleStartRemoval(
+    professorModality: ProfessorModality,
+  ) {
+    if (!canEdit || isAdding || isRemoving) {
+      return
+    }
+
+    setActionError(null)
+
+    setPendingRemoval(professorModality)
+  }
+
+  function handleCancelRemoval() {
+    if (isRemoving) {
+      return
+    }
+
+    setPendingRemoval(null)
+
+    setActionError(null)
+  }
+
+  async function handleConfirmRemoval() {
+    if (
+      !canEdit ||
+      !pendingRemoval ||
+      isRemoving ||
+      isAdding
+    ) {
+      return
+    }
+
+    setIsRemoving(true)
+
+    setActionError(null)
+
+    try {
+      await deleteProfessorModality(
+        gymId,
+        professorId,
+        pendingRemoval.modalityId,
+      )
+
+      setProfessorModalities((currentProfessorModalities) =>
+        currentProfessorModalities.filter(
+          (professorModality) =>
+            professorModality.id !== pendingRemoval.id,
+        ),
+      )
+
+      setPendingRemoval(null)
+    } catch (caughtError) {
+      if (caughtError instanceof ApiError) {
+        setActionError(caughtError.message)
+
+        return
+      }
+
+      setActionError('Não foi possível remover a modalidade.')
+    } finally {
+      setIsRemoving(false)
     }
   }
 
@@ -251,13 +323,17 @@ export function ProfessorModalitiesSection({
                   id="professor-modality-select"
                   value={selectedModalityId}
                   disabled={
-                    isAdding || availableModalities.length === 0
+                    isAdding ||
+                    isRemoving ||
+                    availableModalities.length === 0
                   }
                   data-testid="professor-modality-select"
                   onChange={(event) => {
                     setSelectedModalityId(event.target.value)
 
                     setActionError(null)
+
+                    setPendingRemoval(null)
                   }}
                 >
                   <option value="">
@@ -277,7 +353,11 @@ export function ProfessorModalitiesSection({
               <button
                 type="button"
                 className="professors-button professors-button-primary"
-                disabled={!selectedModalityId || isAdding}
+                disabled={
+                  !selectedModalityId ||
+                  isAdding ||
+                  isRemoving
+                }
                 data-testid="professor-modality-add-button"
                 onClick={() => {
                   void handleAddModality()
@@ -316,48 +396,118 @@ export function ProfessorModalitiesSection({
               className="professor-modalities-list"
               data-testid="professor-modalities-list"
             >
-              {professorModalities.map((professorModality) => (
-                <article
-                  key={professorModality.id}
-                  className="professor-modality-card"
-                  data-testid={`professor-modality-${professorModality.modalityId}`}
-                >
-                  <span
-                    className="professor-modality-color"
-                    style={{
-                      backgroundColor:
-                        professorModality.modality.color ?? '#71717a',
-                    }}
-                    aria-hidden="true"
-                  />
+              {professorModalities.map((professorModality) => {
+                const isConfirmingRemoval =
+                  pendingRemoval?.id === professorModality.id
 
-                  <div className="professor-modality-info">
-                    <strong>
-                      {professorModality.modality.name}
-                    </strong>
-
-                    {professorModality.modality.description ? (
-                      <span>
-                        {professorModality.modality.description}
-                      </span>
-                    ) : (
-                      <span>Sem descrição cadastrada.</span>
-                    )}
-                  </div>
-
-                  <span
-                    className={
-                      professorModality.modality.active
-                        ? 'professor-modality-status professor-modality-status-active'
-                        : 'professor-modality-status professor-modality-status-inactive'
-                    }
+                return (
+                  <div
+                    key={professorModality.id}
+                    className="professor-modality-item"
                   >
-                    {professorModality.modality.active
-                      ? 'Ativa'
-                      : 'Inativa'}
-                  </span>
-                </article>
-              ))}
+                    <article
+                      className="professor-modality-card"
+                      data-testid={`professor-modality-${professorModality.modalityId}`}
+                    >
+                      <span
+                        className="professor-modality-color"
+                        style={{
+                          backgroundColor:
+                            professorModality.modality.color ??
+                            '#71717a',
+                        }}
+                        aria-hidden="true"
+                      />
+
+                      <div className="professor-modality-info">
+                        <strong>
+                          {professorModality.modality.name}
+                        </strong>
+
+                        {professorModality.modality.description ? (
+                          <span>
+                            {professorModality.modality.description}
+                          </span>
+                        ) : (
+                          <span>Sem descrição cadastrada.</span>
+                        )}
+                      </div>
+
+                      <span
+                        className={
+                          professorModality.modality.active
+                            ? 'professor-modality-status professor-modality-status-active'
+                            : 'professor-modality-status professor-modality-status-inactive'
+                        }
+                      >
+                        {professorModality.modality.active
+                          ? 'Ativa'
+                          : 'Inativa'}
+                      </span>
+
+                      {canEdit ? (
+                        <button
+                          type="button"
+                          className="professor-modality-remove-button"
+                          aria-label={`Remover ${professorModality.modality.name}`}
+                          disabled={isAdding || isRemoving}
+                          data-testid={`professor-modality-remove-${professorModality.modalityId}`}
+                          onClick={() => {
+                            handleStartRemoval(professorModality)
+                          }}
+                        >
+                          Remover
+                        </button>
+                      ) : null}
+                    </article>
+
+                    {isConfirmingRemoval ? (
+                      <div
+                        className="professor-modality-removal-confirmation"
+                        data-testid="professor-modality-removal-confirmation"
+                      >
+                        <div>
+                          <strong>Remover modalidade?</strong>
+
+                          <p>
+                            O vínculo com{' '}
+                            <strong>
+                              {professorModality.modality.name}
+                            </strong>{' '}
+                            será removido deste professor.
+                          </p>
+                        </div>
+
+                        <div className="professor-modality-removal-actions">
+                          <button
+                            type="button"
+                            className="professors-button professors-button-secondary"
+                            disabled={isRemoving}
+                            data-testid="professor-modality-removal-cancel"
+                            onClick={handleCancelRemoval}
+                          >
+                            Cancelar
+                          </button>
+
+                          <button
+                            type="button"
+                            className="professors-button professors-button-danger"
+                            disabled={isRemoving}
+                            data-testid="professor-modality-removal-confirm"
+                            onClick={() => {
+                              void handleConfirmRemoval()
+                            }}
+                          >
+                            {isRemoving
+                              ? 'Removendo...'
+                              : 'Confirmar remoção'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })}
             </div>
           )}
         </>
