@@ -14,6 +14,8 @@ import { classGroupProfessorRoutes } from './modules/class-groups/class-group-pr
 
 import { classGroupRoutes } from './modules/class-groups/class-groups.routes.js'
 
+import { classScheduleRoutes } from './modules/class-schedules/class-schedules.routes.js'
+
 import { graduationRoutes } from './modules/graduations/graduations.routes.js'
 
 import { gymRoutes } from './modules/gyms/gyms.routes.js'
@@ -100,6 +102,8 @@ export function configureApp(
   app.register(classGroupRoutes)
 
   app.register(classGroupProfessorRoutes)
+
+  app.register(classScheduleRoutes)
 
   app.register(auditRoutes)
 
