@@ -7,6 +7,11 @@ export const classGroupLevelSchema = z.enum([
   'MIXED',
 ])
 
+export const classGroupProfessorRoleSchema = z.enum([
+  'PRIMARY',
+  'ASSISTANT',
+])
+
 const classGroupNameSchema = z
   .string()
   .trim()
@@ -106,6 +111,20 @@ export const classGroupParamsSchema = z.object({
   classGroupId: z.string().uuid('Identificador da turma inválido.'),
 })
 
+export const classGroupProfessorsParamsSchema = z.object({
+  gymId: z.string().uuid('Identificador da academia inválido.'),
+
+  classGroupId: z.string().uuid('Identificador da turma inválido.'),
+})
+
+export const classGroupProfessorParamsSchema = z.object({
+  gymId: z.string().uuid('Identificador da academia inválido.'),
+
+  classGroupId: z.string().uuid('Identificador da turma inválido.'),
+
+  professorId: z.string().uuid('Identificador do professor inválido.'),
+})
+
 export const listClassGroupsQuerySchema = z.object({
   page: z.coerce
     .number()
@@ -164,4 +183,12 @@ export const updateClassGroupStatusBodySchema = z.object({
   active: z.boolean({
     error: 'O status da turma deve ser informado.',
   }),
+})
+
+export const createClassGroupProfessorBodySchema = z.object({
+  professorId: z
+    .string()
+    .uuid('Identificador do professor inválido.'),
+
+  role: classGroupProfessorRoleSchema,
 })

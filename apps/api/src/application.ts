@@ -10,6 +10,8 @@ import { auditRoutes } from './modules/audit/audit.routes.js'
 
 import { authRoutes } from './modules/auth/auth.routes.js'
 
+import { classGroupProfessorRoutes } from './modules/class-groups/class-group-professors.routes.js'
+
 import { classGroupRoutes } from './modules/class-groups/class-groups.routes.js'
 
 import { graduationRoutes } from './modules/graduations/graduations.routes.js'
@@ -54,7 +56,9 @@ export function getFastifyOptions() {
   }
 }
 
-export function configureApp(app: FastifyInstance) {
+export function configureApp(
+  app: FastifyInstance,
+) {
   registerErrorHandlers(app)
 
   registerCookiePlugin(app)
@@ -95,13 +99,17 @@ export function configureApp(app: FastifyInstance) {
 
   app.register(classGroupRoutes)
 
+  app.register(classGroupProfessorRoutes)
+
   app.register(auditRoutes)
 
   return app
 }
 
 export function buildApp() {
-  const app = Fastify(getFastifyOptions())
+  const app = Fastify(
+    getFastifyOptions(),
+  )
 
   return configureApp(app)
 }

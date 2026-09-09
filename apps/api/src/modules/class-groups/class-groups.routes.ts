@@ -19,7 +19,7 @@ import {
   listClassGroups,
   updateClassGroup,
   updateClassGroupStatus,
-} from './class-groups.service.js'
+} from '../class-groups/class-groups.service.js'
 
 export async function classGroupRoutes(app: FastifyInstance) {
   /*

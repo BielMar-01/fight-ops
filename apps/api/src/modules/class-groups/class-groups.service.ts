@@ -46,7 +46,6 @@ const classGroupSelect = {
       {
         role: 'asc',
       },
-
       {
         professor: {
           name: 'asc',
@@ -76,14 +75,18 @@ type SelectedClassGroup = Prisma.ClassGroupGetPayload<{
   select: typeof classGroupSelect
 }>
 
-function serializeClassGroup(classGroup: SelectedClassGroup) {
-  const primaryProfessorRelation = classGroup.professors.find(
-    (relation) => relation.role === 'PRIMARY',
-  )
+function serializeClassGroup(
+  classGroup: SelectedClassGroup,
+) {
+  const primaryProfessorRelation =
+    classGroup.professors.find(
+      (relation) => relation.role === 'PRIMARY',
+    )
 
-  const assistantProfessorRelations = classGroup.professors.filter(
-    (relation) => relation.role === 'ASSISTANT',
-  )
+  const assistantProfessorRelations =
+    classGroup.professors.filter(
+      (relation) => relation.role === 'ASSISTANT',
+    )
 
   return {
     id: classGroup.id,
@@ -106,19 +109,16 @@ function serializeClassGroup(classGroup: SelectedClassGroup) {
       ? {
           relationId: primaryProfessorRelation.id,
           assignedAt: primaryProfessorRelation.createdAt,
-
           ...primaryProfessorRelation.professor,
         }
       : null,
 
-    assistantProfessors: assistantProfessorRelations.map(
-      (relation) => ({
+    assistantProfessors:
+      assistantProfessorRelations.map((relation) => ({
         relationId: relation.id,
         assignedAt: relation.createdAt,
-
         ...relation.professor,
-      }),
-    ),
+      })),
 
     totalProfessors: classGroup.professors.length,
   }
@@ -155,7 +155,10 @@ async function ensureActiveModality(
   gymId: string,
   modalityId: string,
 ) {
-  const modality = await getModalityFromGym(gymId, modalityId)
+  const modality = await getModalityFromGym(
+    gymId,
+    modalityId,
+  )
 
   if (!modality.active) {
     throw new AppError(
@@ -173,29 +176,29 @@ async function ensureClassGroupNameAvailable(
   name: string,
   ignoredClassGroupId?: string,
 ) {
-  const existingClassGroup = await prisma.classGroup.findFirst({
-    where: {
-      gymId,
+  const existingClassGroup =
+    await prisma.classGroup.findFirst({
+      where: {
+        gymId,
 
-      name: {
-        equals: name.trim(),
+        name: {
+          equals: name.trim(),
+          mode: 'insensitive',
+        },
 
-        mode: 'insensitive',
+        ...(ignoredClassGroupId
+          ? {
+              id: {
+                not: ignoredClassGroupId,
+              },
+            }
+          : {}),
       },
 
-      ...(ignoredClassGroupId
-        ? {
-            id: {
-              not: ignoredClassGroupId,
-            },
-          }
-        : {}),
-    },
-
-    select: {
-      id: true,
-    },
-  })
+      select: {
+        id: true,
+      },
+    })
 
   if (existingClassGroup) {
     throw new AppError(
@@ -211,30 +214,31 @@ async function ensureProfessorsSupportModalityChange(
   classGroupId: string,
   modalityId: string,
 ) {
-  const incompatibleProfessor = await prisma.classGroupProfessor.findFirst({
-    where: {
-      gymId,
-      classGroupId,
+  const incompatibleProfessor =
+    await prisma.classGroupProfessor.findFirst({
+      where: {
+        gymId,
+        classGroupId,
 
-      professor: {
-        modalities: {
-          none: {
-            gymId,
-            modalityId,
+        professor: {
+          modalities: {
+            none: {
+              gymId,
+              modalityId,
+            },
           },
         },
       },
-    },
 
-    select: {
-      professor: {
-        select: {
-          id: true,
-          name: true,
+      select: {
+        professor: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
       },
-    },
-  })
+    })
 
   if (incompatibleProfessor) {
     throw new AppError(
@@ -297,24 +301,19 @@ export async function listClassGroups(
             {
               name: {
                 contains: search,
-
                 mode: 'insensitive',
               },
             },
-
             {
               description: {
                 contains: search,
-
                 mode: 'insensitive',
               },
             },
-
             {
               modality: {
                 name: {
                   contains: search,
-
                   mode: 'insensitive',
                 },
               },
@@ -324,34 +323,35 @@ export async function listClassGroups(
       : {}),
   }
 
-  const [classGroups, total] = await prisma.$transaction([
-    prisma.classGroup.findMany({
-      where,
+  const [classGroups, total] =
+    await prisma.$transaction([
+      prisma.classGroup.findMany({
+        where,
 
-      orderBy: [
-        {
-          active: 'desc',
-        },
+        orderBy: [
+          {
+            active: 'desc',
+          },
+          {
+            name: 'asc',
+          },
+        ],
 
-        {
-          name: 'asc',
-        },
-      ],
+        skip: (page - 1) * limit,
+        take: limit,
 
-      skip: (page - 1) * limit,
+        select: classGroupSelect,
+      }),
 
-      take: limit,
-
-      select: classGroupSelect,
-    }),
-
-    prisma.classGroup.count({
-      where,
-    }),
-  ])
+      prisma.classGroup.count({
+        where,
+      }),
+    ])
 
   return {
-    classGroups: classGroups.map(serializeClassGroup),
+    classGroups: classGroups.map(
+      serializeClassGroup,
+    ),
 
     pagination: {
       page,
@@ -366,14 +366,15 @@ export async function getClassGroupById(
   gymId: string,
   classGroupId: string,
 ) {
-  const classGroup = await prisma.classGroup.findFirst({
-    where: {
-      id: classGroupId,
-      gymId,
-    },
+  const classGroup =
+    await prisma.classGroup.findFirst({
+      where: {
+        id: classGroupId,
+        gymId,
+      },
 
-    select: classGroupSelect,
-  })
+      select: classGroupSelect,
+    })
 
   if (!classGroup) {
     throw new AppError(
@@ -390,18 +391,26 @@ export async function createClassGroup(
   gymId: string,
   input: CreateClassGroupBody,
 ) {
-  await ensureActiveModality(gymId, input.modalityId)
+  await ensureActiveModality(
+    gymId,
+    input.modalityId,
+  )
 
   const name = input.name.trim()
 
-  await ensureClassGroupNameAvailable(gymId, name)
+  await ensureClassGroupNameAvailable(
+    gymId,
+    name,
+  )
 
   const classGroup = await prisma.classGroup.create({
     data: {
       gymId,
       modalityId: input.modalityId,
       name,
-      description: normalizeOptionalText(input.description),
+      description: normalizeOptionalText(
+        input.description,
+      ),
       level: input.level,
       minimumAge: input.minimumAge ?? null,
       maximumAge: input.maximumAge ?? null,
@@ -420,12 +429,16 @@ export async function updateClassGroup(
   classGroupId: string,
   input: UpdateClassGroupBody,
 ) {
-  const currentClassGroup = await getClassGroupById(
-    gymId,
-    classGroupId,
-  )
+  const currentClassGroup =
+    await getClassGroupById(
+      gymId,
+      classGroupId,
+    )
 
-  await ensureActiveModality(gymId, input.modalityId)
+  await ensureActiveModality(
+    gymId,
+    input.modalityId,
+  )
 
   const name = input.name.trim()
 
@@ -435,7 +448,10 @@ export async function updateClassGroup(
     classGroupId,
   )
 
-  if (currentClassGroup.modalityId !== input.modalityId) {
+  if (
+    currentClassGroup.modalityId !==
+    input.modalityId
+  ) {
     await ensureProfessorsSupportModalityChange(
       gymId,
       classGroupId,
@@ -451,7 +467,9 @@ export async function updateClassGroup(
     data: {
       modalityId: input.modalityId,
       name,
-      description: normalizeOptionalText(input.description),
+      description: normalizeOptionalText(
+        input.description,
+      ),
       level: input.level,
       minimumAge: input.minimumAge ?? null,
       maximumAge: input.maximumAge ?? null,
@@ -470,7 +488,10 @@ export async function updateClassGroupStatus(
   classGroupId: string,
   input: UpdateClassGroupStatusBody,
 ) {
-  await getClassGroupById(gymId, classGroupId)
+  await getClassGroupById(
+    gymId,
+    classGroupId,
+  )
 
   const classGroup = await prisma.classGroup.update({
     where: {

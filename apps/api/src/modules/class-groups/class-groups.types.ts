@@ -4,7 +4,11 @@ import type {
   classGroupLevelSchema,
   classGroupListParamsSchema,
   classGroupParamsSchema,
+  classGroupProfessorParamsSchema,
+  classGroupProfessorRoleSchema,
+  classGroupProfessorsParamsSchema,
   createClassGroupBodySchema,
+  createClassGroupProfessorBodySchema,
   listClassGroupsQuerySchema,
   updateClassGroupBodySchema,
   updateClassGroupStatusBodySchema,
@@ -14,12 +18,24 @@ export type ClassGroupLevel = z.infer<
   typeof classGroupLevelSchema
 >
 
+export type ClassGroupProfessorRole = z.infer<
+  typeof classGroupProfessorRoleSchema
+>
+
 export type ClassGroupListParams = z.infer<
   typeof classGroupListParamsSchema
 >
 
 export type ClassGroupParams = z.infer<
   typeof classGroupParamsSchema
+>
+
+export type ClassGroupProfessorsParams = z.infer<
+  typeof classGroupProfessorsParamsSchema
+>
+
+export type ClassGroupProfessorParams = z.infer<
+  typeof classGroupProfessorParamsSchema
 >
 
 export type ListClassGroupsQuery = z.infer<
@@ -36,4 +52,8 @@ export type UpdateClassGroupBody = z.infer<
 
 export type UpdateClassGroupStatusBody = z.infer<
   typeof updateClassGroupStatusBodySchema
+>
+
+export type CreateClassGroupProfessorBody = z.infer<
+  typeof createClassGroupProfessorBodySchema
 >
