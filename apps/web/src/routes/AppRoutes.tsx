@@ -24,6 +24,8 @@ import { ForgotPasswordPage } from '../pages/ForgotPasswordPage'
 
 import { GraduationsPage } from '../pages/GraduationsPage'
 
+import { ClassGroupsPage } from '../pages/ClassGroupsPage'
+
 import { HomePage } from '../pages/HomePage'
 
 import { LoginPage } from '../pages/LoginPage'
@@ -92,6 +94,8 @@ export function AppRoutes() {
           <Route path="/modalities" element={<ModalitiesPage />} />
 
           <Route path="/graduations" element={<GraduationsPage />} />
+
+          <Route path="/class-groups" element={<ClassGroupsPage />} />
 
           <Route path="/audit" element={<AuditPage />} />
         </Route>

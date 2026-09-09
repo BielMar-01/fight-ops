@@ -222,13 +222,22 @@ export function AppLayout() {
 
               <span className="app-navigation-group-title">Academia</span>
 
-              <div className="app-nav-link disabled" data-testid="nav-classes-disabled">
-                <span className="app-nav-icon">▦</span>
+              <NavLink
+                to="/class-groups"
+                className={({ isActive }) =>
+                  isActive
+                    ? 'app-nav-link active'
+                    : 'app-nav-link'
+                }
+                onClick={closeSidebar}              
+                data-testid="nav-class-groups-link"
+              >
+                <span className="app-nav-icon">
+                  ▦
+                </span>
 
                 <span>Turmas</span>
-
-                <small>Em breve</small>
-              </div>
+              </NavLink>
 
               <div className="app-nav-link disabled" data-testid="nav-lessons-disabled">
                 <span className="app-nav-icon">▣</span>
