@@ -79,6 +79,18 @@ export function registerSwagger(app: FastifyInstance) {
         },
 
         {
+          name: 'Class Groups',
+
+          description: 'Cadastro e gestão das turmas oferecidas pelas academias.',
+        },
+
+        {
+          name: 'Class Group Professors',
+
+          description: 'Gestão dos professores responsáveis e auxiliares de cada turma.',
+        },
+
+        {
           name: 'Audit',
 
           description: 'Consulta dos registros de auditoria das academias.',
