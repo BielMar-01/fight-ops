@@ -1,9 +1,12 @@
 import swagger from '@fastify/swagger'
+
 import swaggerUi from '@fastify/swagger-ui'
 
 import type { FastifyInstance } from 'fastify'
 
-export function registerSwagger(app: FastifyInstance) {
+export function registerSwagger(
+  app: FastifyInstance,
+) {
   app.register(swagger, {
     openapi: {
       openapi: '3.0.3',
@@ -21,79 +24,102 @@ export function registerSwagger(app: FastifyInstance) {
         {
           name: 'Health',
 
-          description: 'Monitoramento e disponibilidade da API.',
+          description:
+            'Monitoramento e disponibilidade da API.',
         },
 
         {
           name: 'Auth',
 
-          description: 'Autenticação, recuperação de senha e gerenciamento de sessões.',
+          description:
+            'Autenticação, recuperação de senha e gerenciamento de sessões.',
         },
 
         {
           name: 'Public Site',
 
-          description: 'Conteúdo, identidade visual e SEO das páginas públicas.',
+          description:
+            'Conteúdo, identidade visual e SEO das páginas públicas.',
         },
 
         {
           name: 'Gyms',
 
-          description: 'Cadastro, consulta e administração de academias.',
+          description:
+            'Cadastro, consulta e administração de academias.',
         },
 
         {
           name: 'Gym Members',
 
-          description: 'Gestão dos usuários, perfis e permissões vinculados às academias.',
+          description:
+            'Gestão dos usuários, perfis e permissões vinculados às academias.',
         },
 
         {
           name: 'Students',
 
-          description: 'Cadastro e gestão de alunos das academias.',
+          description:
+            'Cadastro e gestão de alunos das academias.',
         },
 
         {
           name: 'Professors',
 
-          description: 'Cadastro e gestão de professores das academias.',
+          description:
+            'Cadastro e gestão de professores das academias.',
         },
 
         {
-          name: 'Professor Modalities',
+          name:
+            'Professor Modalities',
 
-          description: 'Gestão das modalidades ministradas por cada professor.',
+          description:
+            'Gestão das modalidades ministradas por cada professor.',
         },
 
         {
           name: 'Modalities',
 
-          description: 'Cadastro e gestão das modalidades oferecidas pelas academias.',
+          description:
+            'Cadastro e gestão das modalidades oferecidas pelas academias.',
         },
 
         {
           name: 'Graduations',
 
-          description: 'Gestão das graduações e faixas de cada modalidade.',
+          description:
+            'Gestão das graduações e faixas de cada modalidade.',
         },
 
         {
           name: 'Class Groups',
 
-          description: 'Cadastro e gestão das turmas oferecidas pelas academias.',
+          description:
+            'Cadastro e gestão das turmas oferecidas pelas academias.',
         },
 
         {
-          name: 'Class Group Professors',
+          name:
+            'Class Group Professors',
 
-          description: 'Gestão dos professores responsáveis e auxiliares de cada turma.',
+          description:
+            'Gestão dos professores responsáveis e auxiliares de cada turma.',
+        },
+
+        {
+          name:
+            'Class Schedules',
+
+          description:
+            'Gestão da grade recorrente de horários das turmas.',
         },
 
         {
           name: 'Audit',
 
-          description: 'Consulta dos registros de auditoria das academias.',
+          description:
+            'Consulta dos registros de auditoria das academias.',
         },
       ],
 
@@ -106,7 +132,8 @@ export function registerSwagger(app: FastifyInstance) {
 
             bearerFormat: 'JWT',
 
-            description: 'Access token JWT retornado pelo endpoint de login.',
+            description:
+              'Access token JWT retornado pelo endpoint de login.',
           },
         },
       },

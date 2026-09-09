@@ -25,6 +25,15 @@ import {
   updateClassScheduleStatus,
 } from './class-schedules.service.js'
 
+import {
+  createClassScheduleRouteSchema,
+  getClassScheduleRouteSchema,
+  listClassGroupSchedulesRouteSchema,
+  listClassSchedulesRouteSchema,
+  updateClassScheduleRouteSchema,
+  updateClassScheduleStatusRouteSchema,
+} from './class-schedules.swagger.js'
+
 export async function classScheduleRoutes(
   app: FastifyInstance,
 ) {
@@ -37,8 +46,12 @@ export async function classScheduleRoutes(
   app.get(
     '/gyms/:gymId/class-schedules',
     {
+      schema:
+        listClassSchedulesRouteSchema,
+
       preHandler: [
         authenticate,
+
         requireGymRole(
           'OWNER',
           'ADMIN',
@@ -47,6 +60,7 @@ export async function classScheduleRoutes(
         ),
       ],
     },
+
     async (request, reply) => {
       const params =
         classScheduleListParamsSchema.parse(
@@ -58,10 +72,11 @@ export async function classScheduleRoutes(
           request.query,
         )
 
-      const result = await listClassSchedules(
-        params.gymId,
-        query,
-      )
+      const result =
+        await listClassSchedules(
+          params.gymId,
+          query,
+        )
 
       return reply.send(result)
     },
@@ -76,8 +91,12 @@ export async function classScheduleRoutes(
   app.get(
     '/gyms/:gymId/class-groups/:classGroupId/schedules',
     {
+      schema:
+        listClassGroupSchedulesRouteSchema,
+
       preHandler: [
         authenticate,
+
         requireGymRole(
           'OWNER',
           'ADMIN',
@@ -86,6 +105,7 @@ export async function classScheduleRoutes(
         ),
       ],
     },
+
     async (request, reply) => {
       const params =
         classGroupSchedulesParamsSchema.parse(
@@ -113,8 +133,12 @@ export async function classScheduleRoutes(
   app.get(
     '/gyms/:gymId/class-schedules/:classScheduleId',
     {
+      schema:
+        getClassScheduleRouteSchema,
+
       preHandler: [
         authenticate,
+
         requireGymRole(
           'OWNER',
           'ADMIN',
@@ -123,6 +147,7 @@ export async function classScheduleRoutes(
         ),
       ],
     },
+
     async (request, reply) => {
       const params =
         classScheduleParamsSchema.parse(
@@ -150,14 +175,19 @@ export async function classScheduleRoutes(
   app.post(
     '/gyms/:gymId/class-schedules',
     {
+      schema:
+        createClassScheduleRouteSchema,
+
       preHandler: [
         authenticate,
+
         requireGymRole(
           'OWNER',
           'ADMIN',
         ),
       ],
     },
+
     async (request, reply) => {
       const params =
         classScheduleListParamsSchema.parse(
@@ -177,25 +207,48 @@ export async function classScheduleRoutes(
 
       await createAuditLog({
         gymId: params.gymId,
-        userId: request.user!.id,
+
+        userId:
+          request.user!.id,
+
         action: 'CREATE',
-        entity: 'CLASS_SCHEDULE',
-        entityId: classSchedule.id,
-        newValues: classSchedule,
+
+        entity:
+          'CLASS_SCHEDULE',
+
+        entityId:
+          classSchedule.id,
+
+        newValues:
+          classSchedule,
 
         metadata: {
-          source: 'class-schedules',
+          source:
+            'class-schedules',
+
           classGroupId:
             classSchedule.classGroupId,
-          weekday: classSchedule.weekday,
-          startTime: classSchedule.startTime,
-          endTime: classSchedule.endTime,
-          room: classSchedule.room,
+
+          weekday:
+            classSchedule.weekday,
+
+          startTime:
+            classSchedule.startTime,
+
+          endTime:
+            classSchedule.endTime,
+
+          room:
+            classSchedule.room,
         },
 
-        ipAddress: request.ip,
+        ipAddress:
+          request.ip,
+
         userAgent:
-          request.headers['user-agent'],
+          request.headers[
+            'user-agent'
+          ],
       })
 
       return reply.status(201).send({
@@ -213,14 +266,19 @@ export async function classScheduleRoutes(
   app.put(
     '/gyms/:gymId/class-schedules/:classScheduleId',
     {
+      schema:
+        updateClassScheduleRouteSchema,
+
       preHandler: [
         authenticate,
+
         requireGymRole(
           'OWNER',
           'ADMIN',
         ),
       ],
     },
+
     async (request, reply) => {
       const params =
         classScheduleParamsSchema.parse(
@@ -246,16 +304,30 @@ export async function classScheduleRoutes(
         )
 
       await createAuditLog({
-        gymId: params.gymId,
-        userId: request.user!.id,
-        action: 'UPDATE',
-        entity: 'CLASS_SCHEDULE',
-        entityId: classSchedule.id,
-        oldValues: previousClassSchedule,
-        newValues: classSchedule,
+        gymId:
+          params.gymId,
+
+        userId:
+          request.user!.id,
+
+        action:
+          'UPDATE',
+
+        entity:
+          'CLASS_SCHEDULE',
+
+        entityId:
+          classSchedule.id,
+
+        oldValues:
+          previousClassSchedule,
+
+        newValues:
+          classSchedule,
 
         metadata: {
-          source: 'class-schedules',
+          source:
+            'class-schedules',
 
           previousClassGroupId:
             previousClassSchedule.classGroupId,
@@ -266,7 +338,8 @@ export async function classScheduleRoutes(
           previousWeekday:
             previousClassSchedule.weekday,
 
-          newWeekday: classSchedule.weekday,
+          newWeekday:
+            classSchedule.weekday,
 
           previousStartTime:
             previousClassSchedule.startTime,
@@ -281,9 +354,13 @@ export async function classScheduleRoutes(
             classSchedule.endTime,
         },
 
-        ipAddress: request.ip,
+        ipAddress:
+          request.ip,
+
         userAgent:
-          request.headers['user-agent'],
+          request.headers[
+            'user-agent'
+          ],
       })
 
       return reply.send({
@@ -301,14 +378,19 @@ export async function classScheduleRoutes(
   app.patch(
     '/gyms/:gymId/class-schedules/:classScheduleId/status',
     {
+      schema:
+        updateClassScheduleStatusRouteSchema,
+
       preHandler: [
         authenticate,
+
         requireGymRole(
           'OWNER',
           'ADMIN',
         ),
       ],
     },
+
     async (request, reply) => {
       const params =
         classScheduleParamsSchema.parse(
@@ -334,32 +416,50 @@ export async function classScheduleRoutes(
         )
 
       await createAuditLog({
-        gymId: params.gymId,
-        userId: request.user!.id,
+        gymId:
+          params.gymId,
 
-        action: body.active
-          ? 'ACTIVATE'
-          : 'DEACTIVATE',
+        userId:
+          request.user!.id,
 
-        entity: 'CLASS_SCHEDULE',
-        entityId: classSchedule.id,
-        oldValues: previousClassSchedule,
-        newValues: classSchedule,
+        action:
+          body.active
+            ? 'ACTIVATE'
+            : 'DEACTIVATE',
+
+        entity:
+          'CLASS_SCHEDULE',
+
+        entityId:
+          classSchedule.id,
+
+        oldValues:
+          previousClassSchedule,
+
+        newValues:
+          classSchedule,
 
         metadata: {
-          source: 'class-schedules',
+          source:
+            'class-schedules',
+
           classGroupId:
             classSchedule.classGroupId,
 
           previousStatus:
             previousClassSchedule.active,
 
-          newStatus: classSchedule.active,
+          newStatus:
+            classSchedule.active,
         },
 
-        ipAddress: request.ip,
+        ipAddress:
+          request.ip,
+
         userAgent:
-          request.headers['user-agent'],
+          request.headers[
+            'user-agent'
+          ],
       })
 
       return reply.send({
