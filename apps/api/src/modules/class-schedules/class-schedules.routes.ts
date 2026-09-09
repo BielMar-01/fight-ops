@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 
+import { createAuditLog } from '../audit/audit.service.js'
+
 import { authenticate } from '../auth/authenticate.js'
 
 import { requireGymRole } from '../gyms/gym-access.js'
@@ -173,6 +175,29 @@ export async function classScheduleRoutes(
           body,
         )
 
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+        action: 'CREATE',
+        entity: 'CLASS_SCHEDULE',
+        entityId: classSchedule.id,
+        newValues: classSchedule,
+
+        metadata: {
+          source: 'class-schedules',
+          classGroupId:
+            classSchedule.classGroupId,
+          weekday: classSchedule.weekday,
+          startTime: classSchedule.startTime,
+          endTime: classSchedule.endTime,
+          room: classSchedule.room,
+        },
+
+        ipAddress: request.ip,
+        userAgent:
+          request.headers['user-agent'],
+      })
+
       return reply.status(201).send({
         classSchedule,
       })
@@ -207,12 +232,59 @@ export async function classScheduleRoutes(
           request.body,
         )
 
+      const previousClassSchedule =
+        await getClassScheduleById(
+          params.gymId,
+          params.classScheduleId,
+        )
+
       const classSchedule =
         await updateClassSchedule(
           params.gymId,
           params.classScheduleId,
           body,
         )
+
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+        action: 'UPDATE',
+        entity: 'CLASS_SCHEDULE',
+        entityId: classSchedule.id,
+        oldValues: previousClassSchedule,
+        newValues: classSchedule,
+
+        metadata: {
+          source: 'class-schedules',
+
+          previousClassGroupId:
+            previousClassSchedule.classGroupId,
+
+          newClassGroupId:
+            classSchedule.classGroupId,
+
+          previousWeekday:
+            previousClassSchedule.weekday,
+
+          newWeekday: classSchedule.weekday,
+
+          previousStartTime:
+            previousClassSchedule.startTime,
+
+          newStartTime:
+            classSchedule.startTime,
+
+          previousEndTime:
+            previousClassSchedule.endTime,
+
+          newEndTime:
+            classSchedule.endTime,
+        },
+
+        ipAddress: request.ip,
+        userAgent:
+          request.headers['user-agent'],
+      })
 
       return reply.send({
         classSchedule,
@@ -248,12 +320,47 @@ export async function classScheduleRoutes(
           request.body,
         )
 
+      const previousClassSchedule =
+        await getClassScheduleById(
+          params.gymId,
+          params.classScheduleId,
+        )
+
       const classSchedule =
         await updateClassScheduleStatus(
           params.gymId,
           params.classScheduleId,
           body,
         )
+
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+
+        action: body.active
+          ? 'ACTIVATE'
+          : 'DEACTIVATE',
+
+        entity: 'CLASS_SCHEDULE',
+        entityId: classSchedule.id,
+        oldValues: previousClassSchedule,
+        newValues: classSchedule,
+
+        metadata: {
+          source: 'class-schedules',
+          classGroupId:
+            classSchedule.classGroupId,
+
+          previousStatus:
+            previousClassSchedule.active,
+
+          newStatus: classSchedule.active,
+        },
+
+        ipAddress: request.ip,
+        userAgent:
+          request.headers['user-agent'],
+      })
 
       return reply.send({
         classSchedule,
