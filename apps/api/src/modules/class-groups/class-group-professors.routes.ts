@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 
+import { createAuditLog } from '../audit/audit.service.js'
+
 import { authenticate } from '../auth/authenticate.js'
 
 import { requireGymRole } from '../gyms/gym-access.js'
@@ -88,6 +90,23 @@ export async function classGroupProfessorRoutes(
           body,
         )
 
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+        action: 'CREATE',
+        entity: 'CLASS_GROUP_PROFESSOR',
+        entityId: classGroupProfessor.id,
+        newValues: classGroupProfessor,
+        metadata: {
+          source: 'class-group-professors',
+          classGroupId: params.classGroupId,
+          professorId: body.professorId,
+          role: body.role,
+        },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      })
+
       return reply.status(201).send({
         classGroupProfessor,
       })
@@ -114,11 +133,32 @@ export async function classGroupProfessorRoutes(
           request.params,
         )
 
-      await deleteClassGroupProfessor(
-        params.gymId,
-        params.classGroupId,
-        params.professorId,
-      )
+      const deletedClassGroupProfessor =
+        await deleteClassGroupProfessor(
+          params.gymId,
+          params.classGroupId,
+          params.professorId,
+        )
+
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+        action: 'DELETE',
+        entity: 'CLASS_GROUP_PROFESSOR',
+        entityId:
+          deletedClassGroupProfessor.id,
+        oldValues:
+          deletedClassGroupProfessor,
+        metadata: {
+          source: 'class-group-professors',
+          classGroupId: params.classGroupId,
+          professorId: params.professorId,
+          role:
+            deletedClassGroupProfessor.role,
+        },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      })
 
       return reply.status(204).send()
     },

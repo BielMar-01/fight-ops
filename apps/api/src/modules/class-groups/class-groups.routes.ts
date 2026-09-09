@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 
+import { createAuditLog } from '../audit/audit.service.js'
+
 import { authenticate } from '../auth/authenticate.js'
 
 import { requireGymRole } from '../gyms/gym-access.js'
@@ -19,9 +21,11 @@ import {
   listClassGroups,
   updateClassGroup,
   updateClassGroupStatus,
-} from '../class-groups/class-groups.service.js'
+} from './class-groups.service.js'
 
-export async function classGroupRoutes(app: FastifyInstance) {
+export async function classGroupRoutes(
+  app: FastifyInstance,
+) {
   /*
    * =========================================================
    * LIST
@@ -42,13 +46,15 @@ export async function classGroupRoutes(app: FastifyInstance) {
       ],
     },
     async (request, reply) => {
-      const params = classGroupListParamsSchema.parse(
-        request.params,
-      )
+      const params =
+        classGroupListParamsSchema.parse(
+          request.params,
+        )
 
-      const query = listClassGroupsQuerySchema.parse(
-        request.query,
-      )
+      const query =
+        listClassGroupsQuerySchema.parse(
+          request.query,
+        )
 
       const result = await listClassGroups(
         params.gymId,
@@ -79,9 +85,10 @@ export async function classGroupRoutes(app: FastifyInstance) {
       ],
     },
     async (request, reply) => {
-      const params = classGroupParamsSchema.parse(
-        request.params,
-      )
+      const params =
+        classGroupParamsSchema.parse(
+          request.params,
+        )
 
       const classGroup = await getClassGroupById(
         params.gymId,
@@ -109,18 +116,35 @@ export async function classGroupRoutes(app: FastifyInstance) {
       ],
     },
     async (request, reply) => {
-      const params = classGroupListParamsSchema.parse(
-        request.params,
-      )
+      const params =
+        classGroupListParamsSchema.parse(
+          request.params,
+        )
 
-      const body = createClassGroupBodySchema.parse(
-        request.body,
-      )
+      const body =
+        createClassGroupBodySchema.parse(
+          request.body,
+        )
 
       const classGroup = await createClassGroup(
         params.gymId,
         body,
       )
+
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+        action: 'CREATE',
+        entity: 'CLASS_GROUP',
+        entityId: classGroup.id,
+        newValues: classGroup,
+        metadata: {
+          source: 'class-groups',
+          modalityId: classGroup.modalityId,
+        },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      })
 
       return reply.status(201).send({
         classGroup,
@@ -143,19 +167,43 @@ export async function classGroupRoutes(app: FastifyInstance) {
       ],
     },
     async (request, reply) => {
-      const params = classGroupParamsSchema.parse(
-        request.params,
-      )
+      const params =
+        classGroupParamsSchema.parse(
+          request.params,
+        )
 
-      const body = updateClassGroupBodySchema.parse(
-        request.body,
-      )
+      const body =
+        updateClassGroupBodySchema.parse(
+          request.body,
+        )
+
+      const previousClassGroup =
+        await getClassGroupById(
+          params.gymId,
+          params.classGroupId,
+        )
 
       const classGroup = await updateClassGroup(
         params.gymId,
         params.classGroupId,
         body,
       )
+
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+        action: 'UPDATE',
+        entity: 'CLASS_GROUP',
+        entityId: classGroup.id,
+        oldValues: previousClassGroup,
+        newValues: classGroup,
+        metadata: {
+          source: 'class-groups',
+          modalityId: classGroup.modalityId,
+        },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      })
 
       return reply.send({
         classGroup,
@@ -178,19 +226,48 @@ export async function classGroupRoutes(app: FastifyInstance) {
       ],
     },
     async (request, reply) => {
-      const params = classGroupParamsSchema.parse(
-        request.params,
-      )
+      const params =
+        classGroupParamsSchema.parse(
+          request.params,
+        )
 
-      const body = updateClassGroupStatusBodySchema.parse(
-        request.body,
-      )
+      const body =
+        updateClassGroupStatusBodySchema.parse(
+          request.body,
+        )
 
-      const classGroup = await updateClassGroupStatus(
-        params.gymId,
-        params.classGroupId,
-        body,
-      )
+      const previousClassGroup =
+        await getClassGroupById(
+          params.gymId,
+          params.classGroupId,
+        )
+
+      const classGroup =
+        await updateClassGroupStatus(
+          params.gymId,
+          params.classGroupId,
+          body,
+        )
+
+      await createAuditLog({
+        gymId: params.gymId,
+        userId: request.user!.id,
+        action: body.active
+          ? 'ACTIVATE'
+          : 'DEACTIVATE',
+        entity: 'CLASS_GROUP',
+        entityId: classGroup.id,
+        oldValues: previousClassGroup,
+        newValues: classGroup,
+        metadata: {
+          source: 'class-groups',
+          previousStatus:
+            previousClassGroup.active,
+          newStatus: classGroup.active,
+        },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      })
 
       return reply.send({
         classGroup,
