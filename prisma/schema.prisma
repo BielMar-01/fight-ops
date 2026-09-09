@@ -32,6 +32,16 @@ enum ClassGroupProfessorRole {
   ASSISTANT
 }
 
+enum Weekday {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
 model User {
   id              String     @id @default(uuid()) @db.Uuid
   name            String     @db.VarChar(150)
@@ -117,6 +127,7 @@ model Gym {
   professorModalities  ProfessorModality[]
   classGroups          ClassGroup[]
   classGroupProfessors ClassGroupProfessor[]
+  classSchedules       ClassSchedule[]
 
   @@index([active])
   @@index([createdAt])
@@ -403,6 +414,7 @@ model ClassGroup {
   gym        Gym                   @relation(fields: [gymId], references: [id], onDelete: Restrict)
   modality   Modality              @relation(fields: [modalityId], references: [id], onDelete: Restrict)
   professors ClassGroupProfessor[]
+  schedules  ClassSchedule[]
 
   @@unique([gymId, name], map: "uk_class_groups_gym_name")
   @@index([gymId])
@@ -436,4 +448,35 @@ model ClassGroupProfessor {
   @@index([gymId, professorId])
   @@index([classGroupId, role])
   @@map("class_group_professors")
+}
+
+model ClassSchedule {
+  id           String    @id @default(uuid()) @db.Uuid
+  gymId        String    @map("gym_id") @db.Uuid
+  classGroupId String    @map("class_group_id") @db.Uuid
+  weekday      Weekday
+  startTime    DateTime  @map("start_time") @db.Time(0)
+  endTime      DateTime  @map("end_time") @db.Time(0)
+  room         String?   @db.VarChar(150)
+  notes        String?   @db.Text
+  validFrom    DateTime? @map("valid_from") @db.Date
+  validUntil   DateTime? @map("valid_until") @db.Date
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  gym        Gym        @relation(fields: [gymId], references: [id], onDelete: Restrict)
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id], onDelete: Restrict)
+
+  @@index([gymId])
+  @@index([classGroupId])
+  @@index([gymId, active])
+  @@index([gymId, weekday])
+  @@index([gymId, weekday, active])
+  @@index([gymId, classGroupId])
+  @@index([gymId, classGroupId, active])
+  @@index([gymId, room])
+  @@index([validFrom])
+  @@index([validUntil])
+  @@map("class_schedules")
 }
