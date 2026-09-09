@@ -56,11 +56,10 @@ export async function classScheduleRoutes(
           request.query,
         )
 
-      const result =
-        await listClassSchedules(
-          params.gymId,
-          query,
-        )
+      const result = await listClassSchedules(
+        params.gymId,
+        query,
+      )
 
       return reply.send(result)
     },
@@ -91,37 +90,15 @@ export async function classScheduleRoutes(
           request.params,
         )
 
-      const query =
-        listClassSchedulesQuerySchema.parse(
-          request.query,
-        )
-
-      const result =
+      const classSchedules =
         await listClassGroupSchedules(
           params.gymId,
           params.classGroupId,
-          {
-            page: query.page,
-
-            limit: query.limit,
-
-            search: query.search,
-
-            active: query.active,
-
-            weekday: query.weekday,
-
-            modalityId:
-              query.modalityId,
-
-            professorId:
-              query.professorId,
-
-            validOn: query.validOn,
-          },
         )
 
-      return reply.send(result)
+      return reply.send({
+        classSchedules,
+      })
     },
   )
 
