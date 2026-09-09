@@ -11,48 +11,40 @@ import type {
   UpdateClassScheduleStatusBody,
 } from './class-schedules.types.js'
 
-function normalizeOptionalText(
-  value?: string,
-) {
+function normalizeOptionalText(value?: string) {
   const normalized = value?.trim()
 
-  return normalized
-    ? normalized
-    : null
+  return normalized ? normalized : null
+}
+
+function normalizeRoom(value?: string | null) {
+  const normalized = value?.trim().toLocaleLowerCase('pt-BR')
+
+  return normalized || null
 }
 
 function parseTime(value: string) {
-  return new Date(
-    `1970-01-01T${value}:00.000Z`,
-  )
+  return new Date(`1970-01-01T${value}:00.000Z`)
 }
 
 function serializeTime(value: Date) {
-  return value
-    .toISOString()
-    .slice(11, 16)
+  return value.toISOString().slice(11, 16)
 }
 
-function parseDate(value?: string) {
+function parseDate(value?: string | null) {
   if (!value) {
     return null
   }
 
-  return new Date(
-    `${value}T00:00:00.000Z`,
-  )
+  return new Date(`${value}T00:00:00.000Z`)
 }
 
-function serializeDate(
-  value: Date | null,
-) {
+function serializeDate(value?: Date | null) {
   if (!value) {
     return null
   }
 
-  return value
-    .toISOString()
-    .slice(0, 10)
+  return value.toISOString().slice(0, 10)
 }
 
 const classScheduleSelect = {
@@ -73,7 +65,6 @@ const classScheduleSelect = {
   classGroup: {
     select: {
       id: true,
-      gymId: true,
       modalityId: true,
       name: true,
       level: true,
@@ -105,6 +96,7 @@ const classScheduleSelect = {
         select: {
           id: true,
           role: true,
+          createdAt: true,
 
           professor: {
             select: {
@@ -131,82 +123,61 @@ function serializeClassSchedule(
 ) {
   const primaryProfessorRelation =
     classSchedule.classGroup.professors.find(
-      (relation) =>
-        relation.role === 'PRIMARY',
+      (relation) => relation.role === 'PRIMARY',
     )
 
   const assistantProfessorRelations =
     classSchedule.classGroup.professors.filter(
-      (relation) =>
-        relation.role === 'ASSISTANT',
+      (relation) => relation.role === 'ASSISTANT',
     )
 
   return {
     id: classSchedule.id,
     gymId: classSchedule.gymId,
-    classGroupId:
-      classSchedule.classGroupId,
+    classGroupId: classSchedule.classGroupId,
     weekday: classSchedule.weekday,
-    startTime: serializeTime(
-      classSchedule.startTime,
-    ),
-    endTime: serializeTime(
-      classSchedule.endTime,
-    ),
+    startTime: serializeTime(classSchedule.startTime),
+    endTime: serializeTime(classSchedule.endTime),
     room: classSchedule.room,
     notes: classSchedule.notes,
-    validFrom: serializeDate(
-      classSchedule.validFrom,
-    ),
-    validUntil: serializeDate(
-      classSchedule.validUntil,
-    ),
+    validFrom: serializeDate(classSchedule.validFrom),
+    validUntil: serializeDate(classSchedule.validUntil),
     active: classSchedule.active,
     createdAt: classSchedule.createdAt,
     updatedAt: classSchedule.updatedAt,
 
     classGroup: {
       id: classSchedule.classGroup.id,
-      gymId:
-        classSchedule.classGroup.gymId,
-      modalityId:
-        classSchedule.classGroup
-          .modalityId,
+      modalityId: classSchedule.classGroup.modalityId,
       name: classSchedule.classGroup.name,
-      level:
-        classSchedule.classGroup.level,
+      level: classSchedule.classGroup.level,
       durationMinutes:
-        classSchedule.classGroup
-          .durationMinutes,
-      active:
-        classSchedule.classGroup.active,
+        classSchedule.classGroup.durationMinutes,
+      active: classSchedule.classGroup.active,
 
-      modality:
-        classSchedule.classGroup.modality,
+      modality: classSchedule.classGroup.modality,
 
-      primaryProfessor:
-        primaryProfessorRelation
-          ? {
-              relationId:
-                primaryProfessorRelation.id,
+      primaryProfessor: primaryProfessorRelation
+        ? {
+            relationId: primaryProfessorRelation.id,
+            assignedAt: primaryProfessorRelation.createdAt,
 
-              ...primaryProfessorRelation
-                .professor,
-            }
-          : null,
+            ...primaryProfessorRelation.professor,
+          }
+        : null,
 
       assistantProfessors:
         assistantProfessorRelations.map(
           (relation) => ({
             relationId: relation.id,
+            assignedAt: relation.createdAt,
 
             ...relation.professor,
           }),
         ),
 
       totalProfessors:
-        classSchedule.classGroup
-          .professors.length,
+        classSchedule.classGroup.professors.length,
     },
   }
 }
@@ -224,8 +195,22 @@ async function getClassGroupFromGym(
 
       select: {
         id: true,
+        name: true,
         active: true,
-        modalityId: true,
+
+        professors: {
+          select: {
+            professorId: true,
+
+            professor: {
+              select: {
+                id: true,
+                name: true,
+                active: true,
+              },
+            },
+          },
+        },
       },
     })
 
@@ -244,21 +229,255 @@ async function ensureActiveClassGroup(
   gymId: string,
   classGroupId: string,
 ) {
-  const classGroup =
-    await getClassGroupFromGym(
-      gymId,
-      classGroupId,
-    )
+  const classGroup = await getClassGroupFromGym(
+    gymId,
+    classGroupId,
+  )
 
   if (!classGroup.active) {
     throw new AppError(
       'CLASS_GROUP_INACTIVE',
       409,
-      'Não é possível cadastrar horários em uma turma inativa.',
+      'Não é possível cadastrar um horário para uma turma inativa.',
     )
   }
 
   return classGroup
+}
+
+interface EnsureNoScheduleConflictInput {
+  gymId: string
+  classGroupId: string
+  weekday:
+    | 'SUNDAY'
+    | 'MONDAY'
+    | 'TUESDAY'
+    | 'WEDNESDAY'
+    | 'THURSDAY'
+    | 'FRIDAY'
+    | 'SATURDAY'
+  startTime: string
+  endTime: string
+  room?: string | null
+  validFrom?: string | null
+  validUntil?: string | null
+  ignoredClassScheduleId?: string
+}
+
+async function ensureNoScheduleConflict(
+  input: EnsureNoScheduleConflictInput,
+) {
+  const classGroup = await getClassGroupFromGym(
+    input.gymId,
+    input.classGroupId,
+  )
+
+  const startTime = parseTime(input.startTime)
+  const endTime = parseTime(input.endTime)
+  const validFrom = parseDate(input.validFrom)
+  const validUntil = parseDate(input.validUntil)
+
+  const validityConditions: Prisma.ClassScheduleWhereInput[] =
+    []
+
+  /*
+   * Um período possui conflito quando:
+   *
+   * - o início existente é anterior ou igual ao fim novo;
+   * - o fim existente é posterior ou igual ao início novo.
+   *
+   * Datas nulas são tratadas como períodos sem limite.
+   */
+
+  if (validUntil) {
+    validityConditions.push({
+      OR: [
+        {
+          validFrom: null,
+        },
+
+        {
+          validFrom: {
+            lte: validUntil,
+          },
+        },
+      ],
+    })
+  }
+
+  if (validFrom) {
+    validityConditions.push({
+      OR: [
+        {
+          validUntil: null,
+        },
+
+        {
+          validUntil: {
+            gte: validFrom,
+          },
+        },
+      ],
+    })
+  }
+
+  const conflictingSchedules =
+    await prisma.classSchedule.findMany({
+      where: {
+        gymId: input.gymId,
+        active: true,
+        weekday: input.weekday,
+
+        ...(input.ignoredClassScheduleId
+          ? {
+              id: {
+                not: input.ignoredClassScheduleId,
+              },
+            }
+          : {}),
+
+        /*
+         * Conflito de intervalo:
+         *
+         * horário existente começa antes do novo terminar
+         * e termina depois do novo começar.
+         */
+
+        startTime: {
+          lt: endTime,
+        },
+
+        endTime: {
+          gt: startTime,
+        },
+
+        ...(validityConditions.length > 0
+          ? {
+              AND: validityConditions,
+            }
+          : {}),
+      },
+
+      select: {
+        id: true,
+        classGroupId: true,
+        weekday: true,
+        startTime: true,
+        endTime: true,
+        room: true,
+        validFrom: true,
+        validUntil: true,
+
+        classGroup: {
+          select: {
+            id: true,
+            name: true,
+
+            professors: {
+              select: {
+                professorId: true,
+
+                professor: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+  /*
+   * =========================================================
+   * CONFLITO DA MESMA TURMA
+   * =========================================================
+   */
+
+  const classGroupConflict =
+    conflictingSchedules.find(
+      (schedule) =>
+        schedule.classGroupId === input.classGroupId,
+    )
+
+  if (classGroupConflict) {
+    throw new AppError(
+      'CLASS_SCHEDULE_GROUP_CONFLICT',
+      409,
+      `A turma já possui um horário conflitante entre ${serializeTime(
+        classGroupConflict.startTime,
+      )} e ${serializeTime(
+        classGroupConflict.endTime,
+      )}.`,
+    )
+  }
+
+  /*
+   * =========================================================
+   * CONFLITO DO MESMO LOCAL
+   * =========================================================
+   */
+
+  const normalizedRoom = normalizeRoom(input.room)
+
+  if (normalizedRoom) {
+    const roomConflict =
+      conflictingSchedules.find(
+        (schedule) =>
+          normalizeRoom(schedule.room) ===
+          normalizedRoom,
+      )
+
+    if (roomConflict) {
+      throw new AppError(
+        'CLASS_SCHEDULE_ROOM_CONFLICT',
+        409,
+        `O local "${input.room?.trim()}" já está sendo utilizado pela turma "${roomConflict.classGroup.name}" entre ${serializeTime(
+          roomConflict.startTime,
+        )} e ${serializeTime(
+          roomConflict.endTime,
+        )}.`,
+      )
+    }
+  }
+
+  /*
+   * =========================================================
+   * CONFLITO DE PROFESSOR
+   * =========================================================
+   */
+
+  const professorIds = new Set(
+    classGroup.professors.map(
+      (relation) => relation.professorId,
+    ),
+  )
+
+  if (professorIds.size === 0) {
+    return
+  }
+
+  for (const schedule of conflictingSchedules) {
+    const conflictingProfessor =
+      schedule.classGroup.professors.find(
+        (relation) =>
+          professorIds.has(relation.professorId),
+      )
+
+    if (conflictingProfessor) {
+      throw new AppError(
+        'CLASS_SCHEDULE_PROFESSOR_CONFLICT',
+        409,
+        `O professor "${conflictingProfessor.professor.name}" já está vinculado à turma "${schedule.classGroup.name}" entre ${serializeTime(
+          schedule.startTime,
+        )} e ${serializeTime(
+          schedule.endTime,
+        )}.`,
+      )
+    }
+  }
 }
 
 export async function listClassSchedules(
@@ -277,131 +496,146 @@ export async function listClassSchedules(
     validOn,
   } = query
 
-  const validityDate = validOn
-    ? parseDate(validOn)
-    : null
+  const validOnDate = parseDate(validOn)
 
-  const where: Prisma.ClassScheduleWhereInput =
-    {
-      gymId,
+  const where: Prisma.ClassScheduleWhereInput = {
+    gymId,
 
-      ...(active !== undefined
-        ? {
-            active,
-          }
-        : {}),
+    ...(active !== undefined
+      ? {
+          active,
+        }
+      : {}),
 
-      ...(weekday
-        ? {
-            weekday,
-          }
-        : {}),
+    ...(weekday
+      ? {
+          weekday,
+        }
+      : {}),
 
-      ...(classGroupId
-        ? {
-            classGroupId,
-          }
-        : {}),
+    ...(classGroupId
+      ? {
+          classGroupId,
+        }
+      : {}),
 
-      ...(modalityId
-        ? {
-            classGroup: {
-              modalityId,
-            },
-          }
-        : {}),
+    /*
+     * Os filtros de modalidade e professor precisam
+     * permanecer no mesmo objeto classGroup.
+     */
 
-      ...(professorId
-        ? {
-            classGroup: {
-              professors: {
-                some: {
-                  gymId,
-                  professorId,
+    ...(modalityId || professorId
+      ? {
+          classGroup: {
+            ...(modalityId
+              ? {
+                  modalityId,
+                }
+              : {}),
+
+            ...(professorId
+              ? {
+                  professors: {
+                    some: {
+                      gymId,
+                      professorId,
+                    },
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
+
+    ...(validOnDate
+      ? {
+          AND: [
+            {
+              OR: [
+                {
+                  validFrom: null,
                 },
+
+                {
+                  validFrom: {
+                    lte: validOnDate,
+                  },
+                },
+              ],
+            },
+
+            {
+              OR: [
+                {
+                  validUntil: null,
+                },
+
+                {
+                  validUntil: {
+                    gte: validOnDate,
+                  },
+                },
+              ],
+            },
+          ],
+        }
+      : {}),
+
+    ...(search
+      ? {
+          OR: [
+            {
+              room: {
+                contains: search,
+                mode: 'insensitive',
               },
             },
-          }
-        : {}),
 
-      ...(search
-        ? {
-            OR: [
-              {
-                room: {
+            {
+              notes: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+
+            {
+              classGroup: {
+                name: {
                   contains: search,
-
                   mode: 'insensitive',
                 },
               },
+            },
 
-              {
-                notes: {
-                  contains: search,
-
-                  mode: 'insensitive',
-                },
-              },
-
-              {
-                classGroup: {
+            {
+              classGroup: {
+                modality: {
                   name: {
                     contains: search,
-
                     mode: 'insensitive',
                   },
                 },
               },
+            },
 
-              {
-                classGroup: {
-                  modality: {
-                    name: {
-                      contains: search,
-
-                      mode: 'insensitive',
+            {
+              classGroup: {
+                professors: {
+                  some: {
+                    professor: {
+                      name: {
+                        contains: search,
+                        mode: 'insensitive',
+                      },
                     },
                   },
                 },
               },
-            ],
-          }
-        : {}),
-
-      ...(validityDate
-        ? {
-            AND: [
-              {
-                OR: [
-                  {
-                    validFrom: null,
-                  },
-
-                  {
-                    validFrom: {
-                      lte: validityDate,
-                    },
-                  },
-                ],
-              },
-
-              {
-                OR: [
-                  {
-                    validUntil: null,
-                  },
-
-                  {
-                    validUntil: {
-                      gte: validityDate,
-                    },
-                  },
-                ],
-              },
-            ],
-          }
-        : {}),
-    }
+            },
+          ],
+        }
+      : {}),
+  }
 
   const [classSchedules, total] =
     await prisma.$transaction([
@@ -437,17 +671,15 @@ export async function listClassSchedules(
     ])
 
   return {
-    classSchedules:
-      classSchedules.map(
-        serializeClassSchedule,
-      ),
+    classSchedules: classSchedules.map(
+      serializeClassSchedule,
+    ),
 
     pagination: {
       page,
       limit,
       total,
-      totalPages:
-        Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limit),
     },
   }
 }
@@ -455,20 +687,39 @@ export async function listClassSchedules(
 export async function listClassGroupSchedules(
   gymId: string,
   classGroupId: string,
-  query: Omit<
-    ListClassSchedulesQuery,
-    'classGroupId'
-  >,
 ) {
   await getClassGroupFromGym(
     gymId,
     classGroupId,
   )
 
-  return listClassSchedules(gymId, {
-    ...query,
-    classGroupId,
-  })
+  const classSchedules =
+    await prisma.classSchedule.findMany({
+      where: {
+        gymId,
+        classGroupId,
+      },
+
+      orderBy: [
+        {
+          active: 'desc',
+        },
+
+        {
+          weekday: 'asc',
+        },
+
+        {
+          startTime: 'asc',
+        },
+      ],
+
+      select: classScheduleSelect,
+    })
+
+  return classSchedules.map(
+    serializeClassSchedule,
+  )
 }
 
 export async function getClassScheduleById(
@@ -493,9 +744,7 @@ export async function getClassScheduleById(
     )
   }
 
-  return serializeClassSchedule(
-    classSchedule,
-  )
+  return serializeClassSchedule(classSchedule)
 }
 
 export async function createClassSchedule(
@@ -507,47 +756,35 @@ export async function createClassSchedule(
     input.classGroupId,
   )
 
+  await ensureNoScheduleConflict({
+    gymId,
+    classGroupId: input.classGroupId,
+    weekday: input.weekday,
+    startTime: input.startTime,
+    endTime: input.endTime,
+    room: input.room,
+    validFrom: input.validFrom,
+    validUntil: input.validUntil,
+  })
+
   const classSchedule =
     await prisma.classSchedule.create({
       data: {
         gymId,
-
-        classGroupId:
-          input.classGroupId,
-
+        classGroupId: input.classGroupId,
         weekday: input.weekday,
-
-        startTime: parseTime(
-          input.startTime,
-        ),
-
-        endTime: parseTime(
-          input.endTime,
-        ),
-
-        room: normalizeOptionalText(
-          input.room,
-        ),
-
-        notes: normalizeOptionalText(
-          input.notes,
-        ),
-
-        validFrom: parseDate(
-          input.validFrom,
-        ),
-
-        validUntil: parseDate(
-          input.validUntil,
-        ),
+        startTime: parseTime(input.startTime),
+        endTime: parseTime(input.endTime),
+        room: normalizeOptionalText(input.room),
+        notes: normalizeOptionalText(input.notes),
+        validFrom: parseDate(input.validFrom),
+        validUntil: parseDate(input.validUntil),
       },
 
       select: classScheduleSelect,
     })
 
-  return serializeClassSchedule(
-    classSchedule,
-  )
+  return serializeClassSchedule(classSchedule)
 }
 
 export async function updateClassSchedule(
@@ -555,15 +792,36 @@ export async function updateClassSchedule(
   classScheduleId: string,
   input: UpdateClassScheduleBody,
 ) {
-  await getClassScheduleById(
-    gymId,
-    classScheduleId,
-  )
+  const currentClassSchedule =
+    await getClassScheduleById(
+      gymId,
+      classScheduleId,
+    )
 
   await ensureActiveClassGroup(
     gymId,
     input.classGroupId,
   )
+
+  /*
+   * Horários inativos podem ser editados livremente.
+   * O conflito será validado quando forem reativados.
+   */
+
+  if (currentClassSchedule.active) {
+    await ensureNoScheduleConflict({
+      gymId,
+      classGroupId: input.classGroupId,
+      weekday: input.weekday,
+      startTime: input.startTime,
+      endTime: input.endTime,
+      room: input.room,
+      validFrom: input.validFrom,
+      validUntil: input.validUntil,
+      ignoredClassScheduleId:
+        classScheduleId,
+    })
+  }
 
   const classSchedule =
     await prisma.classSchedule.update({
@@ -572,42 +830,20 @@ export async function updateClassSchedule(
       },
 
       data: {
-        classGroupId:
-          input.classGroupId,
-
+        classGroupId: input.classGroupId,
         weekday: input.weekday,
-
-        startTime: parseTime(
-          input.startTime,
-        ),
-
-        endTime: parseTime(
-          input.endTime,
-        ),
-
-        room: normalizeOptionalText(
-          input.room,
-        ),
-
-        notes: normalizeOptionalText(
-          input.notes,
-        ),
-
-        validFrom: parseDate(
-          input.validFrom,
-        ),
-
-        validUntil: parseDate(
-          input.validUntil,
-        ),
+        startTime: parseTime(input.startTime),
+        endTime: parseTime(input.endTime),
+        room: normalizeOptionalText(input.room),
+        notes: normalizeOptionalText(input.notes),
+        validFrom: parseDate(input.validFrom),
+        validUntil: parseDate(input.validUntil),
       },
 
       select: classScheduleSelect,
     })
 
-  return serializeClassSchedule(
-    classSchedule,
-  )
+  return serializeClassSchedule(classSchedule)
 }
 
 export async function updateClassScheduleStatus(
@@ -621,11 +857,31 @@ export async function updateClassScheduleStatus(
       classScheduleId,
     )
 
-  if (input.active) {
+  if (
+    input.active &&
+    !currentClassSchedule.active
+  ) {
     await ensureActiveClassGroup(
       gymId,
       currentClassSchedule.classGroupId,
     )
+
+    await ensureNoScheduleConflict({
+      gymId,
+      classGroupId:
+        currentClassSchedule.classGroupId,
+      weekday: currentClassSchedule.weekday,
+      startTime:
+        currentClassSchedule.startTime,
+      endTime: currentClassSchedule.endTime,
+      room: currentClassSchedule.room,
+      validFrom:
+        currentClassSchedule.validFrom,
+      validUntil:
+        currentClassSchedule.validUntil,
+      ignoredClassScheduleId:
+        classScheduleId,
+    })
   }
 
   const classSchedule =
@@ -641,7 +897,5 @@ export async function updateClassScheduleStatus(
       select: classScheduleSelect,
     })
 
-  return serializeClassSchedule(
-    classSchedule,
-  )
+  return serializeClassSchedule(classSchedule)
 }
