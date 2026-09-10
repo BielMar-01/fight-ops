@@ -1,0 +1,282 @@
+.weekly-schedule {
+  width: 100%;
+  min-width: 0;
+}
+
+.weekly-schedule-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-color: #3f3f46 #18181b;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+
+.weekly-schedule-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.weekly-schedule-scroll::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: #18181b;
+}
+
+.weekly-schedule-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #3f3f46;
+}
+
+.weekly-schedule-scroll::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+.weekly-schedule-grid {
+  display: grid;
+  min-width: 1540px;
+  grid-template-columns:
+    repeat(7, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.weekly-schedule-day {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #27272a;
+  border-radius: 13px;
+  background: #18181b;
+}
+
+.weekly-schedule-day-header {
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  padding: 13px;
+  border-bottom: 1px solid #27272a;
+  background: #111113;
+  text-align: center;
+}
+
+.weekly-schedule-day-header > span {
+  color: #ef4444;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.weekly-schedule-day-header strong {
+  color: #fafafa;
+  font-size: 0.86rem;
+}
+
+.weekly-schedule-day-header small {
+  color: #71717a;
+  font-size: 0.69rem;
+}
+
+.weekly-schedule-day-content {
+  display: flex;
+  min-height: 280px;
+  flex-direction: column;
+  gap: 9px;
+  padding: 9px;
+}
+
+.weekly-schedule-empty {
+  display: flex;
+  min-height: 110px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 1px dashed #3f3f46;
+  border-radius: 9px;
+  color: #71717a;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.weekly-schedule-card {
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+  border: 1px solid #3f3f46;
+  border-radius: 10px;
+  background: #09090b;
+}
+
+.weekly-schedule-card-inactive {
+  opacity: 0.62;
+}
+
+.weekly-schedule-card-time {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.weekly-schedule-card-time strong {
+  color: #fafafa;
+  font-size: 0.8rem;
+}
+
+.weekly-schedule-card-time span {
+  color: #71717a;
+  font-size: 0.66rem;
+}
+
+.weekly-schedule-card-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.weekly-schedule-card-heading > span {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  margin-top: 4px;
+  border-radius: 50%;
+}
+
+.weekly-schedule-card-heading h3 {
+  min-width: 0;
+  margin: 0;
+  color: #f4f4f5;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.weekly-schedule-card-modality {
+  margin: 5px 0 10px 15px;
+  color: #a1a1aa;
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.weekly-schedule-card-information {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.weekly-schedule-card-information div {
+  min-width: 0;
+}
+
+.weekly-schedule-card-information dt {
+  margin-bottom: 2px;
+  color: #71717a;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.weekly-schedule-card-information dd {
+  margin: 0;
+  color: #d4d4d8;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.weekly-schedule-card-status {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 4px 7px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.weekly-schedule-card-status-active {
+  border-color:
+    rgba(34, 197, 94, 0.35);
+  background:
+    rgba(34, 197, 94, 0.08);
+  color: #86efac;
+}
+
+.weekly-schedule-card-status-inactive {
+  border-color:
+    rgba(161, 161, 170, 0.35);
+  background:
+    rgba(161, 161, 170, 0.08);
+  color: #a1a1aa;
+}
+
+.weekly-schedule-card-actions {
+  display: grid;
+  grid-template-columns:
+    1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.weekly-schedule-card-actions button {
+  min-width: 0;
+  padding: 6px 5px;
+  border: 1px solid #3f3f46;
+  border-radius: 7px;
+  background: transparent;
+  color: #d4d4d8;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.weekly-schedule-card-actions button:hover:not(:disabled) {
+  border-color: #ef4444;
+  color: #f87171;
+}
+
+.weekly-schedule-card-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 760px) {
+  .weekly-schedule-grid {
+    min-width: 1330px;
+    grid-template-columns:
+      repeat(
+        7,
+        minmax(180px, 1fr)
+      );
+  }
+
+  .weekly-schedule-scroll {
+    width: calc(100% + 36px);
+    box-sizing: border-box;
+    margin-right: -18px;
+    margin-left: -18px;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .weekly-schedule-grid {
+    min-width: 1260px;
+    grid-template-columns:
+      repeat(
+        7,
+        minmax(170px, 1fr)
+      );
+  }
+
+  .weekly-schedule-scroll {
+    width: calc(100% + 28px);
+    margin-right: -14px;
+    margin-left: -14px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+}
