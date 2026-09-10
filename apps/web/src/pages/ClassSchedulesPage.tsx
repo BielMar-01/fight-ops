@@ -6,11 +6,16 @@ import {
   useState,
 } from 'react'
 
+import { ManageClassScheduleModal } from '../components/class-schedules/ManageClassScheduleModal'
+
 import { useGym } from '../contexts/GymContext'
 
 import { getClassGroups } from '../services/class-group.service'
 
-import { getClassSchedules } from '../services/class-schedule.service'
+import {
+  getClassSchedules,
+  updateClassScheduleStatus,
+} from '../services/class-schedule.service'
 
 import { getModalities } from '../services/modality.service'
 
@@ -137,7 +142,7 @@ function getErrorMessage(
     return error.message
   }
 
-  return 'Não foi possível carregar os horários.'
+  return 'Não foi possível concluir a operação.'
 }
 
 export function ClassSchedulesPage() {
@@ -218,6 +223,28 @@ export function ClassSchedulesPage() {
   const [
     error,
     setError,
+  ] = useState<string | null>(null)
+
+  const [
+    actionError,
+    setActionError,
+  ] = useState<string | null>(null)
+
+  const [
+    modalOpen,
+    setModalOpen,
+  ] = useState(false)
+
+  const [
+    selectedClassSchedule,
+    setSelectedClassSchedule,
+  ] = useState<ClassSchedule | null>(
+    null,
+  )
+
+  const [
+    updatingStatusId,
+    setUpdatingStatusId,
   ] = useState<string | null>(null)
 
   const canViewClassSchedules =
@@ -338,9 +365,11 @@ export function ClassSchedulesPage() {
         !canViewClassSchedules
       ) {
         setClassSchedules([])
+
         setPagination(
           initialPagination,
         )
+
         setLoading(false)
 
         return
@@ -431,6 +460,9 @@ export function ClassSchedulesPage() {
     setModalityFilter('all')
     setClassGroupFilter('all')
     setValidOnFilter('')
+    setSelectedClassSchedule(null)
+    setModalOpen(false)
+    setActionError(null)
   }, [activeGym?.id])
 
   useEffect(() => {
@@ -462,6 +494,128 @@ export function ClassSchedulesPage() {
     setClassGroupFilter('all')
     setValidOnFilter('')
     setPage(1)
+  }
+
+  function handleOpenCreateModal() {
+    setSelectedClassSchedule(null)
+    setActionError(null)
+    setModalOpen(true)
+  }
+
+  function handleOpenEditModal(
+    classSchedule: ClassSchedule,
+  ) {
+    setSelectedClassSchedule(
+      classSchedule,
+    )
+
+    setActionError(null)
+    setModalOpen(true)
+  }
+
+  function handleCloseModal() {
+    setModalOpen(false)
+    setSelectedClassSchedule(null)
+  }
+
+  function handleScheduleSaved(
+    classSchedule: ClassSchedule,
+  ) {
+    setModalOpen(false)
+    setSelectedClassSchedule(null)
+    setActionError(null)
+
+    setClassSchedules(
+      (currentSchedules) => {
+        const scheduleExists =
+          currentSchedules.some(
+            (schedule) =>
+              schedule.id ===
+              classSchedule.id,
+          )
+
+        if (scheduleExists) {
+          return currentSchedules.map(
+            (schedule) =>
+              schedule.id ===
+              classSchedule.id
+                ? classSchedule
+                : schedule,
+          )
+        }
+
+        return [
+          classSchedule,
+          ...currentSchedules,
+        ]
+      },
+    )
+
+    void loadClassSchedules()
+  }
+
+  async function handleUpdateStatus(
+    classSchedule: ClassSchedule,
+  ) {
+    if (
+      !activeGym ||
+      updatingStatusId
+    ) {
+      return
+    }
+
+    const nextStatus =
+      !classSchedule.active
+
+    const action =
+      nextStatus
+        ? 'ativar'
+        : 'inativar'
+
+    const confirmed =
+      window.confirm(
+        `Deseja realmente ${action} o horário da turma "${classSchedule.classGroup.name}"?`,
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+    setUpdatingStatusId(
+      classSchedule.id,
+    )
+
+    setActionError(null)
+
+    try {
+      const response =
+        await updateClassScheduleStatus(
+          activeGym.id,
+          classSchedule.id,
+          {
+            active: nextStatus,
+          },
+        )
+
+      setClassSchedules(
+        (currentSchedules) =>
+          currentSchedules.map(
+            (schedule) =>
+              schedule.id ===
+              response.classSchedule.id
+                ? response.classSchedule
+                : schedule,
+          ),
+      )
+
+      await loadClassSchedules()
+    } catch (statusError) {
+      setActionError(
+        getErrorMessage(statusError),
+      )
+    } finally {
+      setUpdatingStatusId(null)
+    }
   }
 
   function handlePreviousPage() {
@@ -540,8 +694,9 @@ export function ClassSchedulesPage() {
           <button
             className="class-schedules-button class-schedules-button-primary"
             type="button"
-            title="Disponível na próxima etapa"
-            disabled
+            onClick={
+              handleOpenCreateModal
+            }
           >
             Novo horário
           </button>
@@ -784,6 +939,27 @@ export function ClassSchedulesPage() {
         </form>
       </section>
 
+      {actionError && (
+        <div
+          className="class-schedules-action-error"
+          role="alert"
+        >
+          <span>
+            {actionError}
+          </span>
+
+          <button
+            type="button"
+            aria-label="Fechar mensagem"
+            onClick={() =>
+              setActionError(null)
+            }
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {loading && (
         <section className="class-schedules-state">
           <div className="class-schedules-spinner" />
@@ -818,7 +994,8 @@ export function ClassSchedulesPage() {
 
       {!loading &&
         !error &&
-        sortedClassSchedules.length === 0 && (
+        sortedClassSchedules.length ===
+          0 && (
           <section className="class-schedules-state">
             <strong>
               Nenhum horário encontrado
@@ -837,156 +1014,176 @@ export function ClassSchedulesPage() {
           <>
             <section className="class-schedules-list">
               {sortedClassSchedules.map(
-                (classSchedule) => (
-                  <article
-                    className={`class-schedule-card ${
-                      classSchedule.active
-                        ? ''
-                        : 'class-schedule-card-inactive'
-                    }`}
-                    key={
-                      classSchedule.id
-                    }
-                  >
-                    <div className="class-schedule-time">
-                      <span>
-                        {
-                          weekdayLabels[
-                            classSchedule
-                              .weekday
-                          ]
-                        }
-                      </span>
+                (classSchedule) => {
+                  const updatingStatus =
+                    updatingStatusId ===
+                    classSchedule.id
 
-                      <strong>
-                        {
-                          classSchedule.startTime
-                        }
-                        {' — '}
-                        {
-                          classSchedule.endTime
-                        }
-                      </strong>
-                    </div>
+                  return (
+                    <article
+                      className={`class-schedule-card ${
+                        classSchedule.active
+                          ? ''
+                          : 'class-schedule-card-inactive'
+                      }`}
+                      key={
+                        classSchedule.id
+                      }
+                    >
+                      <div className="class-schedule-time">
+                        <span>
+                          {
+                            weekdayLabels[
+                              classSchedule
+                                .weekday
+                            ]
+                          }
+                        </span>
 
-                    <div className="class-schedule-main">
-                      <div className="class-schedule-heading">
-                        <div>
-                          <span
-                            className="class-schedule-modality-color"
-                            style={{
-                              backgroundColor:
+                        <strong>
+                          {
+                            classSchedule.startTime
+                          }
+                          {' — '}
+                          {
+                            classSchedule.endTime
+                          }
+                        </strong>
+                      </div>
+
+                      <div className="class-schedule-main">
+                        <div className="class-schedule-heading">
+                          <div>
+                            <span
+                              className="class-schedule-modality-color"
+                              style={{
+                                backgroundColor:
+                                  classSchedule
+                                    .classGroup
+                                    .modality
+                                    .color ||
+                                  '#ef4444',
+                              }}
+                            />
+
+                            <h2>
+                              {
                                 classSchedule
                                   .classGroup
-                                  .modality
-                                  .color ||
-                                '#ef4444',
-                            }}
-                          />
+                                  .name
+                              }
+                            </h2>
+                          </div>
 
-                          <h2>
-                            {
-                              classSchedule
-                                .classGroup
-                                .name
-                            }
-                          </h2>
-                        </div>
-
-                        <span
-                          className={`class-schedule-status ${
-                            classSchedule.active
-                              ? 'class-schedule-status-active'
-                              : 'class-schedule-status-inactive'
-                          }`}
-                        >
-                          {classSchedule.active
-                            ? 'Ativo'
-                            : 'Inativo'}
-                        </span>
-                      </div>
-
-                      <p className="class-schedule-modality">
-                        {
-                          classSchedule
-                            .classGroup
-                            .modality.name
-                        }
-                      </p>
-
-                      <div className="class-schedule-information">
-                        <div>
-                          <span>
-                            Professores
-                          </span>
-
-                          <strong>
-                            {getProfessorNames(
-                              classSchedule,
-                            )}
-                          </strong>
-                        </div>
-
-                        <div>
-                          <span>
-                            Local
-                          </span>
-
-                          <strong>
-                            {classSchedule.room ||
-                              'Não informado'}
-                          </strong>
-                        </div>
-
-                        <div>
-                          <span>
-                            Vigência
-                          </span>
-
-                          <strong>
-                            {formatDate(
-                              classSchedule.validFrom,
-                            )}
-                            {' até '}
-                            {formatDate(
-                              classSchedule.validUntil,
-                            )}
-                          </strong>
-                        </div>
-                      </div>
-
-                      {classSchedule.notes && (
-                        <p className="class-schedule-notes">
-                          {
-                            classSchedule.notes
-                          }
-                        </p>
-                      )}
-
-                      {canManageClassSchedules && (
-                        <div className="class-schedule-actions">
-                          <button
-                            type="button"
-                            disabled
-                            title="Disponível na próxima etapa"
-                          >
-                            Editar
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled
-                            title="Disponível na próxima etapa"
+                          <span
+                            className={`class-schedule-status ${
+                              classSchedule.active
+                                ? 'class-schedule-status-active'
+                                : 'class-schedule-status-inactive'
+                            }`}
                           >
                             {classSchedule.active
-                              ? 'Inativar'
-                              : 'Ativar'}
-                          </button>
+                              ? 'Ativo'
+                              : 'Inativo'}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  </article>
-                ),
+
+                        <p className="class-schedule-modality">
+                          {
+                            classSchedule
+                              .classGroup
+                              .modality.name
+                          }
+                        </p>
+
+                        <div className="class-schedule-information">
+                          <div>
+                            <span>
+                              Professores
+                            </span>
+
+                            <strong>
+                              {getProfessorNames(
+                                classSchedule,
+                              )}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>
+                              Local
+                            </span>
+
+                            <strong>
+                              {classSchedule.room ||
+                                'Não informado'}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>
+                              Vigência
+                            </span>
+
+                            <strong>
+                              {formatDate(
+                                classSchedule.validFrom,
+                              )}
+                              {' até '}
+                              {formatDate(
+                                classSchedule.validUntil,
+                              )}
+                            </strong>
+                          </div>
+                        </div>
+
+                        {classSchedule.notes && (
+                          <p className="class-schedule-notes">
+                            {
+                              classSchedule.notes
+                            }
+                          </p>
+                        )}
+
+                        {canManageClassSchedules && (
+                          <div className="class-schedule-actions">
+                            <button
+                              type="button"
+                              disabled={
+                                updatingStatus
+                              }
+                              onClick={() =>
+                                handleOpenEditModal(
+                                  classSchedule,
+                                )
+                              }
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={
+                                updatingStatus
+                              }
+                              onClick={() =>
+                                void handleUpdateStatus(
+                                  classSchedule,
+                                )
+                              }
+                            >
+                              {updatingStatus
+                                ? 'Salvando...'
+                                : classSchedule.active
+                                  ? 'Inativar'
+                                  : 'Ativar'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  )
+                },
               )}
             </section>
 
@@ -1031,6 +1228,22 @@ export function ClassSchedulesPage() {
             </footer>
           </>
         )}
+
+      {modalOpen && (
+        <ManageClassScheduleModal
+          gymId={activeGym.id}
+          classGroups={classGroups}
+          classSchedule={
+            selectedClassSchedule
+          }
+          onClose={
+            handleCloseModal
+          }
+          onSaved={
+            handleScheduleSaved
+          }
+        />
+      )}
     </main>
   )
 }
