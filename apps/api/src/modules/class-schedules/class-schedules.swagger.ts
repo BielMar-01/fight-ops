@@ -311,14 +311,12 @@ const classScheduleSchema = {
       type: 'string',
       pattern:
         '^([01]\\d|2[0-3]):[0-5]\\d$',
-      example: '19:00',
     },
 
     endTime: {
       type: 'string',
       pattern:
         '^([01]\\d|2[0-3]):[0-5]\\d$',
-      example: '20:00',
     },
 
     room: nullableStringSchema,
@@ -384,39 +382,32 @@ const classScheduleBodySchema = {
       type: 'string',
       pattern:
         '^([01]\\d|2[0-3]):[0-5]\\d$',
-      example: '19:00',
     },
 
     endTime: {
       type: 'string',
       pattern:
         '^([01]\\d|2[0-3]):[0-5]\\d$',
-      example: '20:00',
     },
 
     room: {
       type: 'string',
       maxLength: 150,
-      example: 'Tatame 1',
     },
 
     notes: {
       type: 'string',
       maxLength: 5000,
-      example:
-        'Aula recorrente de segunda-feira.',
     },
 
     validFrom: {
       type: 'string',
       format: 'date',
-      example: '2026-09-01',
     },
 
     validUntil: {
       type: 'string',
       format: 'date',
-      example: '2026-12-31',
     },
   },
 
@@ -475,7 +466,6 @@ const listClassSchedulesQuerySchema = {
     validOn: {
       type: 'string',
       format: 'date',
-      example: '2026-09-09',
     },
   },
 }
