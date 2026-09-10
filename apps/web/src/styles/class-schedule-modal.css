@@ -261,3 +261,68 @@
     width: 100%;
   }
 }
+
+@media (max-width: 639px) {
+  .class-schedule-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .class-schedule-modal {
+    width: 100%;
+    max-width: none;
+    max-height: 94dvh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius:
+      18px 18px 0 0;
+  }
+
+  .class-schedule-modal-header {
+    padding: 16px;
+  }
+
+  .class-schedule-modal-form {
+    padding:
+      16px
+      16px
+      calc(
+        16px +
+        env(safe-area-inset-bottom)
+      );
+  }
+
+  .class-schedule-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .class-schedule-form-field-full {
+    grid-column: auto;
+  }
+
+  .class-schedule-form-spacer {
+    display: none;
+  }
+
+  .class-schedule-modal-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    flex-direction: column-reverse;
+    padding-top: 12px;
+    background: #18181b;
+  }
+
+  .class-schedule-modal-button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-height: 600px) {
+  .class-schedule-modal {
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}

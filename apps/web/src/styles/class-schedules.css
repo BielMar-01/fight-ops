@@ -904,3 +904,121 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+@media (max-width: 520px) {
+  .class-schedules-page {
+    width: 100%;
+    min-width: 0;
+    padding:
+      14px
+      max(14px, env(safe-area-inset-right))
+      calc(
+        20px +
+        env(safe-area-inset-bottom)
+      )
+      max(14px, env(safe-area-inset-left));
+  }
+
+  .class-schedules-header {
+    gap: 16px;
+  }
+
+  .class-schedules-header h1 {
+    font-size: 1.55rem;
+  }
+
+  .class-schedules-header p {
+    font-size: 0.86rem;
+  }
+
+  .class-schedules-summary {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .class-schedules-summary article {
+    min-width: 0;
+    padding: 13px;
+  }
+
+  .class-schedules-summary strong {
+    font-size: 1.3rem;
+  }
+
+  .class-schedules-panel {
+    padding: 13px;
+  }
+
+  .class-schedules-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .class-schedules-field,
+  .class-schedules-field-search,
+  .class-schedules-filter-actions {
+    grid-column: auto;
+  }
+
+  .class-schedules-filter-actions {
+    flex-direction: column;
+  }
+
+  .class-schedules-filter-actions .class-schedules-button {
+    width: 100%;
+  }
+
+  .class-schedule-card {
+    grid-template-columns: 1fr;
+  }
+
+  .class-schedule-time {
+    padding: 14px;
+    border-right: 0;
+    border-bottom: 1px solid #27272a;
+  }
+
+  .class-schedule-main {
+    padding: 14px;
+  }
+
+  .class-schedule-heading {
+    flex-direction: column;
+  }
+
+  .class-schedule-information {
+    grid-template-columns: 1fr;
+  }
+
+  .class-schedule-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .class-schedule-actions button {
+    min-height: 40px;
+  }
+
+  .class-schedules-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .class-schedules-pagination > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .class-schedules-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .class-schedule-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .class-schedules-pagination > div {
+    grid-template-columns: 1fr;
+  }
+}

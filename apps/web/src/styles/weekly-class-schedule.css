@@ -280,3 +280,56 @@
     padding-left: 14px;
   }
 }
+
+@media (max-width: 760px) {
+  .weekly-schedule-scroll {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: visible;
+  }
+
+  .weekly-schedule-grid {
+    min-width: 0;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .weekly-schedule-day {
+    width: 100%;
+  }
+
+  .weekly-schedule-day-header {
+    min-height: auto;
+    align-items: flex-start;
+    padding: 14px;
+    text-align: left;
+  }
+
+  .weekly-schedule-day-content {
+    min-height: auto;
+    padding: 10px;
+  }
+
+  .weekly-schedule-empty {
+    min-height: 70px;
+  }
+
+  .weekly-schedule-card {
+    padding: 14px;
+  }
+
+  .weekly-schedule-card-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .weekly-schedule-card-actions button {
+    min-height: 38px;
+  }
+}
+
+@media (max-width: 380px) {
+  .weekly-schedule-card-actions {
+    grid-template-columns: 1fr;
+  }
+}
