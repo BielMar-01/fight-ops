@@ -1,5 +1,3 @@
-import { apiRequest } from './api'
-
 import type {
   CreateClassScheduleInput,
   GetClassGroupSchedulesResponse,
@@ -10,8 +8,10 @@ import type {
   UpdateClassScheduleStatusInput,
 } from '../types/class-schedule'
 
+import { apiRequest } from './api'
+
 function buildClassScheduleQuery(
-  filters: GetClassSchedulesFilters,
+  filters: GetClassSchedulesFilters = {},
 ) {
   const searchParams =
     new URLSearchParams()
@@ -126,6 +126,11 @@ export async function createClassSchedule(
     {
       method: 'POST',
 
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
       body: JSON.stringify(input),
     },
   )
@@ -141,6 +146,11 @@ export async function updateClassSchedule(
     {
       method: 'PUT',
 
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
+
       body: JSON.stringify(input),
     },
   )
@@ -155,6 +165,11 @@ export async function updateClassScheduleStatus(
     `/gyms/${gymId}/class-schedules/${classScheduleId}/status`,
     {
       method: 'PATCH',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+      },
 
       body: JSON.stringify(input),
     },
