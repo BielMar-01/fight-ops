@@ -8,6 +8,8 @@ import {
 
 import { ManageClassScheduleModal } from '../components/class-schedules/ManageClassScheduleModal'
 
+import { WeeklyClassScheduleView } from '../components/class-schedules/WeeklyClassScheduleView'
+
 import { useGym } from '../contexts/GymContext'
 
 import { getClassGroups } from '../services/class-group.service'
@@ -36,6 +38,8 @@ import type {
 import '../styles/class-schedules.css'
 
 const PAGE_LIMIT = 10
+
+const WEEKLY_LIMIT = 100
 
 const initialPagination: ClassSchedulePagination = {
   page: 1,
@@ -78,6 +82,10 @@ type StatusFilter =
 type WeekdayFilter =
   | 'all'
   | Weekday
+
+type ViewMode =
+  | 'list'
+  | 'weekly'
 
 function getActiveFilter(
   status: StatusFilter,
@@ -211,6 +219,11 @@ export function ClassSchedulesPage() {
   ] = useState('')
 
   const [
+    viewMode,
+    setViewMode,
+  ] = useState<ViewMode>('list')
+
+  const [
     loading,
     setLoading,
   ] = useState(true)
@@ -277,30 +290,31 @@ export function ClassSchedulesPage() {
       })
     }, [classSchedules])
 
-  const summary = useMemo(() => {
-    return {
-      total:
-        pagination.total,
+  const summary =
+    useMemo(() => {
+      return {
+        total:
+          pagination.total,
 
-      visible:
-        classSchedules.length,
+        visible:
+          classSchedules.length,
 
-      active:
-        classSchedules.filter(
-          (schedule) =>
-            schedule.active,
-        ).length,
+        active:
+          classSchedules.filter(
+            (schedule) =>
+              schedule.active,
+          ).length,
 
-      inactive:
-        classSchedules.filter(
-          (schedule) =>
-            !schedule.active,
-        ).length,
-    }
-  }, [
-    classSchedules,
-    pagination.total,
-  ])
+        inactive:
+          classSchedules.filter(
+            (schedule) =>
+              !schedule.active,
+          ).length,
+      }
+    }, [
+      classSchedules,
+      pagination.total,
+    ])
 
   const loadOptions =
     useCallback(async () => {
@@ -383,8 +397,15 @@ export function ClassSchedulesPage() {
           await getClassSchedules(
             activeGym.id,
             {
-              page,
-              limit: PAGE_LIMIT,
+              page:
+                viewMode === 'weekly'
+                  ? 1
+                  : page,
+
+              limit:
+                viewMode === 'weekly'
+                  ? WEEKLY_LIMIT
+                  : PAGE_LIMIT,
 
               search:
                 appliedSearch ||
@@ -448,6 +469,7 @@ export function ClassSchedulesPage() {
       page,
       statusFilter,
       validOnFilter,
+      viewMode,
       weekdayFilter,
     ])
 
@@ -460,6 +482,7 @@ export function ClassSchedulesPage() {
     setModalityFilter('all')
     setClassGroupFilter('all')
     setValidOnFilter('')
+    setViewMode('list')
     setSelectedClassSchedule(null)
     setModalOpen(false)
     setActionError(null)
@@ -636,6 +659,13 @@ export function ClassSchedulesPage() {
     )
   }
 
+  function handleChangeViewMode(
+    nextViewMode: ViewMode,
+  ) {
+    setViewMode(nextViewMode)
+    setPage(1)
+  }
+
   if (!activeGym) {
     return (
       <main className="class-schedules-page">
@@ -716,7 +746,7 @@ export function ClassSchedulesPage() {
 
         <article>
           <span>
-            Nesta página
+            Em exibição
           </span>
 
           <strong>
@@ -726,7 +756,7 @@ export function ClassSchedulesPage() {
 
         <article>
           <span>
-            Ativos na página
+            Ativos exibidos
           </span>
 
           <strong>
@@ -736,7 +766,7 @@ export function ClassSchedulesPage() {
 
         <article>
           <span>
-            Inativos na página
+            Inativos exibidos
           </span>
 
           <strong>
@@ -939,6 +969,52 @@ export function ClassSchedulesPage() {
         </form>
       </section>
 
+      <div className="class-schedules-view-options">
+        <span>
+          Visualização
+        </span>
+
+        <div>
+          <button
+            type="button"
+            className={
+              viewMode === 'list'
+                ? 'active'
+                : ''
+            }
+            aria-pressed={
+              viewMode === 'list'
+            }
+            onClick={() =>
+              handleChangeViewMode(
+                'list',
+              )
+            }
+          >
+            Lista
+          </button>
+
+          <button
+            type="button"
+            className={
+              viewMode === 'weekly'
+                ? 'active'
+                : ''
+            }
+            aria-pressed={
+              viewMode === 'weekly'
+            }
+            onClick={() =>
+              handleChangeViewMode(
+                'weekly',
+              )
+            }
+          >
+            Semana
+          </button>
+        </div>
+      </div>
+
       {actionError && (
         <div
           className="class-schedules-action-error"
@@ -1010,222 +1086,265 @@ export function ClassSchedulesPage() {
 
       {!loading &&
         !error &&
-        sortedClassSchedules.length > 0 && (
+        sortedClassSchedules.length >
+          0 && (
           <>
-            <section className="class-schedules-list">
-              {sortedClassSchedules.map(
-                (classSchedule) => {
-                  const updatingStatus =
-                    updatingStatusId ===
-                    classSchedule.id
+            {viewMode === 'list' && (
+              <section className="class-schedules-list">
+                {sortedClassSchedules.map(
+                  (classSchedule) => {
+                    const updatingStatus =
+                      updatingStatusId ===
+                      classSchedule.id
 
-                  return (
-                    <article
-                      className={`class-schedule-card ${
-                        classSchedule.active
-                          ? ''
-                          : 'class-schedule-card-inactive'
-                      }`}
-                      key={
-                        classSchedule.id
-                      }
-                    >
-                      <div className="class-schedule-time">
-                        <span>
-                          {
-                            weekdayLabels[
-                              classSchedule
-                                .weekday
-                            ]
-                          }
-                        </span>
+                    return (
+                      <article
+                        className={`class-schedule-card ${
+                          classSchedule.active
+                            ? ''
+                            : 'class-schedule-card-inactive'
+                        }`}
+                        key={
+                          classSchedule.id
+                        }
+                      >
+                        <div className="class-schedule-time">
+                          <span>
+                            {
+                              weekdayLabels[
+                                classSchedule
+                                  .weekday
+                              ]
+                            }
+                          </span>
 
-                        <strong>
-                          {
-                            classSchedule.startTime
-                          }
-                          {' — '}
-                          {
-                            classSchedule.endTime
-                          }
-                        </strong>
-                      </div>
+                          <strong>
+                            {
+                              classSchedule.startTime
+                            }
+                            {' — '}
+                            {
+                              classSchedule.endTime
+                            }
+                          </strong>
+                        </div>
 
-                      <div className="class-schedule-main">
-                        <div className="class-schedule-heading">
-                          <div>
-                            <span
-                              className="class-schedule-modality-color"
-                              style={{
-                                backgroundColor:
+                        <div className="class-schedule-main">
+                          <div className="class-schedule-heading">
+                            <div>
+                              <span
+                                className="class-schedule-modality-color"
+                                style={{
+                                  backgroundColor:
+                                    classSchedule
+                                      .classGroup
+                                      .modality
+                                      .color ||
+                                    '#ef4444',
+                                }}
+                              />
+
+                              <h2>
+                                {
                                   classSchedule
                                     .classGroup
-                                    .modality
-                                    .color ||
-                                  '#ef4444',
-                              }}
-                            />
+                                    .name
+                                }
+                              </h2>
+                            </div>
 
-                            <h2>
-                              {
-                                classSchedule
-                                  .classGroup
-                                  .name
-                              }
-                            </h2>
-                          </div>
-
-                          <span
-                            className={`class-schedule-status ${
-                              classSchedule.active
-                                ? 'class-schedule-status-active'
-                                : 'class-schedule-status-inactive'
-                            }`}
-                          >
-                            {classSchedule.active
-                              ? 'Ativo'
-                              : 'Inativo'}
-                          </span>
-                        </div>
-
-                        <p className="class-schedule-modality">
-                          {
-                            classSchedule
-                              .classGroup
-                              .modality.name
-                          }
-                        </p>
-
-                        <div className="class-schedule-information">
-                          <div>
-                            <span>
-                              Professores
+                            <span
+                              className={`class-schedule-status ${
+                                classSchedule.active
+                                  ? 'class-schedule-status-active'
+                                  : 'class-schedule-status-inactive'
+                              }`}
+                            >
+                              {classSchedule.active
+                                ? 'Ativo'
+                                : 'Inativo'}
                             </span>
-
-                            <strong>
-                              {getProfessorNames(
-                                classSchedule,
-                              )}
-                            </strong>
                           </div>
 
-                          <div>
-                            <span>
-                              Local
-                            </span>
-
-                            <strong>
-                              {classSchedule.room ||
-                                'Não informado'}
-                            </strong>
-                          </div>
-
-                          <div>
-                            <span>
-                              Vigência
-                            </span>
-
-                            <strong>
-                              {formatDate(
-                                classSchedule.validFrom,
-                              )}
-                              {' até '}
-                              {formatDate(
-                                classSchedule.validUntil,
-                              )}
-                            </strong>
-                          </div>
-                        </div>
-
-                        {classSchedule.notes && (
-                          <p className="class-schedule-notes">
+                          <p className="class-schedule-modality">
                             {
-                              classSchedule.notes
+                              classSchedule
+                                .classGroup
+                                .modality.name
                             }
                           </p>
-                        )}
 
-                        {canManageClassSchedules && (
-                          <div className="class-schedule-actions">
-                            <button
-                              type="button"
-                              disabled={
-                                updatingStatus
-                              }
-                              onClick={() =>
-                                handleOpenEditModal(
-                                  classSchedule,
-                                )
-                              }
-                            >
-                              Editar
-                            </button>
+                          <div className="class-schedule-information">
+                            <div>
+                              <span>
+                                Professores
+                              </span>
 
-                            <button
-                              type="button"
-                              disabled={
-                                updatingStatus
-                              }
-                              onClick={() =>
-                                void handleUpdateStatus(
+                              <strong>
+                                {getProfessorNames(
                                   classSchedule,
-                                )
-                              }
-                            >
-                              {updatingStatus
-                                ? 'Salvando...'
-                                : classSchedule.active
-                                  ? 'Inativar'
-                                  : 'Ativar'}
-                            </button>
+                                )}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>
+                                Local
+                              </span>
+
+                              <strong>
+                                {classSchedule.room ||
+                                  'Não informado'}
+                              </strong>
+                            </div>
+
+                            <div>
+                              <span>
+                                Vigência
+                              </span>
+
+                              <strong>
+                                {formatDate(
+                                  classSchedule.validFrom,
+                                )}
+                                {' até '}
+                                {formatDate(
+                                  classSchedule.validUntil,
+                                )}
+                              </strong>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </article>
-                  )
-                },
-              )}
-            </section>
 
-            <footer className="class-schedules-pagination">
-              <span>
-                Página {pagination.page}
-                {' de '}
-                {Math.max(
-                  1,
-                  pagination.totalPages,
+                          {classSchedule.notes && (
+                            <p className="class-schedule-notes">
+                              {
+                                classSchedule.notes
+                              }
+                            </p>
+                          )}
+
+                          {canManageClassSchedules && (
+                            <div className="class-schedule-actions">
+                              <button
+                                type="button"
+                                disabled={
+                                  updatingStatus
+                                }
+                                onClick={() =>
+                                  handleOpenEditModal(
+                                    classSchedule,
+                                  )
+                                }
+                              >
+                                Editar
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={
+                                  updatingStatus
+                                }
+                                onClick={() =>
+                                  void handleUpdateStatus(
+                                    classSchedule,
+                                  )
+                                }
+                              >
+                                {updatingStatus
+                                  ? 'Salvando...'
+                                  : classSchedule.active
+                                    ? 'Inativar'
+                                    : 'Ativar'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    )
+                  },
                 )}
-              </span>
+              </section>
+            )}
 
-              <div>
-                <button
-                  className="class-schedules-button class-schedules-button-secondary"
-                  type="button"
-                  disabled={
-                    pagination.page <= 1
-                  }
-                  onClick={
-                    handlePreviousPage
-                  }
-                >
-                  Anterior
-                </button>
+            {viewMode === 'weekly' && (
+              <WeeklyClassScheduleView
+                classSchedules={
+                  sortedClassSchedules
+                }
+                canManage={
+                  canManageClassSchedules
+                }
+                updatingStatusId={
+                  updatingStatusId
+                }
+                onEdit={
+                  handleOpenEditModal
+                }
+                onUpdateStatus={(
+                  classSchedule,
+                ) => {
+                  void handleUpdateStatus(
+                    classSchedule,
+                  )
+                }}
+              />
+            )}
 
-                <button
-                  className="class-schedules-button class-schedules-button-secondary"
-                  type="button"
-                  disabled={
-                    pagination.page >=
-                    pagination.totalPages
-                  }
-                  onClick={
-                    handleNextPage
-                  }
-                >
-                  Próxima
-                </button>
-              </div>
-            </footer>
+            {viewMode === 'list' && (
+              <footer className="class-schedules-pagination">
+                <span>
+                  Página{' '}
+                  {pagination.page}
+                  {' de '}
+                  {Math.max(
+                    1,
+                    pagination.totalPages,
+                  )}
+                </span>
+
+                <div>
+                  <button
+                    className="class-schedules-button class-schedules-button-secondary"
+                    type="button"
+                    disabled={
+                      pagination.page <= 1
+                    }
+                    onClick={
+                      handlePreviousPage
+                    }
+                  >
+                    Anterior
+                  </button>
+
+                  <button
+                    className="class-schedules-button class-schedules-button-secondary"
+                    type="button"
+                    disabled={
+                      pagination.page >=
+                      pagination.totalPages
+                    }
+                    onClick={
+                      handleNextPage
+                    }
+                  >
+                    Próxima
+                  </button>
+                </div>
+              </footer>
+            )}
+
+            {viewMode === 'weekly' &&
+              pagination.total >
+                WEEKLY_LIMIT && (
+                <div className="class-schedules-limit-warning">
+                  A visualização semanal
+                  apresenta os primeiros{' '}
+                  {WEEKLY_LIMIT} horários
+                  encontrados. Utilize os
+                  filtros para reduzir os
+                  resultados.
+                </div>
+              )}
           </>
         )}
 
